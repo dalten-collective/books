@@ -68,56 +68,57 @@
   ++  on-arvo
     |=  [=wire sign=sign-arvo]
     ::~&  >  [%wire wire %sign-arvo sign]
-    ?+    wire  `state
+    ?+    wire  `this
         [%iris %rpc %request ~]
-      ?+    sign  `state
+      ?+    sign  `this
           [%iris %http-response *]
-        ?.  ?=([%finished *] client-response.sign)  `state
+        ?.  ?=([%finished *] client-response.sign)  `this
         ~&  >>  headers.response-header.client-response.sign
         ?~  fife=full-file.client-response.sign
-          ((slog leaf+"%empty-rpc-data" ~) `state)
-        ?.  =('application/json' type.u.fife)  `state
+          ((slog leaf+"%empty-rpc-data" ~) `this)
+        ?.  =('application/json' type.u.fife)  `this
         ~&  >>>  ?~  mame=(de-json:html `@t`q.data.u.fife)  "no response"
                  ?.  ?=([%o p=*] u.mame)  "no object"
                  ?~  don=(~(get by `(map @t json)`p.u.mame) 'result')  "no result"
                  (parse-hex-result:rpc:eth u.don)
-        `state
+        `this
       ==
     ::
-        [%iris %rpc @ @ ~]
-      ?+    sign  `state
+        [%iris %rpc @ @ @ ~]
+      =/  con=contract-type
+        ;;(contract-type [(slav %tas +>+<.wire) `@ux`(slav %ux +>+>-.wire)])
+      ?+    sign  `this
           [%iris %http-response *]
-        ?~  rban=(~(get by contracts) (slav %ux +>+<.wire))  `state
-        =/  addy=@ux  (slav %ux +>+<.wire)
-        ?+    (slav %tas +>-.wire)  `state
+        ?~  rban=(~(get by contracts) con)  `this
+        ?+    (slav %tas +>-.wire)  `this
             %name
-          ?^  name.u.rban  `state
-          ?~  phobos=~(name irs-rpc:bot client-response.sign)  `state
+          ?^  name.u.rban  `this
+          ?~  phobos=~(name iris-abi:bot client-response.sign)  `this
           =.  contracts
-            (~(put by contracts) addy u.rban(name phobos))
-          %.  `state  %-  slog
-          :~  leaf+"%books-got-name {(trip u.phobos)}"
-              leaf+"-contract.{(scow %ux addy)}"
-          ==
-        ::
-            %denomination
-          ?^  sub.u.rban  `state
-          ?~  deimos=~(denomination iris-abi:bot client-response.sign)  `state
-          =.  contracts
-            (~(put by contracts) addy u.rban(sub deimos))
-          %.  `state  %-  slog
-          :~  leaf+"%books-got-denomination {<u.deimos>}"
-              leaf+"-contract.{(scow %ux addy)}"
+            (~(put by contracts) con u.rban(name phobos))
+          %.  `this  %-  slog
+          :~  leaf+"%books-got-name {u.phobos}"
+              leaf+"-contract.{<con>}"
           ==
         ::
             %symbol
-          ?^  symbol.u.urban  `state
-          ?~  triton=~(symbol iris-abi:bot client-response.sign)  `state
+          ?^  symbol.u.rban  `this
+          ?~  triton=~(symbol iris-abi:bot client-response.sign)  `this
           =.  contracts
-            (~(put by contracts) addy u.rban(symbol triton))
-          %.  `state  %-  slog
-          :~  leaf+"%books-got-symbol {(trip u.triton)}"
-              leaf+"-contract.{(scow %ux addy)}"
+            (~(put by contracts) con u.rban(symbol triton))
+          %.  `this  %-  slog
+          :~  leaf+"%books-got-symbol {u.triton}"
+              leaf+"-contract.{<con>}"
+          ==
+        ::
+            %denomination
+          ?^  sub.u.rban  `this
+          ?~  deimos=~(denomination iris-abi:bot client-response.sign)  `this
+          =.  contracts
+            (~(put by contracts) con u.rban(sub deimos))
+          %.  `this  %-  slog
+          :~  leaf+"%books-got-denomination {<u.deimos>}"
+              leaf+"-contract.{<con>}"
           ==
         ==
       ==
@@ -127,17 +128,17 @@
     ~&  >>>  wire
     ~&  >>  sign
     `this
-  ++  on-watch  on-watch:def
-  ++  on-leave  on-leave:def
   ++  on-peek   on-peek:def
   ++  on-fail   on-fail:def
+  ++  on-watch  on-watch:def
+  ++  on-leave  on-leave:def
   --
   ::
 |_  bol=bowl:gall
 +*  jot  ~(. books bol)
 ++  iris-abi
   |_  clep=client-response:iris
-  ++  schlep
+  ++  strepper
     ^-  (unit @)
     ?.  ?=([%finished *] clep)  ~
     ?~  fife=full-file.clep     ~
@@ -148,25 +149,25 @@
     `(parse-hex u.don)
   ++  name
     ^-  (unit tape)
-    ?~(don=~(schlep . clep) ~ `(dcode-res u.don [%string]~))
+    ?~(don=`(unit @)`strepper ~ `(dcode-res u.don [%string]~))
   ++  symbol
     ^-  (unit tape)
-    ?~(don=~(schlep . clep) ~ `(dcode-res u.don [%string]~))
+    ?~(don=`(unit @)`strepper ~ `(dcode-res u.don [%string]~))
   ++  total-supply
     ^-  (unit @ud)
-    ?~(don=~(schlep . clep) ~ `(dcode-res u.don [%uint]~))
+    ?~(don=`(unit @)`strepper ~ `(dcode-res u.don [%uint]~))
   ++  denomination
-    ^-  (unit denomination)
-    ?~  don=schlep  ~
+    ^-  (unit ^denomination)
+    ?~  don=`(unit @)`strepper  ~
     =+  pex=u.don
-    ?+  pex  [%other pex]
-      %18  [%wei ~]
-      %15  [%ada ~]
-      %12  [%babbage ~]
-       %9  [%shannon ~]
-       %6  [%szabo ~]
-       %3  [%finney ~]
-       %1  [%ether ~]
+    ?+  pex  `[%other pex]
+      %18  `[%wei ~]
+      %15  `[%ada ~]
+      %12  `[%babbage ~]
+       %9  `[%shannon ~]
+       %6  `[%szabo ~]
+       %3  `[%finney ~]
+       %1  `[%ether ~]
     ==
   --
 ++  con-page
@@ -239,11 +240,11 @@
           [%eth-call [~ +.cont.con ~ ~ ~ decimals.stdlib.erc20.jot] late]
         %+  welp
           ^-  (list card)
-          :~  :+  %pass  /iris/rpc/name/(scot %ux address.cont.con)
+          :~  :+  %pass  /iris/rpc/name/erc-20/(scot %ux address.cont.con)
               [%arvo %i `task:iris`(iris-req node-url ~ name.data)]
-              :+  %pass  /iris/rpc/symbol/(scot %ux address.cont.con)
+              :+  %pass  /iris/rpc/symbol/erc-20/(scot %ux address.cont.con)
               [%arvo %i `task:iris`(iris-req node-url ~ symb.data)]
-              :+  %pass  /iris/rpc/denomination/(scot %ux address.cont.con)
+              :+  %pass  /iris/rpc/denomination/erc-20/(scot %ux address.cont.con)
               [%arvo %i `task:iris`(iris-req node-url ~ deno.data)]
           ==
         ^-  (list card)
