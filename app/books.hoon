@@ -11,13 +11,7 @@
 +$  call     call:rpc:eth
 +$  card     card:agent:gall
 +$  request  request:rpc:eth
-::
-::    helper function
-::
-++  iris-req
-  |=  [url=@t rid=(unit @t) req=request]
-  ^-  task:iris
-  [%request (light-jon (need (de-purl:html url)) (plead-jon rid req)) [5 3]]
+
 --
 ::
 %-  agent:dbug
@@ -67,7 +61,6 @@
   ::
   ++  on-arvo
     |=  [=wire sign=sign-arvo]
-    ::~&  >  [%wire wire %sign-arvo sign]
     ?+    wire  `this
         [%iris %rpc %request ~]
       ?.  ?=([%iris %http-response *] sign)  `this
@@ -82,8 +75,10 @@
       `this
     ::
         [%iris %rpc %eth-balance @ ~]
+      ~&  >>  sign
       ?.  ?=([%iris %http-response *] sign)  `this
       ?~  pend=(~(get by wallets) (slav %ux +>+<.wire))  `this
+      ~&  >>>  ~(eth-balance iris-abi:bot client-response.sign)
       ?~  luna=~(eth-balance iris-abi:bot client-response.sign)  `this
       =.  wallets
         (~(put by wallets) address.u.pend %_(u.pend ether-balance u.luna))
@@ -206,7 +201,7 @@
     :_  state
     ^-  (list card:agent:gall)
     :~  :+  %pass  /iris/rpc/request
-        [%arvo %i (iris-req node-url `rid.con req.con)]
+        [%arvo %i (iris-req:jot node-url `rid.con req.con)]
     ==
   ==
   ++  con-wal
@@ -225,7 +220,7 @@
       :~  :*
         %pass  /iris/rpc/eth-balance/(scot %ux address.con)
         %arvo  %i 
-        (iris-req node-url ~ [%eth-get-balance address.con [%label %latest]])
+        (iris-req:jot node-url ~ [%eth-get-balance address.con [%label %latest]])
       ==  ==
     ==
   ++  con-con
@@ -265,11 +260,11 @@
         %+  welp
           ^-  (list card)
           :~  :+  %pass  /iris/rpc/name/erc-20/(scot %ux address.cont.con)
-              [%arvo %i `task:iris`(iris-req node-url ~ name.data)]
+              [%arvo %i `task:iris`(iris-req:jot node-url ~ name.data)]
               :+  %pass  /iris/rpc/symbol/erc-20/(scot %ux address.cont.con)
-              [%arvo %i `task:iris`(iris-req node-url ~ symb.data)]
+              [%arvo %i `task:iris`(iris-req:jot node-url ~ symb.data)]
               :+  %pass  /iris/rpc/denomination/erc-20/(scot %ux address.cont.con)
-              [%arvo %i `task:iris`(iris-req node-url ~ deno.data)]
+              [%arvo %i `task:iris`(iris-req:jot node-url ~ deno.data)]
           ==
         ^-  (list card)
         =-  (eth-watcher-config:erc20:jot -)

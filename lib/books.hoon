@@ -2,6 +2,15 @@
 /+  eth=ethereum
 ::
 |_  bol=bowl:gall
+::
+::    helper function
+::
+++  iris-req
+  |=  [url=@t rid=(unit @t) req=request:rpc:eth]
+  ^-  task:iris
+  =+  ?~(rid `(scot %da now.bol) `u.rid)
+  [%request (light-jon (need (de-purl:html url)) (plead-jon - req)) [5 3]]
+::
 ++  erc20
   |%
   ++  stdlib
