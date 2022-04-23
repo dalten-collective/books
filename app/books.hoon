@@ -70,56 +70,63 @@
     ::~&  >  [%wire wire %sign-arvo sign]
     ?+    wire  `this
         [%iris %rpc %request ~]
-      ?+    sign  `this
-          [%iris %http-response *]
-        ?.  ?=([%finished *] client-response.sign)  `this
-        ~&  >>  headers.response-header.client-response.sign
-        ?~  fife=full-file.client-response.sign
-          ((slog leaf+"%empty-rpc-data" ~) `this)
-        ?.  =('application/json' type.u.fife)  `this
-        ~&  >>>  ?~  mame=(de-json:html `@t`q.data.u.fife)  "no response"
-                 ?.  ?=([%o p=*] u.mame)  "no object"
-                 ?~  don=(~(get by `(map @t json)`p.u.mame) 'result')  "no result"
-                 (parse-hex-result:rpc:eth u.don)
-        `this
+      ?.  ?=([%iris %http-response *] sign)  `this
+      ?.  ?=([%finished *] client-response.sign)  `this
+      ?~  fife=full-file.client-response.sign
+        ((slog leaf+"%empty-rpc-data" ~) `this)
+      ?.  =('application/json' type.u.fife)  `this
+      ~&  >>>  ?~  mame=(de-json:html `@t`q.data.u.fife)  "no response"
+               ?.  ?=([%o p=*] u.mame)  "no object"
+               ?~  don=(~(get by `(map @t json)`p.u.mame) 'result')  "no result"
+               (parse-hex-result:rpc:eth u.don)
+      `this
+    ::
+        [%iris %rpc %eth-balance @ ~]
+      ?.  ?=([%iris %http-response *] sign)  `this
+      ?~  pend=(~(get by wallets) (slav %ux +>+<.wire))  `this
+      ?~  luna=~(eth-balance iris-abi:bot client-response.sign)  `this
+      =.  wallets
+        (~(put by wallets) address.u.pend %_(u.pend ether-balance u.luna))
+      %.  `this  %-  slog
+      :~  leaf+"%books-got-eth-balance"
+          leaf+"-wallet.{(scow %ux address.u.pend)}"
+          leaf+"-wei.{<u.luna>}"
       ==
     ::
         [%iris %rpc @ @ @ ~]
       =/  con=contract-type
         ;;(contract-type [(slav %tas +>+<.wire) `@ux`(slav %ux +>+>-.wire)])
-      ?+    sign  `this
-          [%iris %http-response *]
-        ?~  rban=(~(get by contracts) con)  `this
-        ?+    (slav %tas +>-.wire)  `this
-            %name
-          ?^  name.u.rban  `this
-          ?~  phobos=~(name iris-abi:bot client-response.sign)  `this
-          =.  contracts
-            (~(put by contracts) con u.rban(name phobos))
-          %.  `this  %-  slog
-          :~  leaf+"%books-got-name {u.phobos}"
-              leaf+"-contract.{<con>}"
-          ==
-        ::
-            %symbol
-          ?^  symbol.u.rban  `this
-          ?~  triton=~(symbol iris-abi:bot client-response.sign)  `this
-          =.  contracts
-            (~(put by contracts) con u.rban(symbol triton))
-          %.  `this  %-  slog
-          :~  leaf+"%books-got-symbol {u.triton}"
-              leaf+"-contract.{<con>}"
-          ==
-        ::
-            %denomination
-          ?^  sub.u.rban  `this
-          ?~  deimos=~(denomination iris-abi:bot client-response.sign)  `this
-          =.  contracts
-            (~(put by contracts) con u.rban(sub deimos))
-          %.  `this  %-  slog
-          :~  leaf+"%books-got-denomination {<u.deimos>}"
-              leaf+"-contract.{<con>}"
-          ==
+      ?.  ?=([%iris %http-response *] sign)  `this
+      ?~  rban=(~(get by contracts) con)  `this
+      ?+    (slav %tas +>-.wire)  `this
+          %name
+        ?^  name.u.rban  `this
+        ?~  phobos=~(name iris-abi:bot client-response.sign)  `this
+        =.  contracts
+          (~(put by contracts) con u.rban(name phobos))
+        %.  `this  %-  slog
+        :~  leaf+"%books-got-name {u.phobos}"
+            leaf+"-contract.{<con>}"
+        ==
+      ::
+          %symbol
+        ?^  symbol.u.rban  `this
+        ?~  triton=~(symbol iris-abi:bot client-response.sign)  `this
+        =.  contracts
+          (~(put by contracts) con u.rban(symbol triton))
+        %.  `this  %-  slog
+        :~  leaf+"%books-got-symbol {u.triton}"
+            leaf+"-contract.{<con>}"
+        ==
+      ::
+          %denomination
+        ?^  sub.u.rban  `this
+        ?~  deimos=~(denomination iris-abi:bot client-response.sign)  `this
+        =.  contracts
+          (~(put by contracts) con u.rban(sub deimos))
+        %.  `this  %-  slog
+        :~  leaf+"%books-got-denomination {<u.deimos>}"
+            leaf+"-contract.{<con>}"
         ==
       ==
     ==  
@@ -156,6 +163,9 @@
   ++  total-supply
     ^-  (unit @ud)
     ?~(don=`(unit @)`strepper ~ `(dcode-res u.don [%uint]~))
+  ++  eth-balance
+    ^-  (unit @ud)
+    ?~(don=`(unit @)`strepper ~ `u.don)
   ++  denomination
     ^-  (unit ^denomination)
     ?~  don=`(unit @)`strepper  ~
@@ -201,12 +211,26 @@
   ==
   ++  con-wal
     |=  con=config-wallets
-    ~&  >>  con
-    `state
+    ^-  (quip card _state)
+    ?-    -.con
+        %watch-wallet
+      ?^  wall=(~(get by wallets) address.con)
+        %.  `state  %-  slog
+        :~  leaf+"%books-watch-wallet-fail"
+            leaf+"-wallet.exists"
+        ==
+      =.  wallets
+        (~(put by wallets) address.con [address.con ~ priv-name.con 0])
+      :_  state
+      :~  :*
+        %pass  /iris/rpc/eth-balance/(scot %ux address.con)
+        %arvo  %i 
+        (iris-req node-url ~ [%eth-get-balance address.con [%label %latest]])
+      ==  ==
+    ==
   ++  con-con
     |=  con=config-contracts
     ^-  (quip card _state)
-    ~&  >>>  con
     ?-    -.con
         %watch-contract
       ::
