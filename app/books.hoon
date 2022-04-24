@@ -75,10 +75,8 @@
       `this
     ::
         [%iris %rpc %eth-balance @ ~]
-      ~&  >>  sign
       ?.  ?=([%iris %http-response *] sign)  `this
       ?~  pend=(~(get by wallets) (slav %ux +>+<.wire))  `this
-      ~&  >>>  ~(eth-balance iris-abi:bot client-response.sign)
       ?~  luna=~(eth-balance iris-abi:bot client-response.sign)  `this
       =.  wallets
         (~(put by wallets) address.u.pend %_(u.pend ether-balance u.luna))
@@ -92,6 +90,7 @@
       =/  con=contract-type
         ;;(contract-type [(slav %tas +>+<.wire) `@ux`(slav %ux +>+>-.wire)])
       ?.  ?=([%iris %http-response *] sign)  `this
+      ~&  >>>  ~(strepper iris-abi:bot client-response.sign)
       ?~  rban=(~(get by contracts) con)  `this
       ?+    (slav %tas +>-.wire)  `this
           %name
@@ -127,8 +126,6 @@
     ==  
   ++  on-agent
     |=  [=wire =sign:agent:gall]
-    ~&  >>>  wire
-    ~&  >>  sign
     `this
   ++  on-peek   on-peek:def
   ++  on-fail   on-fail:def
@@ -141,31 +138,35 @@
 ++  iris-abi
   |_  clep=client-response:iris
   ++  strepper
-    ^-  (unit @)
+    ^-  (unit json)
     ?.  ?=([%finished *] clep)  ~
     ?~  fife=full-file.clep     ~
     ?.  =('application/json' type.u.fife)      ~
     ?~  mame=(de-json:html `@t`q.data.u.fife)  ~
     ?.  ?=([%o p=*] u.mame)  ~
-    ?~  don=(~(get by `(map @t json)`p.u.mame) 'result')  ~
-    `(parse-hex u.don)
+    (~(get by `(map @t json)`p.u.mame) 'result')
   ++  name
     ^-  (unit tape)
-    ?~(don=`(unit @)`strepper ~ `(dcode-res u.don [%string]~))
+    ?~  don=`(unit json)`strepper  ~
+    ?.  ?=([%s @] u.don)  ~
+    `(dcode-res +.u.don [%string]~) 
   ++  symbol
     ^-  (unit tape)
-    ?~(don=`(unit @)`strepper ~ `(dcode-res u.don [%string]~))
+    ?~  don=`(unit json)`strepper  ~
+    ?.  ?=([%s @] u.don)  ~
+    `(dcode-res +.u.don [%string]~) 
   ++  total-supply
     ^-  (unit @ud)
-    ?~(don=`(unit @)`strepper ~ `(dcode-res u.don [%uint]~))
+    ?~  don=`(unit json)`strepper  ~
+    ?.  ?=([%s @] u.don)  ~
+    `(dcode-res +.u.don [%uint]~) 
   ++  eth-balance
     ^-  (unit @ud)
-    ?~(don=`(unit @)`strepper ~ `u.don)
+    ?~(don=`(unit json)`strepper ~ `(parse-hex u.don))
   ++  denomination
     ^-  (unit ^denomination)
-    ?~  don=`(unit @)`strepper  ~
-    =+  pex=u.don
-    ?+  pex  `[%other pex]
+    ?~  don=`(unit json)`strepper  ~
+    ?+  den=(parse-hex u.don)  `[%other den]
       %18  `[%wei ~]
       %15  `[%ada ~]
       %12  `[%babbage ~]
