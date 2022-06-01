@@ -2,8 +2,15 @@
 /+  eth=ethereum, ethio, default-agent, dbug, books
 ::
 |%
+::
+::  state
+::
++$  state-0  [%0 =transactions =wallets =overheard =chains]
+::
+::  versioned-state
+::
 +$  versioned-state  
-  $%  state-zero
+  $%  state-0
   ==
 ::
 ::    aliases
@@ -62,6 +69,11 @@
   ++  on-arvo
     |=  [=wire sign=sign-arvo]
     ?+    wire  `this
+        [@ ?(%iris %eyre %behn) * ~]
+      ~_  leaf+"%books-got-strange-wire {<wire>}"
+      ?>  %.  (scot %tas -.wire)  %~  has  in  %-  sy
+          %+  turn  ~(tap in ~(key by chains))
+          |=(c=chain ?@(c c +<.c))
         [%iris %rpc %request ~]
       ?.  ?=([%iris %http-response *] sign)  `this
       ?.  ?=([%finished *] client-response.sign)  `this
@@ -126,6 +138,8 @@
     ==  
   ++  on-agent
     |=  [=wire =sign:agent:gall]
+    ~&  >   [%wire wire]
+    ~&  >>  [%sign sign]
     `this
   ++  on-peek   on-peek:def
   ++  on-fail   on-fail:def
