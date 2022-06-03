@@ -1,3 +1,20 @@
+::  /sur/books
+::
+|%
+::
+::  page
+::
++$  page
+  $%  [%change-zapper-creds uid=@t pw=@t]
+      [%add-transaction =transaction]
+      [%add-wallet address=@ux =wallet]
+      [%add-friend address=@ux =wallet]
+      [%annotation hash=@ux note=annotation]
+
+  ==
+::
+::  state objects
+::
 +$  network
   $?  %ethereum
       %polygon
@@ -24,7 +41,7 @@
 ::
 +$  subtrans
   $:  type=direction
-      symbol=string
+      symbol=@t
       amount=@rd
       address=@ux
   ==
@@ -52,7 +69,7 @@
       primarywallet=@ux
   ==
 ::
-+$  note
++$  annotation
   $:  basis=@rd
       annotation=@t
       tags=(set @tas)
@@ -63,4 +80,4 @@
       who=@p
       tags=(set @tas)
   ==
-
+--

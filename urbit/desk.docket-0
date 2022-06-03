@@ -1,0 +1,9 @@
+:~  title+'books'
+    info+'it just makes cents'
+    color+0xee.561c
+    site+/apps/books
+    base+'books'
+    version+[0 0 1]
+    website+'https://dalten.org/'
+    license+'Get Rekt'
+==
