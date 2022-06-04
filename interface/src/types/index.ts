@@ -21,10 +21,10 @@ export interface Note {
 
 //  Ethereum-Type Strings
 export type Address = `/^0x([0-9a-f][0-9a-f])*$/I`;
-type txHash = `/^0x([0-9a-f][0-9a-f])*$/I`;
+export type TxHash = `/^0x([0-9a-f][0-9a-f])*$/I`;
 
 //  Supported Networks
-enum Network {
+export enum Network {
   ethereum,
   polygon,
   optimism,
@@ -43,24 +43,24 @@ enum Network {
 }
 
 //  Transaction Direction
-enum Direction {
+export enum Direction {
   incoming,
   outgoing,
   exchange,
 }
 
 //  Multi-call Support
-interface SubTx {
+export interface SubTx {
   type: Direction;
   symbol: string;
   amount: BigNumber;
-  address: Address;
+  address: Address | null;
 }
 
 //  Transaction Shape
 export interface Transaction {
   network: Network;
-  hash: txHash;
+  hash: TxHash;
   blockNumber: number;
   name: string;
   direction: Direction;
@@ -77,7 +77,7 @@ export interface Transaction {
   txGasLimit: BigNumber | null;
   input: string | null;
   cost: BigNumber;
-  txsuccessful: boolean;
+  txSuccessful: boolean;
   primaryWallet: Address;
 }
 
