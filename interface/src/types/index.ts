@@ -1,4 +1,4 @@
-import { BigNumber } from 'ethers';
+import { Decimal } from 'decimal.js';
 
 export interface AgentSubscription {
   agentName: string;
@@ -14,7 +14,7 @@ export interface WalletDetails {
 
 //  Note Shape
 export interface Note {
-  basis: BigNumber;
+  basis: Decimal;
   annotation: string;
   tags: Array<string>;
 }
@@ -53,7 +53,7 @@ export enum Direction {
 export interface SubTx {
   type: Direction;
   symbol: string;
-  amount: BigNumber;
+  amount: Decimal;
   address: Address | null;
 }
 
@@ -67,16 +67,16 @@ export interface Transaction {
   timeStamp: number;
   symbol: string;
   address: Address | null;  //  dis the primary contract action, null for base product
-  amount: BigNumber;
+  amount: Decimal;
   from: Address;
   destination: Address;
   contract: Address | null;
   subTransactions: Array<SubTx>;
   nonce: number;
-  txGas: BigNumber | null;
-  txGasLimit: BigNumber | null;
+  txGas: Decimal | null;
+  txGasLimit: Decimal | null;
   input: string | null;
-  cost: BigNumber;
+  cost: Decimal;
   txSuccessful: boolean;
   primaryWallet: Address;
 }
