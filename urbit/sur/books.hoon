@@ -1,16 +1,28 @@
 ::  /sur/books
 ::
+:: +$  state-zero
+::   $:  zapper-token=[uid=@t pw=@t]
+::       etherscankey=@t
+::       tags=(set @tas)
+::     ::
+::       held-wallets=(map @ux [nick=@t tags=(set @tas)])
+::       lilblackbook=(map @ux wallet)
+::     ::
+::       transactions=((mop @da transaction) gth)
+::       elucidations=(map @ux annotation)
+::   ==
+::
 |%
 ::
 ::  page
 ::
 +$  page
   $%  [%change-zapper-creds uid=@t pw=@t]
+      [%etherscan-key key=@t]
       [%add-transaction =transaction]
-      [%add-wallet address=@ux =wallet]
+      [%add-wallet address=@ux nick=@t tags=(set @tas)]
       [%add-friend address=@ux =wallet]
       [%annotation hash=@ux note=annotation]
-
   ==
 ::
 ::  state objects
@@ -46,6 +58,19 @@
       address=@ux
   ==
 ::
+::
++$  annotation
+  $:  basis=@rd
+      annotation=@t
+      tags=(set @tas)
+  ==
+::
++$  wallet
+  $:  nick=@t
+      who=(unit @p)
+      tags=(set @tas)
+  ==
+::
 +$  transaction
   $:  =network
       hash=@ux
@@ -67,17 +92,5 @@
       cost=@rd
       txsuccessful=?
       primarywallet=@ux
-  ==
-::
-+$  annotation
-  $:  basis=@rd
-      annotation=@t
-      tags=(set @tas)
-  ==
-::
-+$  wallet
-  $:  nick=@t
-      who=@p
-      tags=(set @tas)
   ==
 --
