@@ -77,7 +77,7 @@
         ?-  -.vaz
           %change-zapper-creds  zip-zap:gilt:is
           %etherscan-key        eth-key:gilt:is
-          %add-transaction      add-dis:gilt:is
+          %add-transaction      (add-dis:gilt:is transaction.vaz)
           %add-wallet           (add-wal:gilt:is +.vaz)
           %del-wallet           (del-wal:gilt:is +.vaz)
           %add-friend           add-bud:gilt:is
@@ -111,7 +111,7 @@
         :~  s+(scot %ux a)
           ::
             %-  pairs
-            :~  nickname+s+nick.w
+            :~  nick+s+nick.w
                 who+s+?~(who.w '' (scot %p u.who.w))
                 tags+a+`(list json)`(turn ~(tap in tags.w) (lead %s))
             ==
@@ -126,7 +126,7 @@
           ::
             %-  pairs
             :~  address+s+(scot %ux a)
-                nickname+s+n
+                nick+s+n
                 tags+a+`(list json)`(turn ~(tap in t) (lead %s))
             ==
         ==
@@ -148,8 +148,23 @@
     ^-  (quip card _state)
     `state
   ++  add-dis
+    |=  t=transaction
     ^-  (quip card _state)
-    `state
+    ~|  "%books-fail -bad-transaction! {<t>}"
+    ?<  (~(has by transactions) timestamp.t)
+    ~&  >  timestamp.t
+    ~&  >>  [%before ~(wyt by transactions) t]
+    =.  transactions
+      (put:((on @da transaction) gth) transactions timestamp.t t)
+    ~&  >>  [%after ~(wyt by transactions)]
+    :_  state
+    =-  [%give %fact ~[/website] json+!>(`json`-)]~
+    =,  enjs:format
+    %-  pairs
+    :~  head+s+'add-transaction'
+        status+s+(crip "Added Transaction: {(scow %ux hash.t)}")
+        transaction+a+~[n+~.1 s+'test']
+    ==
   ::
   ++  del-wal
     |=  a=@ux

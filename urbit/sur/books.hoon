@@ -35,7 +35,7 @@
       %polygon
       %optimism
       %gnosis
-      %binancesmartchain
+      %binance-smart-chain
       %fantom
       %avalanche
       %arbitrum
@@ -58,7 +58,7 @@
   $:  type=direction
       symbol=@t
       amount=@rd
-      address=@ux
+      address=(unit @ux)
   ==
 ::
 ::
