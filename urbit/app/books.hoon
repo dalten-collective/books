@@ -79,8 +79,11 @@
           %etherscan-key        eth-key:gilt:is
           %add-transaction      add-dis:gilt:is
           %add-wallet           (add-wal:gilt:is +.vaz)
+          %del-wallet           (del-wal:gilt:is +.vaz)
           %add-friend           add-bud:gilt:is
+          %del-friend           `state
           %annotation           pen-pad:gilt:is
+          %del-a-note           `state
         ==
       [cards this]
     ==
@@ -92,31 +95,42 @@
         [%website ~]
       =,  enjs:format
       :_  this
-      =-  [%give %fact ~ json+!>(`json`(frond 'initialwallets' -))]~
+      =-  [%give %fact ~ json+!>(`json`-)]~
       %-  pairs
-      :~
-        :+  %friendwallets  %a
+      :~  head+s+'wallets'
+        :+  'fren'  %a
         ^-  (list json)
         %-  ~(rep by lilblackbook)
         |=  [[a=@ux w=wallet] j=(list json)]
-        :_  j  %-  pairs
-        :~  address+s+(scot %ux a)
-            nickname+s+nick.w
-            who+s+?~(who.w '' (scot %p u.who.w))
-            tags+a+`(list json)`(turn ~(tap in tags.w) (lead %s))
+        :_  j  :-  %a
+        ::  here, we're sending a list of mini-arrays to 
+        ::  mirror the structure of a Map Object from 
+        ::  Immutable.js
+        :: - https://immutable-js.com/docs/latest@main/Map/
+        ^-  (list json)
+        :~  s+(scot %ux a)
+          ::
+            %-  pairs
+            :~  nickname+s+nick.w
+                who+s+?~(who.w '' (scot %p u.who.w))
+                tags+a+`(list json)`(turn ~(tap in tags.w) (lead %s))
+            ==
         ==
       ::
-        :+  %mywallets  %a
+        :+  'mine'  %a
         ^-  (list json)
         %-  ~(rep by held-wallets)
-        |=  [w=[a=@ux [n=@t t=(set @tas)]] j=(list json)]
-        :_  j  %-  pairs
-        :~  address+s+(scot %ux a.w)
-            nickname+s+n.w
-            tags+a+`(list json)`(turn ~(tap in t.w) (lead %s))
+        |=  [[a=@ux [n=@t t=(set @tas)]] j=(list json)]
+        :_  j  :-  %a
+        :~  s+(scot %ux a)
+          ::
+            %-  pairs
+            :~  address+s+(scot %ux a)
+                nickname+s+n
+                tags+a+`(list json)`(turn ~(tap in t) (lead %s))
+            ==
         ==
       ==
-
     ==
   ++  on-arvo   on-arvo:def
   ++  on-fail   on-fail:def
@@ -136,19 +150,44 @@
   ++  add-dis
     ^-  (quip card _state)
     `state
+  ::
+  ++  del-wal
+    |=  a=@ux
+    ^-  (quip card _state)
+    ~|  '%books-fail -address-not-tracked'
+    ?>  (~(has by held-wallets) a)
+    =,  enjs:format
+    :_  state(held-wallets (~(del by held-wallets) a))
+    =-  [%give %fact ~[/website] json+!>(`json`-)]~
+    %-  pairs
+    :~  head+s+'del-wallet'
+        remove+s+(scot %ux a)
+        status+s+(crip "Deleted Tracked Wallet: {(scow %ux a)}")
+    ==
+    ::
   ++  add-wal
     |=  [a=@ux n=@t t=(set @tas)]
     ^-  (quip card _state)
     ~|  '%books-fail -address-already-tracked'
     ?<  (~(has by held-wallets) a)
+    =,  enjs:format
     :_  state(held-wallets (~(put by held-wallets) a [n t]))
     =-  [%give %fact ~[/website] json+!>(`json`-)]~
-    %+  frond:enjs:format  %diff-my-wallets
-    %-  pairs:enjs:format
-    :~  address+s+(scot %ux a)
-        nickname+s+n
-        tags+a+`(list json)`(turn ~(tap in t) (lead %s))
+    %-  pairs
+    :~  head+s+'add-wallet'
+      :-  'new'
+      :-  %a
+      :~  s+(scot %ux a)
+        ::
+          %-  pairs:enjs:format
+          :~  nick+s+n
+              tags+a+`(list json)`(turn ~(tap in t) (lead %s))
+          ==
+      ==
+    ::
+      status+s+(crip "Added Tracked Wallet: {(scow %ux a)}")
     ==
+  ::
   ++  add-bud
     ^-  (quip card _state)
     `state

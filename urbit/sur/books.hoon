@@ -21,8 +21,11 @@
       [%etherscan-key key=@t]
       [%add-transaction =transaction]
       [%add-wallet address=@ux nick=@t tags=(set @tas)]
+      [%del-wallet address=@ux]
       [%add-friend address=@ux =wallet]
+      [%del-friend address=@ux]
       [%annotation hash=@ux note=annotation]
+      [%del-a-note hash=@ux]
   ==
 ::
 ::  state objects
