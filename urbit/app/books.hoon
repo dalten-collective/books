@@ -27,11 +27,16 @@
       held-wallets=(map @ux [nick=@t tags=(set @tas)])
       lilblackbook=(map @ux wallet)
     ::
-      transactions=((mop @da transaction) gth)
+      transactions=((mop ,[p=@da q=@ux] transaction) gth-hex)
       elucidations=(map @ux annotation)
   ==
 ::
 +$  card  card:agent:gall
+::
+::  sort helper
+++  gth-hex
+  |=  [a=[p=@da q=@ux] b=[p=@da q=@ux]]
+  ?:(=(p.a p.b) (gth q.a q.b) (gth p.a p.b))
 --
 ::
 %-  agent:dbug
@@ -150,21 +155,21 @@
   ++  add-dis
     |=  t=transaction
     ^-  (quip card _state)
-    ~|  "%books-fail -bad-transaction! {<t>}"
-    ?<  (~(has by transactions) timestamp.t)
-    ~&  >  timestamp.t
-    ~&  >>  [%before ~(wyt by transactions) t]
-    =.  transactions
-      (put:((on @da transaction) gth) transactions timestamp.t t)
-    ~&  >>  [%after ~(wyt by transactions)]
-    :_  state
-    =-  [%give %fact ~[/website] json+!>(`json`-)]~
-    =,  enjs:format
-    %-  pairs
-    :~  head+s+'add-transaction'
-        status+s+(crip "Added Transaction: {(scow %ux hash.t)}")
-        transaction+a+~[n+~.1 s+'test']
-    ==
+    ~|  "%books-fail -bad-transaction! {<timestamp.t>}"
+    ?~  gat=(get:((on ,[p=@da q=@ux] transaction) gth-hex) transactions [timestamp.t hash.t])
+      =.  transactions
+        (put:((on ,[p=@da q=@ux] transaction) gth-hex) transactions [timestamp.t hash.t] t)
+      :_  state
+      =-  [%give %fact ~[/website] json+!>(`json`-)]~
+      =,  enjs:format
+      %-  pairs
+      :~  head+s+'add-transaction'
+          status+s+(crip "Added Transaction: {(scow %ux hash.t)}")
+          transaction+a+~[n+~.1 s+'test']
+      ==
+    ~|  "%worse-news -different-records! {<t>} {<u.gat>}"
+    ?>  =(t u.gat)
+    `state
   ::
   ++  del-wal
     |=  a=@ux
