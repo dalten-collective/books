@@ -81,6 +81,7 @@
       =/  vaz=page  !<(page vase)
       =^  cards  state
         ?-  -.vaz
+          %test                 [~[(zapper-fi:uber:is /full)] state]
           %change-zapper-creds  zip-zap:gilt:is
           %etherscan-key        eth-key:gilt:is
           %add-transaction      (add-dis:gilt:is transaction.vaz)
@@ -101,7 +102,9 @@
         [%website ~]
       =,  enjs:format
       :_  this
-      =-  [%give %fact ~ json+!>(`json`-)]~
+      =-  :~  (zapper-fi:uber:is /full)
+              [%give %fact ~ json+!>(`json`-)]
+          ==
       %-  pairs
       :~  head+s+'wallets'
         :+  'fren'  %a
@@ -149,12 +152,19 @@
   |%
   ++  transactions
     ^-  card
-    :^  %pass  /books/do  %arvo
+    :^  %pass  /books/do/trans  %arvo
     [%k %fard %books %send-trans %noun !>([bol transactions])]
   ++  elucidations
     ^-  card
-    :^  %pass  /books/do  %arvo
+    :^  %pass  /books/do/note  %arvo
     [%k %fard %books %send-notes %noun !>([bol elucidations])]
+  ++  zapper-fi
+    |=  p=path
+    ^-  card
+    :^  %pass  (weld /books/do/zap p)  %arvo
+    =-  [%k %fard %books %get-trans %noun !>(-)]
+    ^-  [bowl:gall @t @t (set @ux) ((mop ,[p=@da q=@ux] transaction) gth-hex)]
+    [bol uid.zapper-token pw.zapper-token ~(key by held-wallets) ^transactions]
   --
 ++  gilt                                                 ::  page helpers
   |%
@@ -236,7 +246,8 @@
       |=  t=^transaction
       ^-  json
       %-  pairs
-      :~  network+s+network.t
+      :~  primarywallet+s+(scot %ux primarywallet.t)
+          network+s+network.t
           hash+s+(scot %ux hash.t)
           blocknumber+(numb blocknumber.t)
           name+s+name.t
@@ -271,7 +282,6 @@
           input+?~(input.t ~ s+u.input.t)
           cost+s+(cut 3 [2 (lent (scow %rd cost.t))] (scot %rd cost.t))
           txsuccessful+b+txsuccessful.t
-          primarywallet+s+(scot %ux primarywallet.t)
       ==
     --
 --

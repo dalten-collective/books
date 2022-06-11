@@ -33,7 +33,8 @@
       :~  
         :-  %add-transaction
         %-  ot
-        :~  network+(se %tas)
+        :~  primarywallet+(su ;~(pfix (jest '0x') hex))
+            network+(se %tas)
             hash+(su ;~(pfix (jest '0x') hex))
             blocknumber+ni
             name+so
@@ -52,7 +53,6 @@
             input+so:dejs-soft:format
             cost+ne-string
             txsuccessful+bo
-            primarywallet+(su ;~(pfix (jest '0x') hex))
         ==
       ==
     ++  from-sub

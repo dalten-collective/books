@@ -8,7 +8,7 @@
 ::       held-wallets=(map @ux [nick=@t tags=(set @tas)])
 ::       lilblackbook=(map @ux wallet)
 ::     ::
-::       transactions=((mop @da transaction) gth)
+::       transactions=((mop ,[p=@da q=@ux] transaction) gth-hex)
 ::       elucidations=(map @ux annotation)
 ::   ==
 ::
@@ -26,6 +26,7 @@
       [%del-friend address=@ux]
       [%annotation hash=@ux note=annotation]
       [%del-a-note hash=@ux]
+      [%test ~]
   ==
 ::
 ::  state objects
@@ -75,7 +76,8 @@
   ==
 ::
 +$  transaction
-  $:  =network
+  $:  primarywallet=@ux
+      =network
       hash=@ux
       blocknumber=@ud
       name=@t
@@ -94,6 +96,5 @@
       input=(unit @t)
       cost=@rd
       txsuccessful=?
-      primarywallet=@ux
   ==
 --
