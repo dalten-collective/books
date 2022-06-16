@@ -1,12 +1,31 @@
 import { createRouter, createWebHistory, createWebHashHistory, RouteRecordRaw } from "vue-router";
-import Home from "../views/Home.vue";
+import WalletList from "@/components/WalletList.vue";
+import Navigation from "@/components/Navigation.vue";
+import TransactionList from "@/components/TransactionList.vue";
+import Home from "@/views/Home.vue";
+import { decryptJsonWalletSync } from "@ethersproject/json-wallets";
+import { TransactionDescription } from "ethers/lib/utils";
 
 const routes: Array<RouteRecordRaw> = [
   {
-    path: "/",
-    name: "home",
+    path: '/',
+    name: 'home',
     component: Home,
   },
+
+  {
+    path: '/wallets',
+    name: 'wallets',
+    component: WalletList,
+  },
+
+  {
+    path: '/transactions',
+    name: 'transactions',
+    component: TransactionList,
+  },
+
+
   //{
   //path: "/about",
   //name: "about",
@@ -19,7 +38,7 @@ const routes: Array<RouteRecordRaw> = [
 ];
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory('/apps/books/'),
   routes,
 });
 

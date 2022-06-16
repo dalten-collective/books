@@ -1,32 +1,35 @@
-import { Map, OrderedMap } from 'immutable';
 import axios from 'axios';
 import { joinResult } from '@urbit/api';
+import { pushTransaction } from '@/api/books';
 import { 
   Transaction,
-  Network,
-  Direction,
+  Navi,
   Note, 
   Address, 
   TxHash,
-  SubTx,
-  WalletDetails
+  WalletDetails,
 } from "@/types";
-import { Decimal } from 'decimal.js'
-import Immutable from 'immutable'
+import { Decimal } from 'decimal.js';
+import Immutable, { OrderedMap } from 'immutable';
+import { isTemplateNode } from '@vue/compiler-core';
 
 export default {
   namespaced: true,
   state() {
     return {
-      zapperUID: '96e0cc51-a62e-42ca-acee-910ea7d2a241',
-      zapperPwd: '',
+      //  loading state
+      hasUrbitSubscription: false as Boolean,
+      
+      //  state objects
       etherscanKey: '3NJSFSVR8PZRN6CTIIXERD88YBKCIXXMW7',
-      webData: {} as OrderedMap<number, Transaction>,
-      urbitData: {} as OrderedMap<number, Transaction>,
-      notes: {} as Map<TxHash, Note>,
-      myFriends: {} as Map<Address, WalletDetails>,
-      myWallets: {} as Map<Address, WalletDetails>,
-      arTrans: [],
+      havUrbData: false as boolean,
+      urbitData: [] as Array<[[number, TxHash], Transaction]>,
+      notes: [] as Array<[TxHash, Note]>,
+      myFriends: [] as Array<[Address, WalletDetails]>,
+      myWallets: [] as Array<[Address, {nickname: string, tags: Array<string>}]>,
+      nav: 0 as Navi,
+      transPage: 0 as number,
+      browsing: '' as Address,
     }
   },
 
@@ -34,109 +37,187 @@ export default {
     friends(state): Array<string> {
       return ['test']
     },
+    orderedTransactions(state): Array<[[number, TxHash], Transaction]> {
+      const immuMap = Immutable.OrderedMap(state.urbitData) as OrderedMap<[number, TxHash], Transaction>;
+      
+      if (state.browsing === '') {
+        return immuMap.sort((a: Transaction, b: Transaction) => {
+          if (a.timeStamp > b.timeStamp) { return -1; }
+          if (a.timeStamp < b.timeStamp) { return 1; }
+          if (a.timeStamp == b.timeStamp) {
+            if (a.hash > b.hash) { return -1; }
+            if (a.hash < b.hash) { return 1; }
+            else { return 0; }
+          }
+          else { return 0; }
+        }).toArray() as Array<[[number, TxHash], Transaction]>;
+      } else {
+        
+        const filtMap = Immutable.OrderedMap(state.urbitData.filter((a) => {
+          if (a[1].primaryWallet === state.browsing) { return true; }
+          else { return false; }
+        })) as OrderedMap<[number, TxHash], Transaction>;
+
+        return filtMap.sort((a: Transaction, b: Transaction) => {
+          if (a.timeStamp > b.timeStamp) { return -1; }
+          if (a.timeStamp < b.timeStamp) { return 1; }
+          if (a.timeStamp == b.timeStamp) {
+            if (a.hash > b.hash) { return -1; }
+            if (a.hash < b.hash) { return 1; }
+            else { return 0; }
+          }
+          else { return 0; }
+        }).toArray() as Array<[[number, TxHash], Transaction]>;
+      }
+
+
+
+
+    },
+    paginateTransactions: (state, getters) => {
+      const sorted = getters.orderedTransactions;
+      const begin = function() {if (state.transPage === 0) {
+                                  return 1
+                                } else {return (state.transPage-1)*25+1}}
+      const allay = begin() + 24;
+      console.log("displaying transaction range: ",begin(), allay)
+      return sorted.slice(begin(), allay) as Array <[[number, TxHash], Transaction]>;
+    },
+    pageFrontTransactions: (state, getters) => {
+      const sorted = getters.orderedTransactions;
+      return sorted.slice(1, 5) as Array <[[number, TxHash], Transaction]>;
+    },
   },
 
   mutations: {
-    setArTrans(state, transactions) {
-      state.arTrans = transactions
+
+    setBrowse(state, which) {
+      console.log("wallet: ", which);
+      state.browsing = which;
     },
 
-    setWebData(state, transactions) {
-      state.webData = Immutable.OrderedMap(transactions);
+    setTransPage(state, which) {
+      console.log("page: ", which);
+      state.transPage = which;
     },
 
-    test({}, thing: string) {
-      console.log("test: ", thing);
-    }
+    setNav(state, which) {
+      console.log("tab: ", which);
+      state.nav = which;
+    },
 
+    setWallets(state,
+               battery: {
+                 fren: Array<[Address, WalletDetails]>,
+                 mine: Array<[Address, {nickname: string, tags: Array<string>}]>,
+                }) {
+      console.log("setting my-wallets: ", battery.mine);
+      state.myWallets = Immutable.Map(state.myWallets).mergeDeepWith((olds, news) => {
+        return news;
+      }, Immutable.Map(battery.mine)).toArray();
+      console.log("setting fren-wallets: ", battery.fren);
+      state.myFriends = Immutable.Map(state.myFriends).mergeDeepWith((olds, news) => {
+        return news;
+      }, Immutable.Map(battery.fren)).toArray();
+    },
+
+    setTransactions(state,
+                    battery: {
+                      tran: Array<Transaction>,
+                    }) {
+      console.log("set-transaction");
+      const newt = battery.tran.map(t => [[t.timeStamp, t.hash], t]) as Array<[[number, TxHash], Transaction]>;
+      state.urbitData = state.urbitData.concat(newt.filter((item) => {
+        return !Immutable.Map(state.urbitData).has(item[0]);
+      }))
+    },
+
+    addWallet(state,
+              battery: {
+                new: [Address, {nickname: string, tags: Array<string>}],
+              }) {
+      console.log("add-wallet");
+      state.myWallets = Immutable.Map(state.myWallets).mergeDeepWith((olds, news) => {
+        return news;
+      }, Immutable.Map([ battery.new ])).toArray();
+    },
+
+    delWallet(state,
+              battery: {
+                remove: Address,
+              }) {
+      console.log("del-wallet");
+      state.myWallets = Immutable.Map(state.myWallets).delete(battery.remove).toArray();
+    },
+
+    addTransaction(state,
+                    battery: {
+                      trans: Transaction,
+                    }) {
+      console.log("add-Transaction");
+      state.urbitData = Immutable.OrderedMap(state.urbitData).mergeDeepWith((olds, news) => {
+        return news;
+      }, Immutable.OrderedMap([[[battery.trans.timeStamp, battery.trans.hash], battery.trans]])).toArray();
+    },
   },
 
   actions: {
-    fetchTransactions({ state, commit }) {
-      const baseURL = "https://api.zapper.fi/v2/transactions?address=0xee884fE6D8955A12a91Be2ebe897E2FAEA76e594&addresses%5B%5D=0xee884fE6D8955A12a91Be2ebe897E2FAEA76e594"
-      return new Promise((resolve, reject) => {
-        axios({
-          method: 'get',
-          url: baseURL,
-          auth: {
-            username: state.zapperUID,
-            password: state.zapperPwd,
-          },
-          //timeout: 60000,
-          transformResponse: [function (data) {
-            let stuff = JSON.parse(data);
+    handleSwitchPage(
+      { commit },
+      battery: number) {
+        commit("setTransPage", battery);
+    },
 
-            return stuff.data.map(function (item) {
-              return [
-                item.timeStamp, 
-                {
-                  network: item.network as Network,
-                  hash: item.hash as TxHash,
-                  blockNumber: item.blockNumber as number,
-                  name: item.name as string,
-                  direction: item.direction as Direction,
-                  timeStamp: parseInt(item.timeStamp) as number,
-                  symbol: item.symbol as string,
-                  address: (() => {
-                    if (item.address == '0x0000000000000000000000000000000000000000') {
-                      return null
-                    } else {
-                      return item.address
-                    } 
-                  })() as Address | null,
-                  amount: new Decimal(item.amount) as Decimal,
-                  from: item.from as Address,
-                  destination: item.destination as Address,
-                  contract: item.contract as Address,
-                  subTransactions: item.subTransactions.map(function (subm) {
-                      if (item.address == '0x0000000000000000000000000000000000000000') {
-                        return {
-                          address: null,
-                          amount: new Decimal(subm.amount) as Decimal,
-                          symbol: subm.symbol,
-                          type: subm.type as Direction,
-                        }
-                      } else {
-                        return {
-                          address: subm.address,
-                          amount: new Decimal(subm.amount) as Decimal,
-                          symbol: subm.symbol,
-                          type: subm.type as Direction,
-                        }
-                      }
-                    }),
-                  nonce: item.nonce as number,
-                  txGas: new Decimal(item.gas) as Decimal | null,
-                  txGasLimit: new Decimal(item.gasLimit) as Decimal | null,
-                  input: (() => {
-                    if (item.input == '0x') {
-                      return null
-                    } else {
-                      return item.input
-                    }
-                  })() as string | null,
-                  cost: new Decimal(item.gas) as Decimal,
-                  txSuccessful: item.txSuccessful as Boolean,
-                  primaryWallet: item.account as Address,
-                } as Transaction
-              ];
-            })
-          }]
-        })
-          .then(function (response) {
-            console.log(response);
+    handleSwitchBrowse(
+      { commit },
+      battery: string) {
+        commit("setBrowse", battery);
+    },
+    
+    handleSwitchNav(
+      { commit },
+      battery: Navi) {
+        commit("setNav", battery);
+    },
 
-            console.log()
-
-            commit("setArTrans", response.data);
-            commit("setWebData", response.data);
-            // dispatch mutation x:
-            //  e.g. add these transactions to the webUrbit state
-          })
-          .catch(e => {
-            console.log(e);
-          })
-      })
-    }
+    handleSetWallets(
+      { commit, dispatch },
+      battery: { 
+        fren: Array<[Address, WalletDetails]>,
+        mine: Array<[Address, {nickname: string, tags: Array<string>}]> }) {
+      commit("setWallets",
+             { fren: battery.fren,
+               mine: battery.mine  });
+    },
+    handleSetTransactions(
+      { commit },
+      battery: {
+        tran: Array<Transaction> }) {
+      console.log("battery", battery.tran);
+      commit("setTransactions",
+             { tran: battery.tran });
+    },
+    handleAddWallet(
+      { commit, dispatch },
+      battery: {
+        new: [Address, {nickname: string, tags: Array<string>}] }) {
+      commit("addWallet",
+             { new: battery.new });
+    },
+    handleDelWallet(
+      { commit },
+      battery: { remove: Address }) {
+      commit("delWallet",
+             { remove: battery.remove });
+    },
+    handleAddTransaction(
+      { commit },
+      battery: { transaction: Transaction }) {
+      commit("addTransaction",
+             { trans: battery.transaction });
+    },
+    // handleAddNote(
+    //   { commit }
+    // )
   }
 }

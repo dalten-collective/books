@@ -148,7 +148,7 @@ export default defineComponent({
 
   },
   unmounted() {
-    this.closeAirlocks();
+
   },
 
   components: {
@@ -163,12 +163,6 @@ export default defineComponent({
     fetchTx() {
       this.$store.dispatch("books/fetchTransactions");
     },
-    startAirlock(deskname) {
-      this.$store.dispatch("ship/openAirlockToAgent", deskname);
-    },
-    closeAirlocks() {
-      this.$store.dispatch("ship/closeAgentAirlocks");
-    },
 
     chkStep(arr, wat) {
       return arr.some(el => el.type == wat);
@@ -179,18 +173,6 @@ export default defineComponent({
       let ftxDate = dateFormat(txDate, 'paddedShortDate') + 
                     " " + dateFormat(txDate, 'h:MM:ss TT');
       return ftxDate;
-
-      function leadingZeros(n) {
-        if (n <= 9) {
-          if (n == 0) {
-            return 12;
-          } else {
-            return "0" + n;
-          }
-        } else {
-          return n;
-        }
-      }
     },
 
     onChangePage(pageOfItems) {
