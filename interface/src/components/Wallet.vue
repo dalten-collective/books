@@ -11,45 +11,34 @@
       </div>
     </div>
   </div>
-  <div v-if="showingDetails">
-    Details
-  </div>
-
+  <div v-if="showingDetails">Details</div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { BigNumber } from "ethers";
-import { mapState } from "vuex";
+import { defineComponent } from 'vue';
+import { BigNumber } from 'ethers';
+import { mapState } from 'vuex';
 import type { PropType } from 'vue';
-import { Address } from "@/types";
+import { Address } from '@/types';
 
 export default defineComponent({
   data() {
     return {
       showingDetails: false,
-    }
+    };
   },
 
-  mounted() {
-
-  },
-  unmounted() {
-
-  },
-  components: {
-
-  },
+  mounted() {},
+  unmounted() {},
+  components: {},
   computed: {
-    ...mapState("books", ["myWallets"]),
+    ...mapState('books', ['myWallets']),
   },
   methods: {
-
     toggleDetails() {
       this.showingDetails = !this.showingDetails;
-    }
+    },
   },
-  props: [ 'wallet' ]
-})
+  props: ['wallet'],
+});
 </script>
-
