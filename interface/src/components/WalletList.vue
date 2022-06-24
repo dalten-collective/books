@@ -101,7 +101,7 @@ import { pushWallet, pushTags, pushName } from '@/api/books.ts';
 import { computed, defineComponent, reactive, ref, toRaw } from 'vue';
 import { mapState, useStore } from 'vuex';
 import type { PropType } from 'vue';
-import { Address } from '@/types';
+import { Address, WalletDetails } from '@/types';
 
 export default defineComponent({
   setup() {
@@ -121,6 +121,15 @@ export default defineComponent({
           tags: item[1].tags,
         };
       });
+    });
+
+    const allTags = computed(() => {
+      return myWallets.value.map((w) => w[1].tags).flat().map((tag) => {
+        return {
+          text: tag,
+          value: tag
+        }
+      })
     });
 
     const  walMap = computed(() => {
@@ -188,35 +197,6 @@ export default defineComponent({
     const onDelete = (key) => {
       wallets.value = wallets.value.filter((item) => item.key !== key);
     };
-    const columns = [
-      {
-        title: 'Name',
-        dataIndex: 'name',
-        width: '20%',
-        sorter: (a, b) => a.name.localeCompare(b.name),
-        slots: {
-          customRender: 'name',
-        },
-      },
-      {
-        title: 'Address',
-        dataIndex: 'address',
-        width: '40%',
-      },
-      {
-        title: 'Tags',
-        dataIndex: 'tags',
-        width: '25%',
-        slots: {
-          customRender: 'tags',
-        },
-      },
-      {
-        title: 'Delete',
-        dataIndex: 'Delete',
-        width: '15%',
-      },
-    ];
     const formState = reactive({
       layout: 'inline',
       nick: '',
@@ -250,7 +230,7 @@ export default defineComponent({
     };
 
     return {
-      columns,
+      allTags,
       formRef,
       formState,
       rules,
@@ -284,6 +264,42 @@ export default defineComponent({
   },
   computed: {
     ...mapState('books', ['myWallets', 'myFriends']),
+
+    columns() {
+      return [
+        {
+          title: 'Name',
+          dataIndex: 'name',
+          width: '20%',
+          sorter: (a, b) => a.name.localeCompare(b.name),
+          slots: {
+            customRender: 'name',
+          },
+        },
+        {
+          title: 'Address',
+          dataIndex: 'address',
+          width: '40%',
+        },
+        {
+          title: 'Tags',
+          dataIndex: 'tags',
+          width: '25%',
+          slots: {
+            customRender: 'tags',
+          },
+          filters: this.allTags,
+          onFilter: (soughtTag: string, wallet: WalletDetails) => {
+            return wallet.tags.includes(soughtTag)
+          }
+        },
+        {
+          title: 'Delete',
+          dataIndex: 'Delete',
+          width: '15%',
+        },
+      ];
+    },
 
     namesInUse() {
       const myNames = this.myWallets.map((item) => item[1].nick);
