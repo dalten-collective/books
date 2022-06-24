@@ -229,8 +229,45 @@ export default defineComponent({
         });
     };
 
+    const columns = computed(() => {
+      return [
+        {
+          title: 'Name',
+          dataIndex: 'name',
+          width: '20%',
+          sorter: (a, b) => a.name.localeCompare(b.name),
+          slots: {
+            customRender: 'name',
+          },
+        },
+        {
+          title: 'Address',
+          dataIndex: 'address',
+          width: '40%',
+        },
+        {
+          title: 'Tags',
+          dataIndex: 'tags',
+          width: '25%',
+          slots: {
+            customRender: 'tags',
+          },
+          filters: allTags.value,
+          onFilter: (soughtTag: string, wallet: WalletDetails) => {
+            return wallet.tags.includes(soughtTag)
+          }
+        },
+        {
+          title: 'Delete',
+          dataIndex: 'Delete',
+          width: '15%',
+        },
+      ];
+    });
+
     return {
       allTags,
+      columns,
       formRef,
       formState,
       rules,
@@ -264,43 +301,6 @@ export default defineComponent({
   },
   computed: {
     ...mapState('books', ['myWallets', 'myFriends']),
-
-    columns() {
-      return [
-        {
-          title: 'Name',
-          dataIndex: 'name',
-          width: '20%',
-          sorter: (a, b) => a.name.localeCompare(b.name),
-          slots: {
-            customRender: 'name',
-          },
-        },
-        {
-          title: 'Address',
-          dataIndex: 'address',
-          width: '40%',
-        },
-        {
-          title: 'Tags',
-          dataIndex: 'tags',
-          width: '25%',
-          slots: {
-            customRender: 'tags',
-          },
-          filters: this.allTags,
-          onFilter: (soughtTag: string, wallet: WalletDetails) => {
-            return wallet.tags.includes(soughtTag)
-          }
-        },
-        {
-          title: 'Delete',
-          dataIndex: 'Delete',
-          width: '15%',
-        },
-      ];
-    },
-
     namesInUse() {
       const myNames = this.myWallets.map((item) => item[1].nick);
       const urNames = this.myFriends.map((item) => item[1].nick);
