@@ -1,8 +1,9 @@
 <template>
+  <a-input v-model:value="textSearch" placeholder="Search addresses, nicknames and tags"/>
   <a-table
     bordered
     :columns="columns"
-    :data-source="wallets"
+    :data-source="filteredWallets"
     :scroll="{ x: 750 }"
   >
     <template #name="{ text, record }">
@@ -103,6 +104,13 @@ import { mapState, useStore } from 'vuex';
 import type { PropType } from 'vue';
 import { Address, WalletDetails } from '@/types';
 
+type UIWallet = {
+  key: Address,
+  address: Address,
+  name: string,
+  tags: Array<string>,
+}
+
 export default defineComponent({
   setup() {
     const store = useStore();
@@ -122,6 +130,25 @@ export default defineComponent({
         };
       });
     });
+
+    const textSearch = ref('');
+    const filteredWallets = computed(() => {
+      if (textSearch.value === '') {
+        return wallets.value
+      } else {
+        return wallets.value.filter((wallet: UIWallet) => {
+          return wallet.address.toString().toLowerCase().includes(textSearch.value.toLowerCase())
+        }).concat(
+          wallets.value.filter((wallet: UIWallet) => {
+            return wallet.name.toString().toLowerCase().includes(textSearch.value.toLowerCase())
+          })
+        ).concat(
+          wallets.value.filter((wallet: UIWallet) => {
+            return wallet.tags.join(', ').includes(textSearch.value.toLowerCase())
+          })
+        )
+      }
+    })
 
     const allTags = computed(() => {
       return myWallets.value.map((w) => w[1].tags).flat().map((tag) => {
@@ -253,7 +280,7 @@ export default defineComponent({
             customRender: 'tags',
           },
           filters: allTags.value,
-          onFilter: (soughtTag: string, wallet: WalletDetails) => {
+          onFilter: (soughtTag: string, wallet: UIWallet) => {
             return wallet.tags.includes(soughtTag)
           }
         },
@@ -266,8 +293,10 @@ export default defineComponent({
     });
 
     return {
+      textSearch,
       allTags,
       columns,
+      filteredWallets,
       formRef,
       formState,
       rules,
