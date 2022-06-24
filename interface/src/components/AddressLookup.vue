@@ -23,10 +23,6 @@ export default defineComponent({
     };
   },
 
-  mounted() {},
-
-  unmounted() {},
-
   computed: {
     ...mapState('books', ['myFriends', 'myWallets']),
   },

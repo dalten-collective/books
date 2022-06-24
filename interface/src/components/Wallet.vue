@@ -22,6 +22,7 @@ import type { PropType } from 'vue';
 import { Address } from '@/types';
 
 export default defineComponent({
+
   data() {
     return {
       showingDetails: false,

@@ -50,7 +50,6 @@ export default {
           // console.log("status: ", data.status);
           // Remove hoon dots
           const regex = /\./g;
-
           switch (data.head) {
             case 'wallets':
               const modFren = data.fren.map((fren) => [
@@ -92,8 +91,13 @@ export default {
                 { remove: remType },
                 { root: true }
               );
+            case 'add-friend':
+              return dispatch(
+                'books/handleAddFriend',
+                { new: [data.new[0], data.new[1]] },
+                { root: true }
+              );
             case 'transactions':
-              console.log('ship', data.tran);
               const reformTran = data.tran.map(function (tran) {
                 return {
                   network: tran.network as Network,

@@ -56,8 +56,10 @@
     ^-  (quip card _this)
     =.  zapper-token
       ['96e0cc51-a62e-42ca-acee-910ea7d2a241' '']
+    =+  new=(add now.bowl ~m30)
     %-  (slog leaf+"%books-online" ~)
-    `this
+    :_  this
+    [%pass /books/timer [%arvo %b [%wait new]]]~
   ::
   ++  on-save
     ^-  vase
@@ -69,6 +71,7 @@
     |-
     ?-    -.old
         %0
+      %-  (slog leaf+"%books-reloaded" ~)
       `this(state old)
     ==
   ::
@@ -81,16 +84,18 @@
       =/  vaz=page  !<(page vase)
       =^  cards  state
         ?-  -.vaz
-          %test                 [~[(zapper-fi:uber:is /full)] state]
-          %change-zapper-creds  zip-zap:gilt:is
-          %etherscan-key        eth-key:gilt:is
-          %add-transaction      (add-dis:gilt:is transaction.vaz)
+          %change-zapper-creds  (zip-zap:gilt:is +.vaz)
+          %etherscan-key        (eth-key:gilt:is +.vaz)
+          %add-transaction      (add-dis:gilt:is +.vaz)
           %add-wallet           (add-wal:gilt:is +.vaz)
           %del-wallet           (del-wal:gilt:is +.vaz)
-          %add-friend           add-bud:gilt:is
-          %del-friend           `state
-          %annotation           pen-pad:gilt:is
-          %del-a-note           `state
+          %add-friend           (add-bud:gilt:is +.vaz)
+          %del-friend           (del-bud:gilt:is +.vaz)
+          %annotation           (pen-pad:gilt:is +.vaz)
+          %del-a-note           (rub-rub:gilt:is +.vaz)
+          %set-tags             (tag-man:gilt:is +.vaz)
+          %set-nick             (nic-nam:gilt:is +.vaz)
+          %set-patp             (mah-guy:gilt:is +.vaz)
         ==
       [cards this]
     ==
@@ -141,7 +146,79 @@
         ==
       ==
     ==
-  ++  on-arvo   on-arvo:def
+  ++  on-arvo
+    |=  [=wire sign=sign-arvo]
+    ~&  >>>  wire
+    ?+    wire  (on-arvo:def wire sign)
+        [%books %timer ~]
+      =+  new=(add now.bowl ~m30)
+      =;  always=(list card)
+        [[(zapper-fi:uber:is /when) always] this]
+      [%pass /books/timer/(scot %da new) [%arvo %b [%wait new]]]~
+    ::
+        [%books %do %zap *]
+      ?+    +>+.wire  !!
+          [%full ~]
+        ?>  ?=([%khan %arow *] sign)
+        ?.  ?=(%& -.p.+.sign)  ((slog +.p.p.+.sign) `this)
+        ?>  ?=(%noun -.p.p.+.sign)
+        =/  upd  ::=[p=((mop ,[p=@da q=@ux] transaction) gth-hex) q=(list [[@da @ux] transaction])]
+          !<  $:  p=((mop ,[p=@da q=@ux] transaction) gth-hex)
+                  q=(list [[@da @ux] transaction])
+              ==
+          +.p.p.+.sign
+        =.  transactions
+          %.  [transactions p.upd]
+          uni:((on ,[@da @ux] transaction) gth-hex)
+        :_  this
+        =,  enjs:format
+        =-  [%give %fact ~[/website] json+!>(`json`-)]~
+        %-  pairs
+        :~  head+s+'transactions'
+            tran+a+(transactions:en-json:is p.upd)
+        ==
+      ::
+          [%some ~]
+        ?>  ?=([%khan %arow *] sign)
+        ?.  ?=(%& -.p.+.sign)  ((slog +.p.p.+.sign) `this)
+        ?>  ?=(%noun -.p.p.+.sign)
+        =/  upd  ::=[p=((mop ,[p=@da q=@ux] transaction) gth-hex) q=(list [[@da @ux] transaction])]
+          !<  $:  p=((mop ,[p=@da q=@ux] transaction) gth-hex)
+                  q=(list [[@da @ux] transaction])
+              ==
+          +.p.p.+.sign
+        =.  transactions
+          %.  [transactions p.upd]
+          uni:((on ,[@da @ux] transaction) gth-hex)
+        :_  this
+        =,  enjs:format
+        ~&  >>  ~(wyt by p.upd)
+        ~&  >>  ~(wyt by (gas:((on ,[p=@da q=@ux] transaction) gth-hex) *((mop ,[p=@da q=@ux] transaction) gth-hex) q.upd))
+        ~&  >>  (lent (transactions:en-json:is (gas:((on ,[p=@da q=@ux] transaction) gth-hex) *((mop ,[p=@da q=@ux] transaction) gth-hex) q.upd)))
+        =-  [%give %fact ~[/website] json+!>(`json`-)]~
+        %-  pairs
+        :~  head+s+'transactions'
+          ::
+            :+  %tran  %a
+            %-  transactions:en-json:is
+            (gas:((on ,[p=@da q=@ux] transaction) gth-hex) *((mop ,[p=@da q=@ux] transaction) gth-hex) q.upd)
+        ==
+      ::
+          [%when ~]
+        ?>  ?=([%khan %arow *] sign)
+        ?.  ?=(%& -.p.+.sign)  ((slog +.p.p.+.sign) `this)
+        ?>  ?=(%noun -.p.p.+.sign)
+        =/  upd  ::=[p=((mop ,[p=@da q=@ux] transaction) gth-hex) q=(list [[@da @ux] transaction])]
+          !<  $:  p=((mop ,[p=@da q=@ux] transaction) gth-hex)
+                  q=(list [[@da @ux] transaction])
+              ==
+          +.p.p.+.sign
+        =.  transactions
+          %.  [transactions p.upd]
+          uni:((on ,[@da @ux] transaction) gth-hex)
+        `this
+      ==
+    ==
   ++  on-fail   on-fail:def
   ++  on-peek   on-peek:def
   ++  on-agent  on-agent:def
@@ -153,14 +230,15 @@
   ++  transactions
     ^-  card
     :^  %pass  /books/do/trans  %arvo
-    [%k %fard %books %send-trans %noun !>([bol transactions])]
+    [%k %fard %books %send-trans %noun !>([bol ^transactions])]
   ++  elucidations
     ^-  card
     :^  %pass  /books/do/note  %arvo
-    [%k %fard %books %send-notes %noun !>([bol elucidations])]
+    [%k %fard %books %send-notes %noun !>([bol ^elucidations])]
   ++  zapper-fi
     |=  p=path
     ^-  card
+    ~&  >>>  ~(wyt by ^transactions)
     :^  %pass  (weld /books/do/zap p)  %arvo
     =-  [%k %fard %books %get-trans %noun !>(-)]
     ^-  [bowl:gall @t @t (set @ux) ((mop ,[p=@da q=@ux] transaction) gth-hex)]
@@ -169,11 +247,22 @@
 ++  gilt                                                 ::  page helpers
   |%
   ++  zip-zap
+    |=  [u=@t p=@t]
     ^-  (quip card _state)
-    `state
+    :_  state(zapper-token [u p])
+    =-  [%give %fact ~[/website] json+!>(`json`-)]~
+    %-  pairs:enjs:format
+    ~[head+s+'just-status' status+s+'Zapper.Fi Credentials Updated']
   ++  eth-key
+    |=  [k=@t]
     ^-  (quip card _state)
-    `state
+    :_  state(etherscankey k)
+    =-  [%give %fact ~[/website] json+!>(`json`-)]~
+    %-  pairs:enjs:format
+    :~  head+s+'etherscan-key'
+        key+s+k
+        status+s+'Etherscan Credentials Updated'
+    ==
   ++  add-dis
     |=  t=transaction
     ^-  (quip card _state)
@@ -214,8 +303,11 @@
     ^-  (quip card _state)
     ~|  '%books-fail -address-already-tracked'
     ?<  (~(has by held-wallets) a)
+    =.  held-wallets
+      (~(put by held-wallets) a [n t])
     =,  enjs:format
-    :_  state(held-wallets (~(put by held-wallets) a [n t]))
+    :_  state
+    :-  (zapper-fi:uber /some)
     =-  [%give %fact ~[/website] json+!>(`json`-)]~
     %-  pairs
     :~  head+s+'add-wallet'
@@ -233,15 +325,182 @@
     ==
   ::
   ++  add-bud
-    ^-  (quip card _state)
-    `state
+    |=  [a=@ux w=wallet]
+    :_  state(lilblackbook (~(put by lilblackbook) a w))
+    =-  [%give %fact ~[/website] json+!>(`json`-)]~
+    =,  enjs:format
+    %-  pairs
+    :~  head+s+'add-friend'
+        status+s+(crip "Added Friend: {(scow %uw a)}")
+        :+  %new  %a
+        :~  s+(scot %ux a)
+            %-  pairs
+            :~  nick+s+nick.w
+                who+?~(who.w ~ s+(scot %p u.who.w))
+                :+  %tags  %a
+                %~  tap  in  ^-  (set json)
+                (~(run in tags.w) |=(a=@tas `json`s+(scot %tas a)))
+            ==
+        ==
+    ==
+  ++  del-bud
+    |=  [a=@ux]
+    :_  state(lilblackbook (~(del by lilblackbook) a))
+    =-  [%give %fact ~[/website] json+!>(`json`-)]~
+    %-  pairs:enjs:format
+    :~  head+s+'del-friend'
+        remove+s+(scot %ux a)
+        status+s+(crip "Deleted Friend Info: {(scow %ux a)}")
+    ==
+  ::
   ++  pen-pad
+    |=  [h=@ux n=annotation]
     ^-  (quip card _state)
-    `state
+    :_  state(elucidations (~(put by elucidations) h n))
+    =-  [%give %fact ~[/website] json+!>(`json`-)]~
+    %-  pairs:enjs:format
+    :~  head+s+'annotation'
+        status+s+(crip "New Annotation For: {(scow %ux h)}")
+      ::
+      :+  'new'  %a
+      :~  s+(scot %ux h)  
+        %-  pairs:enjs:format
+        :~  basis+s+(scot %rd basis.n)
+            to+?~(to.n ~ s+(scot %ux u.to.n))
+            annotation+s+(scot %t annotation.n)
+            tags+a+(turn ~(tap in tags.n) (lead %s))
+        ==
+      ==
+    ==
+  ++  rub-rub
+    |=  h=@ux
+    ^-  (quip card _state)
+    :_  state(elucidations (~(del by elucidations) h))
+    =-  [%give %fact ~[/website] json+!>(`json`-)]~
+    %-  pairs:enjs:format
+    :~  head+s+'del-a-note'
+        status+s+(crip "Deleted Annotation For: {(scow %ux h)}")
+        remove+s+(scot %ux h)
+    ==
+  ++  mah-guy
+    |=  [a=@ux p=(unit @p)]
+    ^-  (quip card _state)
+    ~|  '%books-fail -no-such-friend'
+    ?>  (~(has by lilblackbook) a)
+    =+  old=(~(got by lilblackbook) a)
+    =.  lilblackbook
+      (~(put by lilblackbook) a old(who p))
+    :_  state
+    =-  [%give %fact ~[/website] json+!>(`json`-)]~
+    %-  pairs:enjs:format
+    :~  head+s+'add-friend'
+        status+s+(crip "Updated Friend: {(scow %ux a)}")
+    ::
+      :+  'new'  %a
+      :~  s+(scot %ux a)
+        %-  pairs:enjs:format
+        :~  nick+s+nick.old
+            who+?~(p ~ s+(scot %p u.p))
+            tags+a+`(list json)`(turn ~(tap in tags.old) (lead %s))
+        ==
+      ==
+    ==
+  ++  nic-nam
+    |=  [a=@ux n=@t]
+    ^-  (quip card _state)
+    ~|  '%books-fail -no-such-wallet'
+    ?>  |((~(has by held-wallets) a) (~(has by lilblackbook) a))
+    ?:  (~(has by lilblackbook) a)
+      =+  old=(~(got by lilblackbook) a)
+      =.  lilblackbook
+        (~(put by lilblackbook) a old(nick n))
+      :_  state
+      =-  [%give %fact ~[/website] json+!>(`json`-)]~
+      %-  pairs:enjs:format
+      :~  head+s+'add-friend'
+          status+s+(crip "Updated Friend: {(scow %ux a)}")
+      ::
+        :+  'new'  %a
+        :~  s+(scot %ux a)
+        ::
+          %-  pairs:enjs:format
+          :~  nick+s+n
+              who+?~(who.old ~ s+(scot %p u.who.old))
+              tags+a+`(list json)`(turn ~(tap in tags.old) (lead %s))
+          ==
+        ==
+      ==
+    =+  old=(~(got by held-wallets) a)
+    =.  held-wallets
+      (~(put by held-wallets) a old(nick n))
+    :_  state
+    =-  [%give %fact ~[/website] json+!>(`json`-)]~
+    %-  pairs:enjs:format
+    :~  head+s+'add-wallet'
+        status+s+(crip "Updated Wallet: {(scow %ux a)}")
+      ::
+      :+  'new'  %a
+      :~  s+(scot %ux a)
+      ::
+        %-  pairs:enjs:format
+        ~[nick+s+n tags+a+`(list json)`(turn ~(tap in tags.old) (lead %s))]
+      ==
+    ==
+  ++  tag-man
+    |=  [a=@ux t=(set @tas)]
+    ^-  (quip card _state)
+    ~|  '%books-fail -no-such-wallet'
+    ?>  |((~(has by held-wallets) a) (~(has by lilblackbook) a))
+    ?:  (~(has by lilblackbook) a)
+      =+  old=(~(got by lilblackbook) a)
+      =.  lilblackbook
+        (~(put by lilblackbook) a old(tags t))
+      :_  state
+      =-  [%give %fact ~[/website] json+!>(`json`-)]~
+      %-  pairs:enjs:format
+      :~  head+s+'add-friend'
+          status+s+(crip "Updated Friend: {(scow %ux a)}")
+        ::
+        :+  'new'  %a
+        :~  s+(scot %ux a)
+          ::
+            %-  pairs:enjs:format
+            :~  nick+s+nick.old
+                who+?~(who.old ~ s+(scot %p u.who.old))
+              tags+a+`(list json)`(turn ~(tap in t) (lead %s))
+            ==
+        ==
+      ==
+      ::
+    =+  old=(~(got by held-wallets) a)
+    =.  held-wallets
+      (~(put by held-wallets) a old(tags t))
+    :_  state
+    =-  [%give %fact ~[/website] json+!>(`json`-)]~
+    %-  pairs:enjs:format
+    :~  head+s+'add-wallet'
+        status+s+(crip "Updated Wallet: {(scow %ux a)}")
+      ::
+      :+  'new'  %a
+      :~  s+(scot %ux a)
+        ::
+          %-  pairs:enjs:format
+          :~  nick+s+nick.old
+            tags+a+`(list json)`(turn ~(tap in t) (lead %s))
+          ==
+      ==
+    ==
   --
   ++  en-json
     =,  enjs:format
     |%
+    ++  transactions
+      |=  t=_^transactions
+      %+  turn
+        (tap:((on ,[@da @ux] ^transaction) gth-hex) t)
+      |=  [[@da @ux] p=^transaction]
+      (transaction p)
+
     ++  transaction
       |=  t=^transaction
       ^-  json
@@ -280,7 +539,7 @@
           s+(cut 3 [2 (lent (scow %rd u.txgaslimit.t))] (scot %rd u.txgaslimit.t))
         ::
           input+?~(input.t ~ s+u.input.t)
-          cost+s+(cut 3 [2 (lent (scow %rd cost.t))] (scot %rd cost.t))
+          fee+s+(cut 3 [2 (lent (scow %rd fee.t))] (scot %rd fee.t))
           txsuccessful+b+txsuccessful.t
       ==
     --

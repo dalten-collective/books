@@ -22,7 +22,7 @@ export default {
       notes: [] as Array<[TxHash, Note]>,
       myFriends: [] as Array<[Address, WalletDetails]>,
       myWallets: [] as Array<
-        [Address, { nickname: string; tags: Array<string> }]
+        [Address, { nick: string; tags: Array<string> }]
       >,
       nav: 0 as Navi,
       transPage: 0 as number,
@@ -179,11 +179,10 @@ export default {
         new: [Address, { nickname: string; tags: Array<string> }];
       }
     ) {
-      console.log('add-wallet');
+      console.log('add-wallet', battery.new[0]);
       state.myWallets = Immutable.Map(state.myWallets)
-        .mergeDeepWith((olds, news) => {
-          return news;
-        }, Immutable.Map([battery.new]))
+        .delete(battery.new[0])
+        .set(battery.new[0], battery.new[1])
         .toArray();
     },
 
@@ -193,10 +192,24 @@ export default {
         remove: Address;
       }
     ) {
-      console.log('del-wallet');
+      console.log('del-wallet', battery.remove);
       state.myWallets = Immutable.Map(state.myWallets)
         .delete(battery.remove)
         .toArray();
+    },
+
+    addFriend(
+      state,
+      battery: {
+        new: [Address, WalletDetails];
+      }
+    ) {
+      console.log('add-friend', battery.new[0]);
+      state.myFriends = Immutable.setIn(
+        Immutable.Map(state.MyFriends),
+        [battery.new[0]],
+        battery.new[1]
+      ).toArray();
     },
 
     addTransaction(
@@ -205,7 +218,7 @@ export default {
         trans: Transaction;
       }
     ) {
-      console.log('add-Transaction');
+      console.log('add-Transaction', battery.trans);
       state.urbitData = Immutable.OrderedMap(state.urbitData)
         .mergeDeepWith((olds, news) => {
           return news;
@@ -246,7 +259,7 @@ export default {
       commit('setTransactions', { tran: battery.tran });
     },
     handleAddWallet(
-      { commit, dispatch },
+      { commit },
       battery: {
         new: [Address, { nickname: string; tags: Array<string> }];
       }
@@ -255,6 +268,14 @@ export default {
     },
     handleDelWallet({ commit }, battery: { remove: Address }) {
       commit('delWallet', { remove: battery.remove });
+    },
+    handleAddFriend(
+      { commit },
+      battery: {
+        new: [Address, WalletDetails];
+      }
+    ) {
+      commit('addFriend', { new: battery.new });
     },
     handleAddTransaction({ commit }, battery: { transaction: Transaction }) {
       commit('addTransaction', { trans: battery.transaction });

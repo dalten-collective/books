@@ -26,7 +26,9 @@
       [%del-friend address=@ux]
       [%annotation hash=@ux note=annotation]
       [%del-a-note hash=@ux]
-      [%test ~]
+      [%set-tags address=@ux tags=(set @tas)]
+      [%set-patp address=@ux who=(unit @p)]
+      [%set-nick address=@ux nick=@t]
   ==
 ::
 ::  state objects
@@ -65,6 +67,7 @@
 ::
 +$  annotation
   $:  basis=@rd
+      to=(unit @ux)
       annotation=@t
       tags=(set @tas)
   ==
@@ -94,7 +97,7 @@
       txgas=(unit @rd)
       txgaslimit=(unit @rd)
       input=(unit @t)
-      cost=@rd
+      fee=@rd
       txsuccessful=?
   ==
 --

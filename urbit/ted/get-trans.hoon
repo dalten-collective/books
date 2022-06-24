@@ -23,7 +23,7 @@
       txgas=(unit @rd)
       txgaslimit=(unit @rd)
       input=(unit @t)
-      cost=@rd
+      fee=@rd
       txsuccessful=?
   ==
 --
@@ -53,27 +53,28 @@
 ++  json-to-dino
   |=  [jon=json addy=@ux]
   |^  ^-  (list [[@da @ux] transaction])
-  =;  return=[@tas (set almost-trans)]
+  =;  return=(set almost-trans)
     ;;  (list [[@da @ux] transaction])
     %~  tap  in
     ;;  (set [[@da @ux] transaction])
-    %-  ~(run in +.return)
+    %-  ~(run in return)
     |=  mid=almost-trans
     ^-  [[@da @ux] transaction]
     :-  [timestamp.mid hash.mid]
     :-  addy
     %=    mid
+      address    ?:(=(`0x0 address.mid) ~ address.mid)
       network    ;;(network network.mid)
       direction  ;;(direction direction.mid)
     ::
         subtransactions
       %-  ~(run in subtransactions.mid)
       |=  [t=@tas s=@t a=@rd ad=(unit @ux)]
-      [;;(direction t) s a ad]
+      [;;(direction t) s a ?:(=(`0x0 address.mid) ~ address.mid)]
     ==
   =,  dejs:format
   %.  jon
-  %-  of
+  %-  ot
   :~  :-  %data
       %-  as  %-  ot
       :~  network+(se %tas)
@@ -145,13 +146,17 @@
   =,  bol.uber
   |-  ?~  addy
     =;  vaz=vase
-      ((slog leaf+"{<vaz>}" ~) (pure:m !>(~)))
+      %-  (slog leaf+"Length All: {<(lent (tap:((on ,[p=@da q=@ux] transaction) gth-hex) (gas:((on ,[p=@da q=@ux] transaction) gth-hex) trans.uber leg)))>}" ~)
+      %-  (slog leaf+"Length New: {<(lent ~(tap by (~(dif by (malt leg)) (malt (tap:((on ,[p=@da q=@ux] transaction) gth-hex) trans.uber)))))>}" ~)
+      (pure:m vaz)
     !>  ^-  $:  ((mop ,[p=@da q=@ux] transaction) gth-hex)
                 (list [[@da @ux] transaction])
             ==
-    =-  [next ~(tap in (~(dif by next) trans.uber))]
+    =-  :-  next
+        %~  tap  by
+        %-  %~  dif  by  (malt leg)
+        (malt (tap:((on ,[p=@da q=@ux] transaction) gth-hex) trans.uber))
     next=(gas:((on ,[p=@da q=@ux] transaction) gth-hex) trans.uber leg)
-  %-  (slog leaf+"{<(make-http-request uid.uber pw.uber i.addy)>}" ~)
   ;<  ~      bind:m  (send-request (make-http-request uid.uber pw.uber i.addy))
   ;<  =ccru  bind:m  take-maybe-response
   ?~  ccru  $(addy t.addy)

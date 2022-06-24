@@ -105,7 +105,6 @@
 <script lang="ts">
 import AddressLookup from '@/components/AddressLookup.vue';
 import { defineComponent } from 'vue';
-import { BigNumber } from 'ethers';
 import { mapState } from 'vuex';
 import type { PropType } from 'vue';
 import { Address } from '@/types';

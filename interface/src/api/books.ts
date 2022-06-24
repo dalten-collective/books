@@ -19,6 +19,24 @@ export function pushWallet(address: Address, nick: string) {
     });
 };
 
+export function pushTags(address: Address, tags: []) {
+  return urbitAPI
+    .poke({
+        app: 'books',
+        mark: 'books-page',
+        json: { 'set-tags': { address: address, tags: tags } },      
+    })
+};
+
+export function pushName(address: Address, name: string) {
+  return urbitAPI
+    .poke({
+      app: 'books',
+      mark: 'books-page',
+      json: { 'set-nick': { address: address, nick: name}}
+    })
+}
+
 export function pushTransaction(trans: Transaction) {
   const reformTrans = {
     network: trans.network,

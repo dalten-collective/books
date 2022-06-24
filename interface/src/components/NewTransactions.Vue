@@ -1,78 +1,108 @@
 <template>
-  <a-table :columns="columns" :data-source="data" :scroll="{ x: 2000 }">
-    <template #bodyCell="{ column }">
-      <template v-if="column.key === 'action'">
-        <a>Delete</a>
-      </template>
+  <a-table :columns="columns" :data-source="data" :scroll="{ x: 1000 }">
+    <template #addressColumn="{ record }">
+      <AddressLookup :addy="record.primaryWallet" />
     </template>
     <template #expandedRowRender="{ record }">
-      <p style="margin: 0">
-        {{ record.description }}
-      </p>
+      <div class="flex">
+        <p class="flex-auto basis-1/2">
+          {{ record.description }}
+        </p>
+        <div class="flex-auto basis-1/2">
+          <Note :hash="record.hash" />
+        </div>
+      </div>
     </template>
   </a-table>
 </template>
-<script>
-import { defineComponent } from 'vue';
-const columns = [
-  {
-    title: 'Primary Wallet',
-    dataIndex: 'primaryWallet',
-  },
-  {
-    title: 'Age',
-    dataIndex: 'age',
-    key: 'age',
-  },
-  {
-    title: 'Address',
-    dataIndex: 'address',
-    key: 'address',
-  },
-  {
-    title: 'Action',
-    key: 'action',
-  },
-];
-const data = [
-  {
-    key: 1,
-    name: 'John Brown',
-    age: 32,
-    address: 'New York No. 1 Lake Park',
-    description:
-      'My name is John Brown, I am 32 years old, living in New York No. 1 Lake Park.',
-  },
-  {
-    key: 2,
-    name: 'Jim Green',
-    age: 42,
-    address: 'London No. 1 Lake Park',
-    description:
-      'My name is Jim Green, I am 42 years old, living in London No. 1 Lake Park.',
-  },
-  {
-    key: 3,
-    name: 'Joe Black',
-    age: 32,
-    address: 'Sidney No. 1 Lake Park',
-    description:
-      'My name is Joe Black, I am 32 years old, living in Sidney No. 1 Lake Park.',
-  },
-];
+<script lang="ts">
+import AddressLookup from '@/components/AddressLookup.vue';
+import Note from '@/components/Note.vue';
+import { defineComponent, ref } from 'vue';
+import { mapState, mapGetters } from 'vuex';
+import dateFormat, { masks } from 'dateformat';
+
 export default defineComponent({
+  components: {
+    AddressLookup,
+    Note,
+  },
+
   setup() {
+    const filteredInfo = ref();
+    const sortedInfo = ref();
+    const columns = [
+      {
+        title: 'Timestamp',
+        dataIndex: 'timeStamp',
+        sorter: (a, b) => a.timeOriginal - b.timeOriginal,
+      },
+      {
+        title: 'Primary Wallet',
+        dataIndex: 'primaryWallet',
+        slots: {
+          customRender: 'addressColumn',
+        },
+      },
+      {
+        title: 'Involved Currencies',
+        dataIndex: 'involvedCurrencies',
+      },
+      {
+        title: 'Action',
+        dataIndex: 'shortDescription',
+      },
+    ]
+
+
     return {
-      data: 'this',
+      columns,
     };
   },
 
   computed: {
-    ...mapGetters('books', ['paginateTransactions']),
-    dataForm() {
-      return paginateTransactions.map((item) => {
-        item[0];
+    ...mapGetters('books', ['paginateTransactions', 'orderedTransactions']),
+    data() {
+      return this.orderedTransactions.map((item) => {
+        return {
+          key: item[1].hash,
+          hash: item[1].hash,
+          timeStamp: this.makeDate(item[1].timeStamp),
+          timeOriginal: item[1].timeStamp,
+          primaryWallet: item[1].primaryWallet,
+          involvedCurrencies: (() => {
+            const remakeCurrencies = item[1].subTransactions.map((item) => {
+              return item.symbol;
+            })
+            return remakeCurrencies.join("/")
+          })(),
+          shortDescription: (() => {
+            if (item[1].address === null) {
+              if (item[1].name === 'Receive') {
+                return 'Receive Ethereum';
+              } else if (item[1].name === 'Send') {
+                return 'Send Ethereum';
+              }
+            } else if (item[1].name === 'Exchange') {
+              return 'Token Swap';
+            } else {
+              return 'Multipart Transaction';
+            }
+          })(),
+          description: 'test description',
+        };
       });
+    },
+  },
+
+  methods: {
+    makeDate(secs) {
+      let txDate = new Date(secs * 1000);
+      let ftxDate =
+        dateFormat(txDate, 'paddedShortDate') +
+        ' ' +
+        dateFormat(txDate, 'h:MM:ss TT');
+      return ftxDate;
     },
   },
 });

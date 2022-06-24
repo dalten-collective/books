@@ -30,7 +30,26 @@
     ++  to-noun
       =,  dejs:format
       %-  of
-      :~  
+      :~
+        :-  %set-nick
+        %-  ot
+        :~  address+(su ;~(pfix (jest '0x') hex))
+            nick+so
+        ==
+      ::  
+        :-  %set-tags
+        %-  ot
+        :~  address+(su ;~(pfix (jest '0x') hex))
+            tags+(as (se %tas))
+        ==
+      ::
+        :-  %add-wallet
+        %-  ot
+        :~  address+(su ;~(pfix (jest '0x') hex))
+            nick+so
+            tags+(as (se %tas))
+        ==
+      ::
         :-  %add-transaction
         %-  ot
         :~  primarywallet+(su ;~(pfix (jest '0x') hex))
@@ -51,7 +70,7 @@
             txgas+ne-soft-string
             txgaslimit+ne-soft-string
             input+so:dejs-soft:format
-            cost+ne-string
+            fee+ne-string
             txsuccessful+bo
         ==
       ==
