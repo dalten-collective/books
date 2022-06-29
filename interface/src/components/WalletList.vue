@@ -28,18 +28,7 @@
       </div>
     </template>
     <template #tags="{ record }">
-      <template v-for="tag in record.tags">
-        <a-tag :closable="!!tag" @close="handleClose(record.key, tag)">{{tag}}</a-tag>
-      </template>
-      <a-input
-        ref="inputRef"
-        type="text"
-        size="small"
-        :style="{ width: '78px' }"
-        @keyup.enter="handleInput(record.key, $event)"
-      />
-
-
+      <WalletTagEdit :record="record" />
     </template>
     <template #operation="{ record }">
       <a-popconfirm
@@ -96,6 +85,7 @@
 <script lang="ts">
 import Immutable from 'immutable';
 import Wallet from '@/components/Wallet.vue';
+import WalletTagEdit from '@/components/WalletTagEdit.vue';
 import { CheckOutlined, EditOutlined } from '@ant-design/icons-vue';
 import { cloneDeep } from 'lodash-es';
 import { pushWallet, pushTags, pushName } from '@/api/books.ts';
@@ -166,33 +156,7 @@ export default defineComponent({
     // Refs
     const formRef = ref();
 
-    const inputRef = ref();
-
     //  handlers
-    const handleInput = ((k, t) => {
-      const tOld = walMap.value.get(k).tags.slice();
-      tOld.push(t.target.value);
-      console.log("handlerInput", k, tOld);
-      pushTags(k, tOld)
-        .then((r) => {
-          console.log('res: ', r);
-        })
-        .catch((e) => {
-          console.log('err: ', e);
-        });
-      
-    });
-
-    const handleClose = ((k, t) => {
-      pushTags(k, walMap.value.get(k).tags.filter(tOld => tOld !== t))
-        .then((r) => {
-          console.log('res: ', r);
-        })
-        .catch((e) => {
-          console.log('err: ', e);
-        });
-    });
-
     const editableData = reactive({});
 
     const edit = (key) => {
@@ -307,8 +271,6 @@ export default defineComponent({
       edit,
       save,
       wallets,
-      handleClose,
-      handleInput,
     };
   },
 
@@ -325,6 +287,7 @@ export default defineComponent({
   unmounted() {},
   components: {
     Wallet,
+    WalletTagEdit,
     CheckOutlined,
     EditOutlined,
   },
