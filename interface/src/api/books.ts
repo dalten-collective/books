@@ -5,11 +5,24 @@ import { Transaction, Address } from '@/types';
 export function pushWallet(address: Address, nick: string) {
   return urbitAPI
     .poke({
-      //   return {
       app: 'books',
       mark: 'books-page',
       json: { 'add-wallet': { address, nick, tags: [] } },
-      //   }
+    })
+    .then((r) => {
+      return r;
+    })
+    .catch((e) => {
+      console.log('err ', e);
+    });
+};
+
+export function pullWallet(address: Address) {
+  return urbitAPI
+    .poke({
+      app: 'books',
+      mark: 'books-page',
+      json: { 'del-wallet': { address } },
     })
     .then((r) => {
       return r;

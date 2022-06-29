@@ -1,6 +1,13 @@
 <template>
   <div>
-    <a-tag v-for="tag in record.tags" :key="tag" :closable="!!tag" @close="handleClose(tag)">{{tag}}</a-tag>
+    <a-tag
+      v-for="tag in record.tags"
+      :key="tag"
+      :closable="!!tag" @close="handleClose(tag)"
+      color="blue"
+    >
+      {{tag}}
+    </a-tag>
     <a-input
       v-model:value="newTag"
       type="text"

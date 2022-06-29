@@ -50,6 +50,11 @@
             tags+(as (se %tas))
         ==
       ::
+        :-  %del-wallet
+        %-  ot
+        :~  address+(su ;~(pfix (jest '0x') hex))
+        ==
+      ::
         :-  %add-transaction
         %-  ot
         :~  primarywallet+(su ;~(pfix (jest '0x') hex))

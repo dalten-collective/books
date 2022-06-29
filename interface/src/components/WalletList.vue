@@ -5,6 +5,7 @@
     :columns="columns"
     :data-source="filteredWallets"
     :scroll="{ x: 750 }"
+    :loading="overallLoading"
   >
     <template #name="{ text, record }">
       <div class="editable-cell">
@@ -30,10 +31,9 @@
     <template #tags="{ record }">
       <WalletTagEdit :record="record" />
     </template>
-    <template #operation="{ record }">
+    <template #actions="{ record }">
       <a-popconfirm
-        v-if="wallets.length"
-        title="Sure to delete?"
+        title="Are you sure you want to remove this wallet?"
         @confirm="onDelete(record.key)"
       >
         <a>Delete</a>
@@ -88,7 +88,7 @@ import Wallet from '@/components/Wallet.vue';
 import WalletTagEdit from '@/components/WalletTagEdit.vue';
 import { CheckOutlined, EditOutlined } from '@ant-design/icons-vue';
 import { cloneDeep } from 'lodash-es';
-import { pushWallet, pushTags, pushName } from '@/api/books.ts';
+import { pushWallet, pullWallet, pushName } from '@/api/books.ts';
 import { computed, defineComponent, reactive, ref, toRaw } from 'vue';
 import { mapState, useStore } from 'vuex';
 import type { PropType } from 'vue';
@@ -155,6 +155,7 @@ export default defineComponent({
 
     // Refs
     const formRef = ref();
+    const overallLoading = ref(false);
 
     //  handlers
     const editableData = reactive({});
@@ -186,8 +187,10 @@ export default defineComponent({
     };
 
     const onDelete = (key) => {
-      wallets.value = wallets.value.filter((item) => item.key !== key);
+      overallLoading.value = true;
+      pullWallet(key).finally(() => { overallLoading.value = false; })
     };
+
     const formState = reactive({
       layout: 'inline',
       nick: '',
@@ -249,9 +252,12 @@ export default defineComponent({
           }
         },
         {
-          title: 'Delete',
-          dataIndex: 'Delete',
+          title: 'Actions',
+          dataIndex: 'actions',
           width: '15%',
+          slots: {
+            customRender: 'actions',
+          },
         },
       ];
     });
@@ -271,6 +277,7 @@ export default defineComponent({
       edit,
       save,
       wallets,
+      overallLoading,
     };
   },
 
@@ -321,13 +328,15 @@ export default defineComponent({
       if (!this.validAddress) {
         return;
       }
-      this.pushWalletPending = true;
+      this.pushWalletPending = true; // TODO: deprecated?
+      this.overallLoading = true;
       pushWallet(this.newAddress, this.newNick).then((r) => {
         console.log('res: ', r);
         this.pushWalletPending = false;
         this.newAddress = '';
         this.newNick = '';
-      });
+      })
+      .finally(() => { this.overallLoading = false; })
     },
   },
 });
