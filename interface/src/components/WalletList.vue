@@ -62,7 +62,6 @@
       Add Tracked Wallet
     </a-button>
   </a-form>
-
 </template>
 
 <script lang="ts">
@@ -74,9 +73,10 @@ import { pushWallet, pushTags, pushName } from '@/api/books.ts';
 import { computed, defineComponent, reactive, ref, toRaw } from 'vue';
 import { mapState, useStore } from 'vuex';
 import type { PropType } from 'vue';
-import { Address } from '@/types';
+import { Address, WalletDetails } from '@/types';
 
 export default defineComponent({
+
   setup() {
     //  boiler
     const store = useStore();
@@ -106,19 +106,64 @@ export default defineComponent({
       });
     });
 
-    const  walMap = computed(() => {
-      return Immutable.Map(myWallets.value)
-    })
+    const walMap = computed(() => {
+      return Immutable.Map(myWallets.value);
+    });
+
+    const allTags = computed(() => {
+      return Array.from(new Set(myWallets.value.map((w) => w[1].tags).flat())).map((tag) => {
+        return {
+          text: tag,
+          value: tag,
+        }
+      })
+    });
+
+    const columns = computed (() => {
+      return [
+        {
+          title: 'Name',
+          dataIndex: 'name',
+          width: '20%',
+          sorter: (a, b) => a.name.localeCompare(b.name),
+          slots: {
+            customRender: 'name',
+          },
+        },
+        {
+          title: 'Address',
+          dataIndex: 'address',
+          width: '30%',
+        },
+        {
+          title: 'Tags',
+          dataIndex: 'tags',
+          width: '25%',
+          slots: {
+            customRender: 'tags',
+          },
+          filters: allTags.value,
+          onFilter: (soughtTag: string, wallet: WalletDetails) => {
+              return wallet.tags.includes(soughtTag)
+            } 
+        },
+        {
+          title: 'Delete',
+          dataIndex: 'Delete',
+          width: '15%',
+        },
+      ];
+    });
 
     // Refs
     const formRef = ref();
     const inputRef = ref();
 
     //  handlers
-    const handleInput = ((k, t) => {
+    const handleInput = (k, t) => {
       const tOld = walMap.value.get(k).tags.slice();
       tOld.push(t.target.value);
-      console.log("handlerInput", k, tOld);
+      console.log('handlerInput', k, tOld);
       pushTags(k, tOld)
         .then((r) => {
           console.log('res: ', r);
@@ -126,18 +171,20 @@ export default defineComponent({
         .catch((e) => {
           console.log('err: ', e);
         });
-      
-    });
+    };
 
-    const handleClose = ((k, t) => {
-      pushTags(k, walMap.value.get(k).tags.filter(tOld => tOld !== t))
+    const handleClose = (k, t) => {
+      pushTags(
+        k,
+        walMap.value.get(k).tags.filter((tOld) => tOld !== t)
+      )
         .then((r) => {
           console.log('res: ', r);
         })
         .catch((e) => {
           console.log('err: ', e);
         });
-    });
+    };
 
     const editableData = reactive({});
 
@@ -170,35 +217,6 @@ export default defineComponent({
     const onDelete = (key) => {
       wallets.value = wallets.value.filter((item) => item.key !== key);
     };
-    const columns = [
-      {
-        title: 'Name',
-        dataIndex: 'name',
-        width: '20%',
-        sorter: (a, b) => a.name.localeCompare(b.name),
-        slots: {
-          customRender: 'name',
-        },
-      },
-      {
-        title: 'Address',
-        dataIndex: 'address',
-        width: '30%',
-      },
-      {
-        title: 'Tags',
-        dataIndex: 'tags',
-        width: '25%',
-        slots: {
-          customRender: 'tags',
-        },
-      },
-      {
-        title: 'Delete',
-        dataIndex: 'Delete',
-        width: '15%',
-      },
-    ];
     const formState = reactive({
       layout: 'inline',
       nick: '',
@@ -230,16 +248,16 @@ export default defineComponent({
           pattern: /^0x[a-fA-F0-9]{40}$/,
           message: 'Provide Wallet Address',
           trigger: 'blur',
-        }
+        },
       ],
       tags: [
         {
           required: false,
           pattern: /^[a-zA-Z0-9\-\_\s]+$/,
           trigger: 'blur',
-          message: "a-z, 0-9, '-' and '_' only, separated by spaces"
-        }
-      ]
+          message: "a-z, 0-9, '-' and '_' only, separated by spaces",
+        },
+      ],
     };
 
     //  methods
@@ -275,7 +293,11 @@ export default defineComponent({
         .then(() => {
           console.log(formRef.value);
           console.log('values', formState, toRaw(formState));
-          pushWallet(toRaw(formState).address, toRaw(formState).nick, toRaw(formState).tags)
+          pushWallet(
+            toRaw(formState).address,
+            toRaw(formState).nick,
+            toRaw(formState).tags
+          )
             .then((r) => {
               console.log('res: ', r);
             })
@@ -291,7 +313,6 @@ export default defineComponent({
     return {
       myWallets,
       myFriends,
-      columns,
       formRef,
       formState,
       rules,
@@ -306,7 +327,9 @@ export default defineComponent({
       handleInput,
       namesInUse,
       validAddress,
-      handleAddWallet
+      handleAddWallet,
+      allTags,
+      columns
     };
   },
 
@@ -323,6 +346,5 @@ export default defineComponent({
     EditOutlined,
     WalletTagEdit,
   },
-
 });
 </script>
