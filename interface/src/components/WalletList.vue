@@ -27,20 +27,7 @@
       </div>
     </template>
     <template #tags="{ record }">
-      <template v-for="tag in record.tags">
-        <a-tag :closable="!!tag" @close="handleClose(record.key, tag)">
-          {{tag}}
-        </a-tag>
-      </template>
-      <a-input
-        ref="inputRef"
-        type="text"
-        size="small"
-        :style="{ width: '78px' }"
-        @keyup.enter="handleInput(record.key, $event)"
-      />
-
-
+      <WalletTagEdit :record="record" />
     </template>
     <template #operation="{ record }">
       <a-popconfirm
@@ -80,6 +67,7 @@
 
 <script lang="ts">
 import Immutable from 'immutable';
+import WalletTagEdit from '@/components/WalletTagEdit.vue';
 import { CheckOutlined, EditOutlined } from '@ant-design/icons-vue';
 import { cloneDeep } from 'lodash-es';
 import { pushWallet, pushTags, pushName } from '@/api/books.ts';
@@ -333,6 +321,7 @@ export default defineComponent({
   components: {
     CheckOutlined,
     EditOutlined,
+    WalletTagEdit,
   },
 
 });

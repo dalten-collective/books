@@ -40,6 +40,7 @@ export function pushFriend(
 }
 
 export function pushTags(address: Address, tags: []) {
+  console.log(tags)
   return urbitAPI.poke({
     app: 'books',
     mark: 'books-page',
