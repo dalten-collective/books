@@ -1,34 +1,27 @@
 <template>
-  <div class="has-tooltip" v-if="showingDetails">
-    <span class="tooltip rounded bg-gray-100 p-1 text-red-500 shadow-lg">
-      {{ addy }}
-    </span>
-  </div>
-  <div @click="toggleDetails">
+  <a-tooltip :title="addy" color="gold" placement="topLeft">
     {{ checkAddress(myWallets, myFriends, addy) }}
-  </div>
+  </a-tooltip>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-import { mapState, mapGetters } from 'vuex';
+import { defineComponent, computed } from 'vue';
+import { useStore } from 'vuex';
 import type { PropType } from 'vue';
 import { Address, TxHash, Transaction } from '@/types';
 import Immutable, { OrderedMap, Map } from 'immutable';
 
 export default defineComponent({
-  data() {
-    return {
-      showingDetails: false,
-    };
-  },
+  setup() {
+    //  boiler
+    const store = useStore();
 
-  computed: {
-    ...mapState('books', ['myFriends', 'myWallets']),
-  },
+    //  mapState and mapGetters replacements
+    const myWallets = computed(() => store.state.books.myWallets);
+    const myFriends = computed(() => store.state.books.myFriends);
 
-  methods: {
-    checkAddress(map, fmap, addy) {
+    //  methods
+    const checkAddress = (map, fmap, addy) => {
       const myWal = Immutable.Map(map) as Map<
         [Address, { nickname: string; tags: Array<string> }]
       >;
@@ -44,9 +37,9 @@ export default defineComponent({
       } else {
         return this.truncateAddress(addy);
       }
-    },
+    };
 
-    truncateAddress(address) {
+    const truncateAddress = (address) => {
       try {
         const truncateRegex =
           /^(0x[a-zA-Z0-9]{4})[a-zA-Z0-9]+([a-zA-Z0-9]{4})$/;
@@ -57,11 +50,25 @@ export default defineComponent({
       } catch (e) {
         return address;
       }
-    },
+    };
 
-    toggleDetails() {
+    const toggleDetails = () => {
       this.showingDetails = !this.showingDetails;
-    },
+    };
+
+    return {
+      myWallets,
+      myFriends,
+      checkAddress,
+      truncateAddress,
+      toggleDetails,
+    };
+  },
+
+  data() {
+    return {
+      showingDetails: false,
+    };
   },
 
   props: {

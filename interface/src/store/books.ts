@@ -21,9 +21,7 @@ export default {
       urbitData: [] as Array<[[number, TxHash], Transaction]>,
       notes: [] as Array<[TxHash, Note]>,
       myFriends: [] as Array<[Address, WalletDetails]>,
-      myWallets: [] as Array<
-        [Address, { nick: string; tags: Array<string> }]
-      >,
+      myWallets: [] as Array<[Address, { nick: string; tags: Array<string> }]>,
       nav: 0 as Navi,
       transPage: 0 as number,
       browsing: '' as Address,
@@ -241,7 +239,7 @@ export default {
     },
 
     handleSetWallets(
-      { commit, dispatch },
+      { commit },
       battery: {
         fren: Array<[Address, WalletDetails]>;
         mine: Array<[Address, { nickname: string; tags: Array<string> }]>;

@@ -28,7 +28,9 @@
     </template>
     <template #tags="{ record }">
       <template v-for="tag in record.tags">
-        <a-tag :closable="!!tag" @close="handleClose(record.key, tag)">{{tag}}</a-tag>
+        <a-tag :closable="!!tag" @close="handleClose(record.key, tag)">
+          {{tag}}
+        </a-tag>
       </template>
       <a-input
         ref="inputRef"
@@ -60,41 +62,24 @@
     <a-form-item label="Nickname: " ref="nick" name="nick">
       <a-input v-model:value="formState.nick" placeholder="UnBankedKing" />
     </a-form-item>
-    <a-form-item label="Address: ">
+    <a-form-item label="Address: " ref="address" name="address">
       <a-input
         v-model:value="formState.address"
         placeholder="0xeeee.1111.2222.3333.4444.5555.6666.7777.8888.9999"
       />
     </a-form-item>
-    <a-form-item label="Tags: ">
+    <a-form-item label="Tags: " ref="tags" name="tags">
       <a-input v-model:value="formState.tags" placeholder="abc one-two three" />
     </a-form-item>
-    <a-button type="primary" class="bg-slate-600" @click="onSubmit"
-      >Add Tracked Wallet</a-button
-    >
+    <a-button type="primary" class="bg-slate-600" @click="onSubmit">
+      Add Tracked Wallet
+    </a-button>
   </a-form>
-  <div name="entry" class="flex flex-row">
-    <div :class="[pushWalletPending ? 'bg-gray-100 dark:bg-gray-400' : '']">
-      <input
-        class="w-11/12 grow"
-        type="text"
-        placeholder="0xeeee.1111.2222.3333.4444.5555.6666.7777.8888.9999"
-        v-model="newAddress"
-      />
-      <input type="text" placeholder="my-new-wallet" v-model="newNick" />
-      <button
-        @click="handleAddWallet"
-        :disabled="!validAddress || pushWalletPending"
-      >
-        Add Wallet
-      </button>
-    </div>
-  </div>
+
 </template>
 
 <script lang="ts">
 import Immutable from 'immutable';
-import Wallet from '@/components/Wallet.vue';
 import { CheckOutlined, EditOutlined } from '@ant-design/icons-vue';
 import { cloneDeep } from 'lodash-es';
 import { pushWallet, pushTags, pushName } from '@/api/books.ts';
@@ -105,10 +90,20 @@ import { Address } from '@/types';
 
 export default defineComponent({
   setup() {
+    //  boiler
     const store = useStore();
 
-    // Computed
+    //  mounted-actions
+    store.dispatch('books/handleSwitchNav', 1);
+
+    //  mapState and mapGetters replacements
     const myWallets = computed(() => store.state.books.myWallets);
+    const myFriends = computed(() => store.state.books.myFriends);
+    const namesInUse = computed(() => {
+      const myNames = this.myWallets.map((item) => item[1].nick);
+      const urNames = this.myFriends.map((item) => item[1].nick);
+      return myNames.concat(urNames);
+    });
 
     const count = computed(() => wallets.value.length + 1);
 
@@ -129,7 +124,6 @@ export default defineComponent({
 
     // Refs
     const formRef = ref();
-
     const inputRef = ref();
 
     //  handlers
@@ -201,7 +195,7 @@ export default defineComponent({
       {
         title: 'Address',
         dataIndex: 'address',
-        width: '40%',
+        width: '30%',
       },
       {
         title: 'Tags',
@@ -236,13 +230,70 @@ export default defineComponent({
           trigger: 'blur',
         },
       ],
+      address: [
+        {
+          required: true,
+          message: 'Address Required',
+          trigger: 'blur',
+        },
+        {
+          min: 42,
+          max: 42,
+          pattern: /^0x[a-fA-F0-9]{40}$/,
+          message: 'Provide Wallet Address',
+          trigger: 'blur',
+        }
+      ],
+      tags: [
+        {
+          required: false,
+          pattern: /^[a-zA-Z0-9\-\_\s]+$/,
+          trigger: 'blur',
+          message: "a-z, 0-9, '-' and '_' only, separated by spaces"
+        }
+      ]
     };
+
+    //  methods
+    const validAddress = () => {
+      if (this.newAddress === '') {
+        return false;
+      }
+      if (this.newNick === '') {
+        return false;
+      }
+      if (!/^0x[a-fA-F0-9]{40}$/.test(this.newAddress)) {
+        return false;
+      }
+      return true;
+    };
+
+    const handleAddWallet = () => {
+      if (!this.validAddress) {
+        return;
+      }
+      this.pushWalletPending = true;
+      pushWallet(this.newAddress, this.newNick).then((r) => {
+        console.log('res: ', r);
+        this.pushWalletPending = false;
+        this.newAddress = '';
+        this.newNick = '';
+      });
+    };
+
     const onSubmit = () => {
       formRef.value
         .validate()
         .then(() => {
           console.log(formRef.value);
           console.log('values', formState, toRaw(formState));
+          pushWallet(toRaw(formState).address, toRaw(formState).nick, toRaw(formState).tags)
+            .then((r) => {
+              console.log('res: ', r);
+            })
+            .catch((e) => {
+              console.log('err: ', e);
+            });
         })
         .catch((error) => {
           console.log('error', error);
@@ -250,6 +301,8 @@ export default defineComponent({
     };
 
     return {
+      myWallets,
+      myFriends,
       columns,
       formRef,
       formState,
@@ -263,6 +316,9 @@ export default defineComponent({
       wallets,
       handleClose,
       handleInput,
+      namesInUse,
+      validAddress,
+      handleAddWallet
     };
   },
 
@@ -273,54 +329,11 @@ export default defineComponent({
       pushWalletPending: false,
     };
   },
-  mounted() {
-    this.switchNav();
-  },
-  unmounted() {},
+
   components: {
-    Wallet,
     CheckOutlined,
     EditOutlined,
   },
-  computed: {
-    ...mapState('books', ['myWallets', 'myFriends']),
 
-    namesInUse() {
-      const myNames = this.myWallets.map((item) => item[1].nick);
-      const urNames = this.myFriends.map((item) => item[1].nick);
-      return myNames.concat(urNames);
-    },
-
-    validAddress() {
-      if (this.newAddress === '') {
-        return false;
-      }
-      if (this.newNick === '') {
-        return false;
-      }
-      if (!/^0x[a-fA-F0-9]{40}$/.test(this.newAddress)) {
-        return false;
-      }
-      return true;
-    },
-  },
-  methods: {
-    switchNav() {
-      this.$store.dispatch('books/handleSwitchNav', 1);
-    },
-
-    handleAddWallet() {
-      if (!this.validAddress) {
-        return;
-      }
-      this.pushWalletPending = true;
-      pushWallet(this.newAddress, this.newNick).then((r) => {
-        console.log('res: ', r);
-        this.pushWalletPending = false;
-        this.newAddress = '';
-        this.newNick = '';
-      });
-    },
-  },
 });
 </script>

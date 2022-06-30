@@ -161,7 +161,7 @@ export default {
                               .replace(regex, '')
                               .padStart(40, '0')) as Address;
                         }
-                      }) as unknown as Address | null,
+                      })() as unknown as Address | null,
                     } as SubTx;
                   }),
                   nonce: tran.nonce,
@@ -171,21 +171,21 @@ export default {
                     } else {
                       return new Decimal(tran.txgas) as Decimal;
                     }
-                  }) as unknown as Decimal | null,
+                  })() as unknown as Decimal | null,
                   txGasLimit: (() => {
                     if (tran.txgaslimit === null) {
                       return null as null;
                     } else {
                       return new Decimal(tran.txgaslimit) as Decimal;
                     }
-                  }) as unknown as Decimal | null,
+                  })() as unknown as Decimal | null,
                   input: (() => {
                     if (tran.input === null) {
                       return null as null;
                     } else {
                       return tran.input as string;
                     }
-                  }) as unknown as string | null,
+                  })() as unknown as string | null,
                   fee: new Decimal(tran.fee),
                   txSuccessful: tran.txsuccessful,
                   primaryWallet:

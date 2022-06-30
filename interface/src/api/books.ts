@@ -2,39 +2,57 @@ import urbitAPI from './urbitAPI';
 import { Scry } from '@urbit/http-api';
 import { Transaction, Address } from '@/types';
 
-export function pushWallet(address: Address, nick: string) {
-  return urbitAPI
-    .poke({
-      //   return {
-      app: 'books',
-      mark: 'books-page',
-      json: { 'add-wallet': { address, nick, tags: [] } },
-      //   }
-    })
-    .then((r) => {
-      return r;
-    })
-    .catch((e) => {
-      console.log('err ', e);
-    });
-};
+export function pushWallet(address: Address, nick: string, tags: string) {
+  return urbitAPI.poke({
+    //   return {
+    app: 'books',
+    mark: 'books-page',
+    json: {
+      'add-wallet': {
+        address: address.toLowerCase(),
+        nick: nick,
+        tags: tags.split(' ').map((item) => item.toLowerCase()),
+      },
+    },
+    //   }
+  });
+}
+
+export function pushFriend(
+  address: Address,
+  nick: string,
+  who: string,
+  tags: string
+) {
+  console.log(address, nick, who, tags);
+  return urbitAPI.poke({
+    app: 'books',
+    mark: 'books-page',
+    json: {
+      'add-friend': {
+        address: address.toLowerCase(),
+        nick: nick,
+        who: who,
+        tags: tags.split(' ').map((item) => item.toLowerCase()),
+      },
+    },
+  });
+}
 
 export function pushTags(address: Address, tags: []) {
-  return urbitAPI
-    .poke({
-        app: 'books',
-        mark: 'books-page',
-        json: { 'set-tags': { address: address, tags: tags } },      
-    })
-};
+  return urbitAPI.poke({
+    app: 'books',
+    mark: 'books-page',
+    json: { 'set-tags': { address: address, tags: tags } },
+  });
+}
 
 export function pushName(address: Address, name: string) {
-  return urbitAPI
-    .poke({
-      app: 'books',
-      mark: 'books-page',
-      json: { 'set-nick': { address: address, nick: name}}
-    })
+  return urbitAPI.poke({
+    app: 'books',
+    mark: 'books-page',
+    json: { 'set-nick': { address: address, nick: name } },
+  });
 }
 
 export function pushTransaction(trans: Transaction) {
@@ -83,4 +101,4 @@ export function pushTransaction(trans: Transaction) {
       console.log(reformTrans);
       console.log('err ', e);
     });
-};
+}

@@ -1,10 +1,12 @@
-import { createRouter, createWebHistory, createWebHashHistory, RouteRecordRaw } from "vue-router";
-import WalletList from "@/components/WalletList.vue";
-import Navigation from "@/components/Navigation.vue";
-import TransactionList from "@/components/TransactionList.vue";
-import Home from "@/views/Home.vue";
-import { decryptJsonWalletSync } from "@ethersproject/json-wallets";
-import { TransactionDescription } from "ethers/lib/utils";
+import {
+  createRouter,
+  createWebHistory,
+  RouteRecordRaw,
+} from 'vue-router';
+import WalletList from '@/components/WalletList.vue';
+import FriendList from '@/components/FriendList.vue';
+import TransactionList from '@/components/TransactionList.vue';
+import Home from '@/views/Home.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -25,6 +27,11 @@ const routes: Array<RouteRecordRaw> = [
     component: TransactionList,
   },
 
+  {
+    path: '/rolodex',
+    name: 'rolodex',
+    component: FriendList,
+  },
 
   //{
   //path: "/about",

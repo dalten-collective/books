@@ -12,6 +12,7 @@
   ++  noun  page
   ++  json
     |=  jon=^json
+    ~&  >>>  jon
     %-  page
     =<  (to-noun jon)
     |%
@@ -47,7 +48,15 @@
         %-  ot
         :~  address+(su ;~(pfix (jest '0x') hex))
             nick+so
-            tags+(as (se %tas))
+            tags+(ci |=(a=(set @tas) `(~(dif in a) (sy [%$ ~]))) (as so))
+        ==
+      ::
+        :-  %add-friend
+        %-  ot
+        :~  address+(su ;~(pfix (jest '0x') hex))
+            nick+so
+            who+(ci |=(a=@t ?:(=('' a) ~ `(slav %p a))) so):dejs-soft:format
+            tags+(ci |=(a=(set @tas) `(~(dif in a) (sy [%$ ~]))) (as so))
         ==
       ::
         :-  %add-transaction

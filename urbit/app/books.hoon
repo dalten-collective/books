@@ -154,7 +154,7 @@
       =+  new=(add now.bowl ~m30)
       =;  always=(list card)
         [[(zapper-fi:uber:is /when) always] this]
-      [%pass /books/timer/(scot %da new) [%arvo %b [%wait new]]]~
+      [%pass /books/timer [%arvo %b [%wait new]]]~
     ::
         [%books %do %zap *]
       ?+    +>+.wire  !!
