@@ -96,25 +96,7 @@ export default {
           .toArray() as Array<[[number, TxHash], Transaction]>;
       }
     },
-    paginateTransactions: (state, getters) => {
-      const sorted = getters.orderedTransactions;
-      const begin = function () {
-        if (state.transPage === 0) {
-          return 1;
-        } else {
-          return (state.transPage - 1) * 25 + 1;
-        }
-      };
-      const allay = begin() + 24;
-      console.log('displaying transaction range: ', begin(), allay);
-      return sorted.slice(begin(), allay) as Array<
-        [[number, TxHash], Transaction]
-      >;
-    },
-    pageFrontTransactions: (state, getters) => {
-      const sorted = getters.orderedTransactions;
-      return sorted.slice(1, 5) as Array<[[number, TxHash], Transaction]>;
-    },
+
   },
 
   mutations: {
@@ -203,12 +185,24 @@ export default {
       }
     ) {
       console.log('add-friend', battery.new[0]);
-      state.myFriends = Immutable.setIn(
-        Immutable.Map(state.MyFriends),
-        [battery.new[0]],
-        battery.new[1]
-      ).toArray();
+      state.myFriends = Immutable.Map(state.myFriends)
+        .delete(battery.new[0])
+        .set(battery.new[0], battery.new[1])
+        .toArray();
     },
+
+    delFriend(
+      state,
+      battery: {
+        remove: Address;
+      }
+    ) {
+      console.log('del-friend', battery.remove);
+      state.myWallets = Immutable.Map(state.myFriends)
+        .delete(battery.remove)
+        .toArray();
+    },
+
 
     addTransaction(
       state,
@@ -274,6 +268,9 @@ export default {
       }
     ) {
       commit('addFriend', { new: battery.new });
+    },
+    handleDelFriend({ commit }, battery: { remove: Address }) {
+      commit('delFriend', { remove: battery.remove });
     },
     handleAddTransaction({ commit }, battery: { transaction: Transaction }) {
       commit('addTransaction', { trans: battery.transaction });

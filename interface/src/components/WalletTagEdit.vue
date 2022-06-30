@@ -5,7 +5,7 @@
       :key="tag"
       :closable="!!tag"
       @close="handleClose(tag)"
-      color="blue"
+      color="#475668"
     >
       {{ tag }}
     </a-tag>

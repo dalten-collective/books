@@ -4,6 +4,7 @@
     :columns="columns"
     :data-source="friends"
     :scroll="{ x: 750 }"
+    :loading="overallLoading"
   >
     <template #tags="{ record }">
       <template v-for="tag in record.tags">
@@ -19,6 +20,14 @@
         @keyup.enter="handleInput(record.key, $event)"
       />
     </template>
+    <template #actions="{ record }">
+      <a-popconfirm
+        title="Are you sure you want to remove this wallet?"
+        @confirm="onDelete(record.key)"
+      >
+        <a>Delete</a>
+      </a-popconfirm>
+    </template>
   </a-table>
   <a-form
     ref="formRef"
@@ -32,7 +41,7 @@
     <a-form-item label="Address: " ref="address" name="address">
       <a-input
         v-model:value="formState.address"
-        placeholder="0xeeee.1111.2222.3333.4444.5555.6666.7777.8888.9999"
+        placeholder="0xeeee111122223333444455556666777788889999"
       />
     </a-form-item>
     <a-form-item label="Who (@p - optional): " ref="who" name="who">
@@ -42,7 +51,7 @@
       <a-input v-model:value="formState.tags" placeholder="abc one-two three" />
     </a-form-item>
     <a-button type="primary" class="bg-slate-600" @click="onSubmit">
-      Add Tracked Wallet
+      Add Friend (Untracked)
     </a-button>
   </a-form>
 </template>
@@ -50,7 +59,7 @@
 <script lang="ts">
 import { computed, defineComponent, reactive, ref, toRaw } from 'vue';
 import { mapState, useStore } from 'vuex';
-import { pushFriend } from '@/api/books.ts';
+import { pushFriend, pullFriend } from '@/api/books.ts';
 import Immutable from 'immutable';
 import { Address } from '@/types';
 
@@ -63,6 +72,7 @@ export default defineComponent({
     store.dispatch('books/handleSwitchNav', 3);
 
     // Refs
+    const overallLoading = ref(false);
     const formRef = ref();
     const inputRef = ref();
 
@@ -96,9 +106,11 @@ export default defineComponent({
         },
       },
       {
-        title: 'Delete',
-        dataIndex: 'Delete',
+        dataIndex: 'actions',
         width: '10%',
+        slots: {
+          customRender: 'actions',
+        }
       },
     ];
     const myFriends = computed(() => store.state.books.myFriends);
@@ -164,7 +176,15 @@ export default defineComponent({
     };
 
     //  methods
+    const onDelete = (key) => {
+      overallLoading.value = true;
+      pullFriend(key).finally(() => {
+        overallLoading.value = false;
+      });
+    };
+
     const onSubmit = () => {
+      overallLoading = true;
       formRef.value
         .validate()
         .then(() => {
@@ -181,6 +201,10 @@ export default defineComponent({
             })
             .catch((e) => {
               console.log('err: ', e);
+            })
+            .finally(() => {
+              overallLoading = false;
+              formRef.value.resetFields();
             });
         })
         .catch((error) => {
@@ -195,6 +219,8 @@ export default defineComponent({
       formState,
       rules,
       onSubmit,
+      onDelete,
+      overallLoading
     };
   },
 });

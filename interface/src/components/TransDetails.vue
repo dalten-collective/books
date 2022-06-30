@@ -56,10 +56,10 @@
     </a-tab-pane>
     <a-tab-pane key="2" tab="Other Information">
       <a-descriptions>
-        <a-descriptions-item label="Network Cost">
+        <a-descriptions-item label="Network Fees">
           {{ fee }}
         </a-descriptions-item>
-        <a-descriptions-item label="Input Data">
+        <a-descriptions-item label="Function Call">
           {{ input }}
         </a-descriptions-item>
         <a-descriptions-item label="Nonce">
