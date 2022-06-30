@@ -49,10 +49,8 @@ import { defineComponent, computed, ref } from 'vue';
 import { useStore } from 'vuex';
 import dateFormat, { masks } from 'dateformat';
 import AddressLookup from '@/components/AddressLookup.vue';
-import PagePolice from '@/components/PagePolice.vue';
 import SelectedWallet from '@/components/SelectedWallet.vue';
 import TransDetails from '@/components/TransDetails.vue';
-import TransUnit from '@/components/Transaction.vue';
 import { defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import type { PropType } from 'vue';
@@ -129,32 +127,6 @@ export default defineComponent({
       }
     });
 
-    const columns = [
-      {
-        title: 'Timestamp',
-        dataIndex: 'timeStamp',
-        sorter: (a, b) => a.timeOriginal - b.timeOriginal,
-      },
-      {
-        title: 'Primary Wallet',
-        dataIndex: 'primaryWallet',
-        slots: {
-          customRender: 'addressColumn',
-        },
-      },
-      {
-        title: 'Involved Currencies',
-        dataIndex: 'involvedCurrencies',
-        slots: {
-          customRender: 'currencyColumn',
-        },
-      },
-      {
-        title: 'Action',
-        dataIndex: 'shortDescription',
-      },
-    ];
-
     const nameChek = (addy) => {
       //  First, get arrays of addy, name for utility
       const myne = myWallets.value
@@ -183,6 +155,76 @@ export default defineComponent({
       }
     };
 
+    const involvedWallets = computed(() => {
+      return Array.from(
+        new Set(
+          orderedTransactions.value.map(w => w[1].primaryWallet)
+        )
+      ).map((addy) => {
+        const nick = nameChek(addy)
+        return {
+          text: nick,
+          value: addy
+        }
+      })
+    })
+
+    const allCurrencies = computed(() => {
+      const uniqCurrencies = Array.from(
+        new Set(
+          data.value
+            .map((t) => {
+              return t.involvedCurrencies.map((c) => c[2])
+            })
+            .flat()
+        )
+      )
+      const mapped = uniqCurrencies.map((currency) => {
+        return {
+          text: currency,
+          value: currency,
+        }
+      })
+      return mapped
+    });
+
+    const columns = computed(() => {
+      return [
+        {
+          title: 'Timestamp',
+          dataIndex: 'timeStamp',
+          sorter: (a, b) => a.timeOriginal - b.timeOriginal,
+        },
+        {
+          title: 'Primary Wallet',
+          dataIndex: 'primaryWallet',
+          slots: {
+            customRender: 'addressColumn',
+          },
+          // doesn't like the nameChek helper
+          // filters: involvedWallets.value,
+          // onFilter: (soughtAddress: string, wallet) => {
+          //   return wallet.primaryWallet == soughtAddress
+          // }
+        },
+        {
+          title: 'Involved Currencies',
+          dataIndex: 'involvedCurrencies',
+          slots: {
+            customRender: 'currencyColumn',
+          },
+          filters: allCurrencies.value,
+          onFilter: (soughtCurrency, txn) => {
+            return txn.involvedCurrencies.map((c) => c[2]).includes(soughtCurrency)
+          }
+        },
+        {
+          title: 'Action',
+          dataIndex: 'shortDescription',
+        },
+      ]
+    })
+
     //  methods
     const makeDate = (secs) => {
       let txDate = new Date(secs * 1000);
@@ -198,6 +240,8 @@ export default defineComponent({
       nameChek,
       columns,
       data,
+      // involvedWallets,
+      allCurrencies,
     };
   },
 
