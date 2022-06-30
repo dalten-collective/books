@@ -94,7 +94,25 @@ export default {
             case 'add-friend':
               return dispatch(
                 'books/handleAddFriend',
-                { new: [data.new[0], data.new[1]] },
+                {
+                  new: [
+                    '0x' +
+                      data.new[0]
+                        .split('0x')[1]
+                        .replace(regex, '')
+                        .padStart(40, '0'),
+                    data.new[1],
+                  ],
+                },
+                { root: true }
+              );
+            case 'del-friend':
+              const fremType = 
+                '0x' +
+                data.remove.split('0x')[1].replace(regex, '').padStart(40, '0');
+              return dispatch(
+                'books/handleDelFriend',
+                { remove: fremType },
                 { root: true }
               );
             case 'transactions':

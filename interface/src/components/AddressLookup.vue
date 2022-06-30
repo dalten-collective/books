@@ -22,6 +22,10 @@ export default defineComponent({
 
     //  methods
     const checkAddress = (map, fmap, addy) => {
+      if (null === addy) {
+        return 'Unknown';
+      }
+      
       const myWal = Immutable.Map(map) as Map<
         [Address, { nickname: string; tags: Array<string> }]
       >;
@@ -29,13 +33,13 @@ export default defineComponent({
       if (Immutable.has(myWal, addy)) {
         return Immutable.get(myWal, addy).nick
           ? Immutable.get(myWal, addy).nick
-          : this.truncateAddress(addy);
+          : truncateAddress(addy);
       } else if (Immutable.has(frenWal, addy)) {
         return Immutable.get(frenWal, addy).nick
           ? Immutable.get(frenWal, addy).nick
-          : this.truncateAddress(addy);
+          : truncateAddress(addy);
       } else {
-        return this.truncateAddress(addy);
+        return truncateAddress(addy);
       }
     };
 

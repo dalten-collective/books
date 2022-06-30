@@ -76,58 +76,13 @@
           <template #expandedRowRender="{ record }">
             <div class="flex flex-row">
               <div class="flex-auto basis-1/2">
-                <div v-for="step in record.description">
-                  <a-tooltip
-                    :title="[null === step[3] ? 'Null Address' : step[3]]"
-                    color="gold"
-                    placement="topLeft"
-                  >
-                    <a-statistic
-                      :title="[
-                        step[0] === 'outgoing'
-                          ? 'Sent to ' + nameChek(step[3])
-                          : 'Received from ' + nameChek(step[3]),
-                      ]"
-                      :value="step[1]"
-                      :precision="2"
-                      :suffix="step[2]"
-                      :value-style="{ fontSize: '15px' }"
-                    >
-                      <template #prefix>
-                        <svg
-                          v-if="step[0] === 'outgoing'"
-                          focusable="false"
-                          class=""
-                          data-icon="arrow-down"
-                          width="15px"
-                          height="15px"
-                          fill="red"
-                          aria-hidden="true"
-                          viewBox="64 64 896 896"
-                        >
-                          <path
-                            d="M862 465.3h-81c-4.6 0-9 2-12.1 5.5L550 723.1V160c0-4.4-3.6-8-8-8h-60c-4.4 0-8 3.6-8 8v563.1L255.1 470.8c-3-3.5-7.4-5.5-12.1-5.5h-81c-6.8 0-10.5 8.1-6 13.2L487.9 861a31.96 31.96 0 0048.3 0L868 478.5c4.5-5.2.8-13.2-6-13.2z"
-                          />
-                        </svg>
-                        <svg
-                          v-if="step[0] === 'incoming'"
-                          focusable="false"
-                          class=""
-                          data-icon="arrow-up"
-                          width="15px"
-                          height="15px"
-                          fill="green"
-                          aria-hidden="true"
-                          viewBox="64 64 896 896"
-                        >
-                          <path
-                            d="M868 545.5L536.1 163a31.96 31.96 0 00-48.3 0L156 545.5a7.97 7.97 0 006 13.2h81c4.6 0 9-2 12.1-5.5L474 300.9V864c0 4.4 3.6 8 8 8h60c4.4 0 8-3.6 8-8V300.9l218.9 252.3c3 3.5 7.4 5.5 12.1 5.5h81c6.8 0 10.5-8 6-13.2z"
-                          />
-                        </svg>
-                      </template>
-                    </a-statistic>
-                  </a-tooltip>
-                </div>
+                <TransDetails
+                  :description="record.description"
+                  :nonce="record.nonce"
+                  :input="record.input"
+                  :fee="record.fee"
+                  :hash="record.hash"
+                />
               </div>
               <div class="flex-auto basis-1/2">
                 <Note :hash="record.hash" />
@@ -152,6 +107,7 @@
 import { defineComponent, computed, ref } from 'vue';
 import Note from '@/components/Note.vue';
 import AddressLookup from '@/components/AddressLookup.vue';
+import TransDetails from '@/components/TransDetails.vue';
 import { useStore } from 'vuex';
 import Immutable from 'immutable';
 import dateFormat, { masks } from 'dateformat';
@@ -212,6 +168,11 @@ export default defineComponent({
             timeStamp: makeDate(item[1].timeStamp),
             timeOriginal: item[1].timeStamp,
             primaryWallet: item[1].primaryWallet,
+            nonce: item[1].nonce,
+            txGas: item[1].txGas,
+            txGasLimit: item[1].txGasLimit,
+            fee: item[1].fee.toSignificantDigits(5).toString(),
+            input: item[1].input,
             involvedCurrencies: (() => {
               return item[1].subTransactions.slice().map((step) => {
                 return [
@@ -246,14 +207,14 @@ export default defineComponent({
     });
 
     //  Wallet Data
-    const key = ref(0)
+    const key = ref('0')
     const tabList = computed(() => {
       if (undefined === myWallets.value) {
         return null;
       } else if (myWallets.value !== undefined) {
         return myWallets.value.slice().map((item, index) => {
           return {
-            key: index,
+            key: index.toString(),
             tab: item[1].nick,
           };
         });
@@ -332,6 +293,7 @@ export default defineComponent({
   components: {
     AddressLookup,
     Note,
+    TransDetails,
   },
 });
 </script>

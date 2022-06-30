@@ -64,6 +64,11 @@
             tags+(ci |=(a=(set @tas) `(~(dif in a) (sy [%$ ~]))) (as so))
         ==
       ::
+        :-  %del-friend
+        %-  ot
+        :~  address+(su ;~(pfix (jest '0x') hex))
+        ==
+      ::
         :-  %add-transaction
         %-  ot
         :~  primarywallet+(su ;~(pfix (jest '0x') hex))
