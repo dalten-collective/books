@@ -4,6 +4,7 @@
     :columns="columns"
     :data-source="wallets"
     :scroll="{ x: 750 }"
+    :loading="overallLoading"
   >
     <template #name="{ text, record }">
       <div class="editable-cell">
@@ -29,13 +30,12 @@
     <template #tags="{ record }">
       <WalletTagEdit :record="record" />
     </template>
-    <template #operation="{ record }">
+    <template #actions="{ record }">
       <a-popconfirm
-        v-if="wallets.length"
-        title="Sure to delete?"
+        title="Are you sure you want to remove this wallet?"
         @confirm="onDelete(record.key)"
       >
-        <a>Delete</a>
+        <a class="hover:text-yellow-500">Delete</a>
       </a-popconfirm>
     </template>
   </a-table>
@@ -52,7 +52,7 @@
     <a-form-item label="Address: " ref="address" name="address">
       <a-input
         v-model:value="formState.address"
-        placeholder="0xeeee.1111.2222.3333.4444.5555.6666.7777.8888.9999"
+        placeholder="0xeeee111122223333444455556666777788889999"
       />
     </a-form-item>
     <a-form-item label="Tags: " ref="tags" name="tags">
@@ -69,14 +69,13 @@ import Immutable from 'immutable';
 import WalletTagEdit from '@/components/WalletTagEdit.vue';
 import { CheckOutlined, EditOutlined } from '@ant-design/icons-vue';
 import { cloneDeep } from 'lodash-es';
-import { pushWallet, pushTags, pushName } from '@/api/books.ts';
+import { pushWallet, pullWallet, pushName } from '@/api/books.ts';
 import { computed, defineComponent, reactive, ref, toRaw } from 'vue';
 import { mapState, useStore } from 'vuex';
 import type { PropType } from 'vue';
 import { Address, WalletDetails } from '@/types';
 
 export default defineComponent({
-
   setup() {
     //  boiler
     const store = useStore();
@@ -111,15 +110,17 @@ export default defineComponent({
     });
 
     const allTags = computed(() => {
-      return Array.from(new Set(myWallets.value.map((w) => w[1].tags).flat())).map((tag) => {
+      return Array.from(
+        new Set(myWallets.value.map((w) => w[1].tags).flat())
+      ).map((tag) => {
         return {
           text: tag,
           value: tag,
-        }
-      })
+        };
+      });
     });
 
-    const columns = computed (() => {
+    const columns = computed(() => {
       return [
         {
           title: 'Name',
@@ -144,18 +145,21 @@ export default defineComponent({
           },
           filters: allTags.value,
           onFilter: (soughtTag: string, wallet: WalletDetails) => {
-              return wallet.tags.includes(soughtTag)
-            } 
+            return wallet.tags.includes(soughtTag);
+          },
         },
         {
-          title: 'Delete',
-          dataIndex: 'Delete',
+          dataIndex: 'actions',
           width: '15%',
+          slots: {
+            customRender: 'actions',
+          },
         },
       ];
     });
 
     // Refs
+    const overallLoading = ref(false);
     const formRef = ref();
     const inputRef = ref();
 
@@ -215,7 +219,10 @@ export default defineComponent({
     };
 
     const onDelete = (key) => {
-      wallets.value = wallets.value.filter((item) => item.key !== key);
+      overallLoading.value = true;
+      pullWallet(key).finally(() => {
+        overallLoading.value = false;
+      });
     };
     const formState = reactive({
       layout: 'inline',
@@ -261,33 +268,8 @@ export default defineComponent({
     };
 
     //  methods
-    const validAddress = () => {
-      if (this.newAddress === '') {
-        return false;
-      }
-      if (this.newNick === '') {
-        return false;
-      }
-      if (!/^0x[a-fA-F0-9]{40}$/.test(this.newAddress)) {
-        return false;
-      }
-      return true;
-    };
-
-    const handleAddWallet = () => {
-      if (!this.validAddress) {
-        return;
-      }
-      this.pushWalletPending = true;
-      pushWallet(this.newAddress, this.newNick).then((r) => {
-        console.log('res: ', r);
-        this.pushWalletPending = false;
-        this.newAddress = '';
-        this.newNick = '';
-      });
-    };
-
     const onSubmit = () => {
+      overallLoading.value = true;
       formRef.value
         .validate()
         .then(() => {
@@ -303,11 +285,16 @@ export default defineComponent({
             })
             .catch((e) => {
               console.log('err: ', e);
+            })
+            .finally(() => {
+              overallLoading.value = false;
+              formRef.value.resetFields()
             });
         })
-        .catch((error) => {
-          console.log('error', error);
-        });
+      .catch((error) => {
+        console.log('error', error);
+      });
+    
     };
 
     return {
@@ -326,20 +313,12 @@ export default defineComponent({
       handleClose,
       handleInput,
       namesInUse,
-      validAddress,
-      handleAddWallet,
       allTags,
-      columns
+      columns,
+      overallLoading,
     };
   },
 
-  data() {
-    return {
-      newAddress: '',
-      newNick: '',
-      pushWalletPending: false,
-    };
-  },
 
   components: {
     CheckOutlined,

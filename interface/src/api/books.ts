@@ -18,13 +18,27 @@ export function pushWallet(address: Address, nick: string, tags: string) {
   });
 }
 
+export function pullWallet(address: Address) {
+  return urbitAPI
+    .poke({
+      app: 'books',
+      mark: 'books-page',
+      json: { 'del-wallet': { address } },
+    })
+    .then((r) => {
+      return r;
+    })
+    .catch((e) => {
+      console.log('err ', e);
+    })
+}
+
 export function pushFriend(
   address: Address,
   nick: string,
   who: string,
   tags: string
 ) {
-  console.log(address, nick, who, tags);
   return urbitAPI.poke({
     app: 'books',
     mark: 'books-page',
@@ -37,6 +51,21 @@ export function pushFriend(
       },
     },
   });
+}
+
+export function pullFriend(address: Address) {
+  return urbitAPI
+    .poke({
+      app: 'books',
+      mark: 'books-page',
+      json: { 'del-friend': { address } },
+    })
+    .then((r) => {
+      return r;
+    })
+    .catch((e) => {
+      console.log('err ', e);
+    })
 }
 
 export function pushTags(address: Address, tags: []) {
