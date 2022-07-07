@@ -121,7 +121,24 @@
         [[(zapper-fi:uber:is /when) always] this]
       [%pass /books/timer [%arvo %b [%wait new]]]~
     ::
-      [%books %do %note ~]
+        [%books %do %nix ~]
+      ?>  ?=([%khan %arow *] sign)
+      ?.  ?=(%& -.p.+.sign)  ((slog +.p.p.+.sign) `this)
+      ?>  ?=(%noun -.p.p.+.sign)
+      =/  upd  ::=[p=((mop ,[p=@da q=@ux] transaction) gth-hex) q=(list [[@da @ux] transaction])]
+        !<  $:  p=((mop ,[p=@da q=@ux] transaction) gth-hex)
+                q=(list [[@da @ux] transaction])
+            ==
+        +.p.p.+.sign
+      :_  this(transactions p.upd)
+      =,  enjs:format
+      =-  ~&  >>  -  [%give %fact ~[/website] json+!>(`json`-)]~
+        %-  pairs
+        :~  head+s+'del-transactions'
+            tran+a+(transactions:en-json:is p.upd)
+        ==
+    ::
+        [%books %do %note ~]
       ?>  ?=([%khan %arow *] sign)
       ?.  ?=(%& -.p.+.sign)  ((slog +.p.p.+.sign) `this)
       ?>  ?=(%noun -.p.p.+.sign)
@@ -203,6 +220,12 @@
     ^-  card
     :^  %pass  /books/do/note  %arvo
     [%k %fard %books %send-notes %noun !>([bol elucidations])]
+  ++  nix-trans
+    ^-  card
+    :^  %pass  /books/do/nix  %arvo
+    =-  [%k %fard %books %del-trans %noun !>(-)]
+    ^-  [bowl:gall @t @t (set @ux) ((mop ,[p=@da q=@ux] transaction) gth-hex)]
+    [bol uid.zapper-token pw.zapper-token ~(key by held-wallets) transactions]
     ::
   ++  zapper-fi
     |=  p=path
@@ -296,9 +319,10 @@
     ^-  (quip card _state)
     ~|  '%books-fail -address-not-tracked'
     ?>  (~(has by held-wallets) a)
+    =.  held-wallets  (~(del by held-wallets) a)
     =,  enjs:format
-    :_  state(held-wallets (~(del by held-wallets) a))
-    =-  [%give %fact ~[/website] json+!>(`json`-)]~
+    :_  state
+    =-  ~[nix-trans:uber [%give %fact ~[/website] json+!>(`json`-)]]
     %-  pairs
     :~  head+s+'del-wallet'
         remove+s+(scot %ux a)

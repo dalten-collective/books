@@ -118,13 +118,14 @@ export default {
               );
             case 'annotation':
               const reformNote = data.new.slice().map((item) => {
+                console.log("item", item)
                 return [
-                    '0x' + item[0].split('0x')[1].replace(regex, '').padStart(64, '0'),
+                    '0x' + item.hash.split('0x')[1].replace(regex, '').padStart(64, '0'),
                     {
-                      basis: new Decimal(item[1].basis.split('.~')[1]),
-                      to: [ item[1].to !== null ? '0x' + item[1].to.split('0x')[1].replace(regex, '').padStart(40, '0') : null],
-                      annotation: item[1].annotation,
-                      tags: item[1].tags
+                      basis: new Decimal(item.basis.split('.~')[1]),
+                      to: [ item.to !== null ? '0x' + item.to.split('0x')[1].replace(regex, '').padStart(40, '0') : null],
+                      annotation: item.annotation,
+                      tags: item.tags
                     }
                   ]
               });

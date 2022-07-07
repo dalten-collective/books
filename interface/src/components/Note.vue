@@ -172,11 +172,11 @@ export default defineComponent({
       })(),
       to: (() => {
         if (Immutable.has(annotations.value, props.hash)) {
-          return Immutable.get(annotations.value, props.hash).to as Address | null;
+          return Immutable.get(annotations.value, props.hash).to as Address;
         } else {
-          return null as Address | null;
+          return null as null;
         }
-      })(),
+      })() as Address | null,
       annotation: (() => {
         if (Immutable.has(annotations.value, props.hash)) {
           return Immutable.get(annotations.value, props.hash).annotation as string;
