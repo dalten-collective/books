@@ -10,7 +10,14 @@
 
     <template #noteColumn="{ record }">
       <div class='grid grid-cols-1'>
-        <form-outlined v-if="hasNote(record)" :style="{ color: '#EAB304' }"/>
+        <a-tooltip
+          placement="topRight"
+        >
+          <template #title>
+            <span>{{ recordAnnotation(record) }}</span>
+          </template>
+          <form-outlined v-if="hasNote(record)" :style="{ color: '#EAB304' }"/>
+        </a-tooltip>
       </div>
     </template>
 
@@ -223,6 +230,13 @@ export default defineComponent({
       }
       return notes.to.filter((c) => c !== null)
     }
+    const recordAnnotation = (record: Transaction): string => {
+      const notes = annotations(record)
+      if (Object.keys(notes).length === 0) {
+        return ""
+      }
+      return notes.annotation
+    }
 
     const nameChek = (addy) => {
       //  First, get arrays of addy, name for utility
@@ -418,6 +432,7 @@ export default defineComponent({
       hasNote,
       annotations,
       recordCounterparties,
+      recordAnnotation,
     };
   },
 
