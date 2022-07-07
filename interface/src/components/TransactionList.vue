@@ -49,7 +49,6 @@ import { defineComponent, computed, ref } from 'vue';
 import { useStore } from 'vuex';
 import dateFormat, { masks } from 'dateformat';
 import AddressLookup from '@/components/AddressLookup.vue';
-import SelectedWallet from '@/components/SelectedWallet.vue';
 import TransDetails from '@/components/TransDetails.vue';
 import { defineComponent } from 'vue';
 import { useStore } from 'vuex';

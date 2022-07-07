@@ -5,6 +5,7 @@ import {
   Address,
   TxHash,
   WalletDetails,
+  Annotation
 } from '@/types';
 import Immutable, { OrderedMap } from 'immutable';
 
@@ -32,6 +33,12 @@ export default {
     friends(state): Array<string> {
       return ['test'];
     },
+
+    pageFrontTransactions: (state, getters) => {
+      const sorted = getters.orderedTransactions;
+      return sorted.slice(1, 5) as Array<[[number, TxHash], Transaction]>;
+    },
+
     orderedTransactions(state): Array<[[number, TxHash], Transaction]> {
       const immuMap = Immutable.OrderedMap(state.urbitData) as OrderedMap<
         [number, TxHash],
@@ -96,7 +103,6 @@ export default {
           .toArray() as Array<[[number, TxHash], Transaction]>;
       }
     },
-
   },
 
   mutations: {
@@ -152,6 +158,19 @@ export default {
         })
       );
     },
+    setAnnotations(
+      state,
+      battery: {
+        notes: Array<[TxHash, Annotation]>
+      }
+    ) {
+      console.log('set-annotation');
+      state.notes = state.notes.concat(
+        battery.notes.filter((item) => {
+          return !Immutable.Map(state.notes).has(item[0]);
+        })
+      );
+    },
 
     addWallet(
       state,
@@ -203,7 +222,6 @@ export default {
         .toArray();
     },
 
-
     addTransaction(
       state,
       battery: {
@@ -240,6 +258,10 @@ export default {
       }
     ) {
       commit('setWallets', { fren: battery.fren, mine: battery.mine });
+    },
+    handleSetAnnotation({ commit }, battery: { notes: Array<[TxHash, Note]> }) {
+      console.log('battery', battery.notes);
+      commit('setAnnotations', { notes: battery.notes });
     },
     handleSetTransactions(
       { commit },
