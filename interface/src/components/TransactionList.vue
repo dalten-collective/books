@@ -147,7 +147,7 @@ export default defineComponent({
 
     const columns = [
       {
-        title: 'Timestamp',
+        title: 'Date',
         dataIndex: 'timeStamp',
         sorter: (a, b) => a.timeOriginal - b.timeOriginal,
         slots: {
