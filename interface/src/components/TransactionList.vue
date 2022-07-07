@@ -6,18 +6,24 @@
       />
     </template>
 
-    <template #currencyColumn="{ record }">
+    <template #currencyInColumn="{ record }">
       <div class="grid grid-cols-1 gap-2">
-        <div v-for="step in record.involvedCurrencies">
+        <div>
           <div class="flex flex-row">
-            <div v-if="step[0] === 'outgoing'" class="text-sm text-red-500">
-              {{ step[1] + ' ' + step[2] }}
+            <div class="text-sm text-green-500">
+              {{ presentFlow(getInflow(record.involvedCurrencies)) }}
             </div>
-            <div v-if="step[0] === 'incoming'" class="text-sm text-green-500">
-              {{ step[1] + ' ' + step[2] }}
-            </div>
-            <div v-if="step[0] === 'exchange'" class="text-grey-500 text-sm">
-              {{ step[1] + ' ' + step[2] }}
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <template #currencyOutColumn="{ record }">
+      <div class="grid grid-cols-1 gap-2">
+        <div>
+          <div class="flex flex-row">
+            <div class="text-sm text-red-500">
+              {{ presentFlow(getOutflow(record.involvedCurrencies)) }}
             </div>
           </div>
         </div>
@@ -52,10 +58,14 @@ import AddressLookup from '@/components/AddressLookup.vue';
 import TransDetails from '@/components/TransDetails.vue';
 import { defineComponent } from 'vue';
 import { useStore } from 'vuex';
-import type { PropType } from 'vue';
 import dateFormat, { masks } from 'dateformat';
 import Immutable from 'immutable';
 import { TxHash, Transaction } from '@/types';
+
+type FlowDirection = string
+type FlowAmount = string
+type FlowCurrency = string
+type Steps = [FlowDirection, FlowAmount, FlowCurrency]
 
 export default defineComponent({
   setup() {
@@ -140,10 +150,17 @@ export default defineComponent({
         },
       },
       {
-        title: 'Involved Currencies',
+        title: 'In',
         dataIndex: 'involvedCurrencies',
         slots: {
-          customRender: 'currencyColumn',
+          customRender: 'currencyInColumn',
+        },
+      },
+      {
+        title: 'Out',
+        dataIndex: 'involvedCurrencies',
+        slots: {
+          customRender: 'currencyOutColumn',
         },
       },
       {
@@ -151,6 +168,34 @@ export default defineComponent({
         dataIndex: 'shortDescription',
       },
     ];
+
+    const getInflow = (involved: Array<Steps>): Steps | undefined  => {
+      return involved.find((triplet: Steps) => triplet[0] === 'incoming')
+    }
+
+    const getOutflow = (involved: Array<Steps>): Steps | undefined => {
+      return involved.find((triplet: Steps) => triplet[0] === 'outgoing')
+    }
+
+    // TODO: unclear how to use
+    const getExchange = (involved: Array<Steps>): Steps | undefined  => {
+      return involved.find((triplet: Steps) => triplet[0] === 'exchange')
+    }
+
+    const presentFlow = (steps: Steps | undefined): string => {
+      if (steps === undefined) {
+        return ''
+      } else {
+        const direction = steps[0]
+        const amount = steps[1]
+        const currency = steps[2]
+        if ( direction === 'outgoing' ) {
+          return `- (${ amount }) ${ currency }`
+        } else {
+          return `${ amount } ${ currency }`
+        }
+      }
+    }
 
     const nameChek = (addy) => {
       //  First, get arrays of addy, name for utility
@@ -195,6 +240,9 @@ export default defineComponent({
       nameChek,
       columns,
       data,
+      getInflow,
+      getOutflow,
+      presentFlow,
     };
   },
 
