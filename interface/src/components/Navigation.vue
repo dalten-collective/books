@@ -1,6 +1,6 @@
 <template>
   <ul class="list-reset flex flex-row text-center md:flex-col md:text-left">
-    <li class="mr-3 flex-1">
+    <li class="mr-3 h-24">
       <router-link :to="{ name: 'home' }">
         <div
           class="align-left block border-b-2 py-1 pl-1 no-underline transition ease-in-out hover:scale-110 hover:border-yellow-400 hover:text-yellow-400 md:py-3"
@@ -26,6 +26,35 @@
             </svg>
             <span class="ml-4 text-2xl font-bold">Books</span>
           </div>
+        </div>
+      </router-link>
+    </li>
+    <li class="mr-3 flex-1">
+      <router-link :to="{ name: 'transactions' }">
+        <div
+          class="my-6 flex items-center rounded-lg p-2 transition ease-in-out hover:scale-110 hover:text-yellow-400"
+          v-bind:class="[nav === 2 ? 'bg-gray-600 dark:bg-gray-800' : '']"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="24px"
+            width="24px"
+            viewBox="0 0 24 24"
+            fill="#000000"
+          >
+            <path d="M0 0h24v24H0V0z" fill="none" />
+            <path
+              d="M6.5 10h-2v7h2v-7zm6 0h-2v7h2v-7zm8.5 9H2v2h19v-2zm-2.5-9h-2v7h2v-7zm-7-6.74L16.71 6H6.29l5.21-2.74m0-2.26L2 6v2h19V6l-9.5-5z"
+              v-bind:fill="[nav === 2 ? '#EAB308' : '#171717']"
+            />
+          </svg>
+          <span
+            class="mx-4 text-lg font-normal"
+            v-bind:class="[nav === 2 ? 'text-yellow-500' : '']"
+          >
+            Ledger
+          </span>
+          <span class="flex-grow text-right"> </span>
         </div>
       </router-link>
     </li>
@@ -59,35 +88,6 @@
             v-bind:class="[nav === 1 ? 'text-yellow-500' : '']"
           >
             Wallets
-          </span>
-          <span class="flex-grow text-right"> </span>
-        </div>
-      </router-link>
-    </li>
-    <li class="mr-3 flex-1">
-      <router-link :to="{ name: 'transactions' }">
-        <div
-          class="my-6 flex items-center rounded-lg p-2 transition ease-in-out hover:scale-110 hover:text-yellow-400"
-          v-bind:class="[nav === 2 ? 'bg-gray-600 dark:bg-gray-800' : '']"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            height="24px"
-            width="24px"
-            viewBox="0 0 24 24"
-            fill="#000000"
-          >
-            <path d="M0 0h24v24H0V0z" fill="none" />
-            <path
-              d="M6.5 10h-2v7h2v-7zm6 0h-2v7h2v-7zm8.5 9H2v2h19v-2zm-2.5-9h-2v7h2v-7zm-7-6.74L16.71 6H6.29l5.21-2.74m0-2.26L2 6v2h19V6l-9.5-5z"
-              v-bind:fill="[nav === 2 ? '#EAB308' : '#171717']"
-            />
-          </svg>
-          <span
-            class="mx-4 text-lg font-normal"
-            v-bind:class="[nav === 2 ? 'text-yellow-500' : '']"
-          >
-            Ledger
           </span>
           <span class="flex-grow text-right"> </span>
         </div>

@@ -8,7 +8,7 @@
           </div>
         </div>
       </div>
-      <div class="w-full md:w-5/6">
+      <div class="w-full md:w-5/6 md:mt-24">
         <router-view />
       </div>
     </div>
