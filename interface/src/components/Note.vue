@@ -1,9 +1,9 @@
 <template>
-  <a-form :model="formState">
+  <a-form ref="formRef" :rules="rules" :model="formState">
     <a-form-item label="Annotated: ">
       <a-switch
         v-model:checked="formState.annotated"
-        :style="[formState.annotated ? 'background-color: #788AAC' : '']"
+        :style="[formState.annotated ? 'background-color: #EAB304' : '']"
       />
     </a-form-item>
 
@@ -20,10 +20,9 @@
       label="To: "
       :style="[formState.annotated ? '' : 'display: none']"
     >
-      <div class="flex flex-row" v-if="formState.to === null">
+      <div class="flex flex-row">
         <svg
           class="basis-1/12"
-          xmlns="http://www.w3.org/2000/svg"
           height="24px"
           width="24px"
           viewBox="0 0 48 48"
@@ -55,15 +54,29 @@
           </a-select>
         </a-form-item>
       </div>
-      <div v-else></div>
     </a-form-item>
+    <a-form-item
+      label="Annotation: "
+      :style="[formState.annotated ? '' : 'display: none']"
+    >
+      <a-textarea v-model:value="formState.annotation" />
+    </a-form-item>
+    <a-button
+      type="primary"
+      class="bg-slate-600"
+      @click="onSubmit"
+      :style="[formState.annotated ? '' : 'display: none']"
+    >
+      Save
+    </a-button>
   </a-form>
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, computed } from 'vue';
+import { defineComponent, reactive, computed, ref, toRaw } from 'vue';
 import { useStore } from 'vuex';
 import type { PropType } from 'vue';
+import { pushAnnotation } from '@/api/books.ts';
 import { TxHash } from '@/types';
 import Immutable, { OrderedMap, Map } from 'immutable';
 import { Decimal } from 'decimal.js';
@@ -79,9 +92,9 @@ export default defineComponent({
     const myFriends = computed(() => store.state.books.myFriends);
 
     const annotations = computed(() => {
-      return Immutable.Map(notes);
+      return Immutable.Map(notes.value);
     });
-    
+
     const people = computed(() => {
       const friends = (() => {
         return myFriends.value.map((item) => {
@@ -134,29 +147,100 @@ export default defineComponent({
       }>;
     });
 
+    //  Refs
+    const overallLoading = ref(false);
+    const formRef = ref();
+
+    console.log('notes', notes.value);
+    console.log('props', props.hash);
+    console.log('has', Immutable.has(Immutable.Map(notes.value), props.hash));
+    console.log('has-alt', Immutable.has(annotations.value, props.hash));
     //  form stuff
     const formState = reactive({
       annotated: (() => {
-        return Immutable.has(annotations, props.hash) as boolean;
+        return Immutable.has(annotations.value, props.hash) as boolean;
       })(),
       basis: (() => {
-        if (Immutable.has(annotations, props.hash)) {
-          return Immutable.get(annotations, props.hash).basis as Decimal;
+        if (Immutable.has(annotations.value, props.hash)) {
+          return Immutable.get(
+            annotations.value,
+            props.hash
+          ).basis.toSignificantDigits(5).toString() as string;
         } else {
-          return 0x0 as Decimal;
+          return '0' as string;
         }
       })(),
       to: (() => {
-        if (Immutable.has(annotations, props.hash)) {
-          return Immutable.get(annotations, props.hash)
-            .to as Address | null;
+        if (Immutable.has(annotations.value, props.hash)) {
+          return Immutable.get(annotations.value, props.hash).to as Address | null;
         } else {
           return null as Address | null;
         }
       })(),
-      annnotation: '' as string,
+      annotation: (() => {
+        if (Immutable.has(annotations.value, props.hash)) {
+          return Immutable.get(annotations.value, props.hash).annotation as string;
+        } else {
+          return '' as string;
+        }
+      })(),
       tags: [] as Array<[string]>,
-    })
+    });
+    const rules = {
+      annotation: [
+        {
+          required: false,
+          trigger: blur,
+        },
+      ],
+      to: [
+        {
+          required: false,
+          trigger: 'blur',
+        },
+      ],
+      tags: [
+        {
+          required: false,
+          pattern: /^[a-zA-Z0-9\-\_\s]+$/,
+          trigger: 'blur',
+          message: "a-z, 0-9, '-' and '_' only, separated by spaces",
+        },
+      ],
+    };
+
+    //  methods
+    const truncateAddress = (address) => {
+      try {
+        const truncateRegex =
+          /^(0x[a-zA-Z0-9]{4})[a-zA-Z0-9]+([a-zA-Z0-9]{4})$/;
+        const match = address.match(truncateRegex);
+        if (match) {
+          return `${match[1]}…${match[2]}`;
+        }
+      } catch (e) {
+        return address;
+      }
+    };
+
+    const onSubmit = () => {
+      overallLoading.value = true;
+      formRef.value
+        .validate()
+        .then(() => {
+          console.log('values', formState, toRaw(formState));
+          pushAnnotation(props.hash, {
+            basis: Decimal(toRaw(formState.basis)).toSignificantDigits(5),
+            to: toRaw(formState.to),
+            annotation: toRaw(formState.annotation),
+            tags: [],
+          });
+          overallLoading.value = false;
+        })
+        .catch((error) => {
+          console.log('error', error);
+        });
+    };
 
     return {
       notes,
@@ -164,8 +248,13 @@ export default defineComponent({
       myFriends,
       annotations,
       people,
-      formState
-    }
+      formState,
+      truncateAddress,
+      onSubmit,
+      formRef,
+      overallLoading,
+      rules,
+    };
   },
 
   methods: {
@@ -186,18 +275,7 @@ export default defineComponent({
         return null as Address | null;
       }
     },
-    truncateAddress(address) {
-      try {
-        const truncateRegex =
-          /^(0x[a-zA-Z0-9]{4})[a-zA-Z0-9]+([a-zA-Z0-9]{4})$/;
-        const match = address.match(truncateRegex);
-        if (match) {
-          return `${match[1]}…${match[2]}`;
-        }
-      } catch (e) {
-        return address;
-      }
-    },
+
     handleChange(value) {
       console.log('selected', value);
     },

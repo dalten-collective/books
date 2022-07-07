@@ -288,13 +288,12 @@ export default defineComponent({
             })
             .finally(() => {
               overallLoading.value = false;
-              formRef.value.resetFields()
+              formRef.value.resetFields();
             });
         })
       .catch((error) => {
         console.log('error', error);
       });
-    
     };
 
     return {
