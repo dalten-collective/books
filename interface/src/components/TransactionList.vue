@@ -89,6 +89,7 @@
 </template>
 
 <script lang="ts">
+import { Decimal } from 'decimal.js';
 import { FormOutlined } from '@ant-design/icons-vue';
 import Note from '@/components/Note.vue';
 import { defineComponent, computed, ref } from 'vue';
@@ -386,6 +387,16 @@ export default defineComponent({
             if (inf !== undefined) {
               return inf[2] === soughtCurrency
             }
+          },
+          sorter: {
+            compare: (a, b) => {
+              let ain = getInflow(a.involvedCurrencies) || 0
+              let bin = getInflow(b.involvedCurrencies) || 0
+              if (ain !== undefined && ain[1] !== undefined) { ain = ain[1] } else { ain = 0 }
+              if (bin !== undefined && bin[1] !== undefined) { bin = bin[1] } else { bin = 0 }
+
+              return Decimal.sub(ain, bin)
+            }
           }
         },
         {
@@ -400,7 +411,25 @@ export default defineComponent({
             if (out !== undefined) {
               return out[2] === soughtCurrency
             }
+          },
+          sorter: {
+            compare: (a, b) => {
+              let aout = getOutflow(a.involvedCurrencies) || 0
+              let bout = getOutflow(b.involvedCurrencies) || 0
+              if (aout !== undefined && aout[1] !== undefined) { aout = aout[1] } else { aout = 0 }
+              if (bout !== undefined && bout[1] !== undefined) { bout = bout[1] } else { bout = 0 }
+
+              return Decimal.sub(aout, bout)
+            }
           }
+        },
+        {
+          title: 'Fee',
+          dataIndex: 'fee',
+          sorter: (a, b) => a.fee - b.fee,
+          // slots: {
+          //   customRender: 'currencyOutColumn',
+          // },
         },
         {
           title: 'Action',
