@@ -184,7 +184,7 @@ export default defineComponent({
     };
 
     const onSubmit = () => {
-      overallLoading = true;
+      overallLoading.value = true;
       formRef.value
         .validate()
         .then(() => {
@@ -203,7 +203,7 @@ export default defineComponent({
               console.log('err: ', e);
             })
             .finally(() => {
-              overallLoading = false;
+              overallLoading.value = false;
               formRef.value.resetFields();
             });
         })
