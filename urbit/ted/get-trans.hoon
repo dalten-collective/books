@@ -72,6 +72,10 @@
       |=  [t=@tas s=@t a=@rd ad=(unit @ux)]
       [;;(direction t) s a ?:(=(`0x0 address.mid) ~ address.mid)]
     ==
+  =/  error=(unit @t)
+    ((ot:dejs-soft:format [%message so:dejs-soft:format]~) jon)
+  ~&  >>>  error
+  ?.  ?=(~ error)  *(set almost-trans)
   =,  dejs:format
   %.  jon
   %-  ot

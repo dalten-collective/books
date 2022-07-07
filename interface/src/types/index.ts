@@ -124,12 +124,12 @@ export interface DelFriend {
 }
 export interface Annotation {
   head: 'annotation';
-  new: Array<[TxHash, Note]>;
+  new: Array<[string, {basis: string, to: string | null, annotation: string, tags: Array<string>}]>;
   status: string;
 }
 export interface DelANote {
   head: 'del-a-note';
-  remove: TxHash;
+  remove: string;
   status: string;
 }
 export interface JustStatus {

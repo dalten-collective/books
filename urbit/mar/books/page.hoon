@@ -69,6 +69,18 @@
         :~  address+(su ;~(pfix (jest '0x') hex))
         ==
       ::
+        :-  %annotation
+        %-  ot
+        :~  hash+(su ;~(pfix (jest '0x') hex))
+            :-  %note
+            %-  ot
+            :~  basis+ne-string
+                to+(ci |=(a=@t `(unit @ux)`?:(=('' a) ~ (rush a ;~(pfix (jest '0x') hex)))) so):dejs-soft:format
+                annotation+so
+                tags+(ci |=(a=(set @tas) `(~(dif in a) (sy [%$ ~]))) (as so))
+            ==
+        ==
+      ::
         :-  %add-transaction
         %-  ot
         :~  primarywallet+(su ;~(pfix (jest '0x') hex))
