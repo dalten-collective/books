@@ -15,9 +15,26 @@
     </template>
 
     <template #addressColumn="{ record }">
-      <AddressLookup
-        :addy="record.primaryWallet"
-      />
+      <div class="flex flex-row">
+        <AddressLookup
+          :addy="record.primaryWallet"
+          class="mr-2"
+        />
+      </div>
+    </template>
+
+    <template #counterpartyColumn="{ record }">
+      <div class="flex flex-row">
+        <div
+          v-if="recordCounterparties(record).length > 0"
+        >
+          <AddressLookup
+            v-for="cp in recordCounterparties(record)"
+            :key="cp"
+            :addy="cp"
+          />
+        </div>
+      </div>
     </template>
 
     <template #currencyInColumn="{ record }">
@@ -76,7 +93,8 @@ import { defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import dateFormat, { masks } from 'dateformat';
 import Immutable from 'immutable';
-import { TxHash, Transaction } from '@/types';
+import { Address, Transaction } from '@/types';
+import { Note as ANote } from '@/types';
 
 type FlowDirection = string
 type FlowAmount = string
@@ -189,8 +207,21 @@ export default defineComponent({
       }
     }
 
-    const hasNote = (record): bool => {
+    const hasNote = (record: Transaction): boolean => {
       return Immutable.has(Immutable.Map(notes.value), record.hash);
+    }
+    const annotations = (record: Transaction): ANote | Object => {
+      if (hasNote(record)) {
+        return Immutable.Map(notes.value).get(record.hash, {});
+      }
+      return {}
+    }
+    const recordCounterparties = (record: Transaction): Address[] => {
+      const notes = annotations(record)
+      if (Object.keys(notes).length === 0) {
+        return []
+      }
+      return notes.to.filter((c) => c !== null)
     }
 
     const nameChek = (addy) => {
@@ -220,6 +251,25 @@ export default defineComponent({
         }
       }
     };
+
+    const allCounterparties = computed(() => {
+      const myne = myWallets.value
+        .slice()
+        .map((i) => i[0])
+      const yurs = myFriends.value
+        .slice()
+        .map((i) => i[0])
+      const everyone = myne.concat(yurs)
+
+      const mapped = everyone.map((addy) => {
+        const text = nameChek(addy)
+        return {
+          text: text,
+          value: addy,
+        }
+      })
+      return mapped
+    })
 
     const inCurrencies = computed(() => {
       const uniqCurrencies = Array.from(
@@ -299,6 +349,18 @@ export default defineComponent({
           },
         },
         {
+          title: 'Counterparty',
+          dataIndex: '',
+          slots: {
+            customRender: 'counterpartyColumn',
+          },
+          filters: allCounterparties.value,
+          onFilter: (soughtParty, txn) => {
+            const cps = recordCounterparties(txn)
+            return cps.includes(soughtParty)
+          }
+        },
+        {
           title: 'In',
           dataIndex: ['involvedCurrencies', '[2]'],
           slots: {
@@ -354,6 +416,8 @@ export default defineComponent({
       getOutflow,
       presentFlow,
       hasNote,
+      annotations,
+      recordCounterparties,
     };
   },
 
