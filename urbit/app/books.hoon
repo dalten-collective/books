@@ -370,13 +370,13 @@
         status+s+(crip "New Annotation For: {(scow %ux h)}")
       ::
       :+  'new'  %a
-      :~  s+(scot %ux h)  
-        %-  pairs:enjs:format
-        :~  basis+s+(scot %rd basis.n)
-            to+?~(to.n ~ s+(scot %ux u.to.n))
-            annotation+s+(scot %t annotation.n)
-            tags+a+(turn ~(tap in tags.n) (lead %s))
-        ==
+      :~  %-  pairs:enjs:format
+          :~  hash+s+(scot %ux h)
+              basis+s+(scot %rd basis.n)
+              to+?~(to.n ~ s+(scot %ux u.to.n))
+              annotation+s+(scot %t annotation.n)
+              tags+a+(turn ~(tap in tags.n) (lead %s))
+          ==
       ==
     ==
   ++  rub-rub

@@ -20,14 +20,12 @@
               max=(list json)
           ==
       :_  max
-      :-  %a
-      :~  s+(scot %ux hax)
-          %-  pairs
-          :~  basis+s+(scot %rd b)
-              to+?~(t ~ s+(scot %ux u.t))
-              annotation+s+a
-              tags+a+`(list json)`(turn ~(tap in tg) (lead %s))
-          ==
+      %-  pairs
+      :~  hash+s+(scot %ux hax)
+          basis+s+(scot %rd b)
+          to+?~(t ~ s+(scot %ux u.t))
+          annotation+s+a
+          tags+a+`(list json)`(turn ~(tap in tg) (lead %s))
       ==
   ==
 %-  (slog leaf+"we did it, reddit" ~)
