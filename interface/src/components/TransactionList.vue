@@ -1,10 +1,16 @@
 <template>
-  <a-table :columns="columns" :data-source="data" :scroll="{ x: 1000 }">
+  <a-table :columns="columns" :data-source="data" :scroll="{ x: 1000 }" expand-row-by-click>
     <template #dateColumn="{ record }">
       <div class="grid grid-cols-1 gap-2">
         <div>
           {{ record.timeStamp.split(" ")[0] }}
         </div>
+      </div>
+    </template>
+
+    <template #noteColumn="{ record }">
+      <div class='grid grid-cols-1'>
+        <form-outlined v-if="hasNote(record)" :style="{ color: '#EAB304' }"/>
       </div>
     </template>
 
@@ -59,6 +65,7 @@
 </template>
 
 <script lang="ts">
+import { FormOutlined } from '@ant-design/icons-vue';
 import Note from '@/components/Note.vue';
 import { defineComponent, computed, ref } from 'vue';
 import { useStore } from 'vuex';
@@ -87,6 +94,7 @@ export default defineComponent({
     );
     const myWallets = computed(() => store.state.books.myWallets);
     const myFriends = computed(() => store.state.books.myFriends);
+    const notes = computed(() => store.state.books.notes);
 
     //  mounted-actions
     store.dispatch('books/handleSwitchNav', 2);
@@ -181,6 +189,10 @@ export default defineComponent({
       }
     }
 
+    const hasNote = (record): bool => {
+      return Immutable.has(Immutable.Map(notes.value), record.hash);
+    }
+
     const nameChek = (addy) => {
       //  First, get arrays of addy, name for utility
       const myne = myWallets.value
@@ -266,6 +278,12 @@ export default defineComponent({
     const columns = computed(() => {
       return [
         {
+          title: '',
+          slots: {
+            customRender: 'noteColumn'
+          }
+        },
+        {
           title: 'Date',
           dataIndex: 'timeStamp',
           sorter: (a, b) => a.timeOriginal - b.timeOriginal,
@@ -335,6 +353,7 @@ export default defineComponent({
       getInflow,
       getOutflow,
       presentFlow,
+      hasNote,
     };
   },
 
@@ -342,6 +361,7 @@ export default defineComponent({
     Note,
     AddressLookup,
     TransDetails,
+    FormOutlined,
   },
 });
 </script>
