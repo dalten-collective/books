@@ -3,14 +3,14 @@
     <li class="mr-3 h-24">
       <router-link :to="{ name: 'home' }">
         <div
-          class="align-left block border-b-2 py-1 pl-1 no-underline transition ease-in-out hover:scale-110 hover:border-yellow-400 hover:text-yellow-400 md:py-3"
+          class="md:py-3 align-left block border-b-2 py-1 pl-1 no-underline transition ease-in-out hover:scale-110 hover:border-yellow-400 hover:text-yellow-400"
           v-bind:class="[
             nav === 0
               ? 'text-yellow-500 md:border-yellow-500'
               : 'text-neutral-900 md:border-neutral-900',
           ]"
         >
-          <div class="mx-2 mt-10 flex items-center justify-start">
+          <div class="mx-2 mt-6 md:mt-10 flex items-center justify-start">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               height="24px"
