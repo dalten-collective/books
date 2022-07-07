@@ -8,4 +8,4 @@ _TODO_
 
 ## Interface
 
-- See [[interface/README.md]]
+- See [interface/README.md](interface/README.md)
