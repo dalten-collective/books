@@ -13,6 +13,7 @@ export enum Navi {
 export type Page =
   | Wallets
   | Transactions
+  | AdjustTransactions
   | EtherscanKey
   | AddTransaction
   | AddWallet
@@ -31,6 +32,36 @@ export interface Wallets {
 }
 export interface Transactions {
   head: 'transactions';
+  tran: Array<{
+    network: Network;
+    hash: string;
+    blocknumber: number;
+    name: string;
+    direction: Direction;
+    timestamp: number;
+    symbol: string;
+    address: string | null;
+    amount: string;
+    from: string;
+    destination: string;
+    contract: string | null;
+    subtransactions: Array<{
+      type: string;
+      symbol: string;
+      amount: string;
+      address: string | null;
+    }>;
+    nonce: number;
+    txgas: string | null;
+    txgaslimit: string | null;
+    input: string | null;
+    fee: string;
+    txsuccessful: boolean;
+    primarywallet: string;
+  }>;
+}
+export interface AdjustTransactions {
+  head: 'del-transactions';
   tran: Array<{
     network: Network;
     hash: string;
@@ -124,7 +155,7 @@ export interface DelFriend {
 }
 export interface Annotation {
   head: 'annotation';
-  new: Array<[string, {basis: string, to: string | null, annotation: string, tags: Array<string>}]>;
+  new: Array<{hash: string, basis: string, to: string | null, annotation: string, tags: Array<string>}>;
   status: string;
 }
 export interface DelANote {

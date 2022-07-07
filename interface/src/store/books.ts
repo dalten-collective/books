@@ -5,7 +5,7 @@ import {
   Address,
   TxHash,
   WalletDetails,
-  Annotation
+  Annotation,
 } from '@/types';
 import Immutable, { OrderedMap } from 'immutable';
 
@@ -149,7 +149,7 @@ export default {
       }
     ) {
       console.log('set-transaction');
-      const newt = battery.tran.map((t) => [[t.timeStamp, t.hash], t]) as Array<
+      const newt = battery.tran.slice().map((t) => [[t.timeStamp, t.hash], t]) as Array<
         [[number, TxHash], Transaction]
       >;
       state.urbitData = state.urbitData.concat(
@@ -158,10 +158,22 @@ export default {
         })
       );
     },
+    unSetTransactions (
+      state,
+      battery: {
+        tran: Array<Transaction>;
+      }
+    ) {
+      console.log('unset-transaction');
+      const newt = battery.tran.slice().map((t) => [[t.timeStamp, t.hash], t]) as Array<
+        [[number, TxHash], Transaction]
+      >;
+      state.urbitData = newt;
+    },
     setAnnotations(
       state,
       battery: {
-        notes: Array<[TxHash, Annotation]>
+        notes: Array<[TxHash, Annotation]>;
       }
     ) {
       console.log('set-annotation');
@@ -271,6 +283,15 @@ export default {
     ) {
       console.log('battery', battery.tran);
       commit('setTransactions', { tran: battery.tran });
+    },
+    handleUnSetTransactions(
+      { commit },
+      battery: {
+        tran: Array<Transaction>;
+      }
+    ) {
+      console.log('unsetting', battery.tran);
+      commit('unSetTransactions', { tran: battery.tran })
     },
     handleAddWallet(
       { commit },
