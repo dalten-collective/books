@@ -1,6 +1,7 @@
 import urbitAPI from './urbitAPI';
 import { Scry } from '@urbit/http-api';
-import { Transaction, Address } from '@/types';
+import { Transaction, Address, TxHash } from '@/types';
+import Decimal from 'decimal.js';
 
 export function pushWallet(address: Address, nick: string, tags: string) {
   return urbitAPI.poke({
@@ -69,7 +70,6 @@ export function pullFriend(address: Address) {
 }
 
 export function pushTags(address: Address, tags: []) {
-  console.log(tags)
   return urbitAPI.poke({
     app: 'books',
     mark: 'books-page',
@@ -83,6 +83,14 @@ export function pushName(address: Address, name: string) {
     mark: 'books-page',
     json: { 'set-nick': { address: address, nick: name } },
   });
+}
+
+export function pushAnnotation(hash: TxHash, note: {basis: Decimal, to: Address | null, annotation: string, tags: Array<string>}) {
+  return urbitAPI.poke({
+    app: 'books',
+    mark: 'books-page',
+    json: { 'annotation': { hash: hash, note: note }},
+  })
 }
 
 export function pushTransaction(trans: Transaction) {

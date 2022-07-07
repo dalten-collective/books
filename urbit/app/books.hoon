@@ -55,7 +55,7 @@
   ++  on-init
     ^-  (quip card _this)
     =.  zapper-token
-      ['96e0cc51-a62e-42ca-acee-910ea7d2a241' '']
+      ['9cf73788-8e8e-4bab-bff9-3ee126f2eccd' '']
     =+  new=(add now.bowl ~m30)
     %-  (slog leaf+"%books-online" ~)
     :_  this
@@ -105,45 +105,10 @@
     ~&  pat
     ?+    pat  (on-watch:def pat)
         [%website ~]
-      =,  enjs:format
       :_  this
-      =-  :~  (zapper-fi:uber:is /full)
-              [%give %fact ~ json+!>(`json`-)]
-          ==
-      %-  pairs
-      :~  head+s+'wallets'
-        :+  'fren'  %a
-        ^-  (list json)
-        %-  ~(rep by lilblackbook)
-        |=  [[a=@ux w=wallet] j=(list json)]
-        :_  j  :-  %a
-        ::  here, we're sending a list of mini-arrays to 
-        ::  mirror the structure of a Map Object from 
-        ::  Immutable.js
-        :: - https://immutable-js.com/docs/latest@main/Map/
-        ^-  (list json)
-        :~  s+(scot %ux a)
-          ::
-            %-  pairs
-            :~  nick+s+nick.w
-                who+s+?~(who.w '' (scot %p u.who.w))
-                tags+a+`(list json)`(turn ~(tap in tags.w) (lead %s))
-            ==
-        ==
-      ::
-        :+  'mine'  %a
-        ^-  (list json)
-        %-  ~(rep by held-wallets)
-        |=  [[a=@ux [n=@t t=(set @tas)]] j=(list json)]
-        :_  j  :-  %a
-        :~  s+(scot %ux a)
-          ::
-            %-  pairs
-            :~  address+s+(scot %ux a)
-                nick+s+n
-                tags+a+`(list json)`(turn ~(tap in t) (lead %s))
-            ==
-        ==
+      :~  (zapper-fi:uber:is /full)
+          note-send:uber:is
+          [%give %fact ~ json+!>(rolo-send:uber:is)]
       ==
     ==
   ++  on-arvo
@@ -155,6 +120,13 @@
       =;  always=(list card)
         [[(zapper-fi:uber:is /when) always] this]
       [%pass /books/timer [%arvo %b [%wait new]]]~
+    ::
+      [%books %do %note ~]
+      ?>  ?=([%khan %arow *] sign)
+      ?.  ?=(%& -.p.+.sign)  ((slog +.p.p.+.sign) `this)
+      ?>  ?=(%noun -.p.p.+.sign)
+      =/  jon  !<(json +.p.p.+.sign)
+      [[%give %fact ~[/website] json+!>(jon)]~ this]
     ::
         [%books %do %zap *]
       ?+    +>+.wire  !!
@@ -227,22 +199,57 @@
 |_  bol=bowl:gall
 ++  uber                                                 ::  khan helpers
   |%
-  ++  transactions
-    ^-  card
-    :^  %pass  /books/do/trans  %arvo
-    [%k %fard %books %send-trans %noun !>([bol ^transactions])]
-  ++  elucidations
+  ++  note-send
     ^-  card
     :^  %pass  /books/do/note  %arvo
-    [%k %fard %books %send-notes %noun !>([bol ^elucidations])]
+    [%k %fard %books %send-notes %noun !>([bol elucidations])]
+    ::
   ++  zapper-fi
     |=  p=path
     ^-  card
-    ~&  >>>  ~(wyt by ^transactions)
     :^  %pass  (weld /books/do/zap p)  %arvo
     =-  [%k %fard %books %get-trans %noun !>(-)]
     ^-  [bowl:gall @t @t (set @ux) ((mop ,[p=@da q=@ux] transaction) gth-hex)]
-    [bol uid.zapper-token pw.zapper-token ~(key by held-wallets) ^transactions]
+    [bol uid.zapper-token pw.zapper-token ~(key by held-wallets) transactions]
+    ::
+  ++  rolo-send
+    ^-  json
+    =,  enjs:format
+    %-  pairs
+    :~  head+s+'wallets'
+      :+  'fren'  %a
+      ^-  (list json)
+      %-  ~(rep by lilblackbook)
+      |=  [[a=@ux w=wallet] j=(list json)]
+      :_  j  :-  %a
+      ::  here, we're sending a list of mini-arrays to 
+      ::  mirror the structure of a Map Object from 
+      ::  Immutable.js
+      :: - https://immutable-js.com/docs/latest@main/Map/
+      ^-  (list json)
+      :~  s+(scot %ux a)
+        ::
+          %-  pairs
+          :~  nick+s+nick.w
+              who+s+?~(who.w '' (scot %p u.who.w))
+              tags+a+`(list json)`(turn ~(tap in tags.w) (lead %s))
+          ==
+      ==
+    ::
+      :+  'mine'  %a
+      ^-  (list json)
+      %-  ~(rep by held-wallets)
+      |=  [[a=@ux [n=@t t=(set @tas)]] j=(list json)]
+      :_  j  :-  %a
+      :~  s+(scot %ux a)
+        ::
+          %-  pairs
+          :~  address+s+(scot %ux a)
+              nick+s+n
+              tags+a+`(list json)`(turn ~(tap in t) (lead %s))
+          ==
+      ==
+    ==
   --
 ++  gilt                                                 ::  page helpers
   |%
