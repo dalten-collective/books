@@ -6,18 +6,24 @@
       />
     </template>
 
-    <template #currencyColumn="{ record }">
+    <template #currencyInColumn="{ record }">
       <div class="grid grid-cols-1 gap-2">
-        <div v-for="step in record.involvedCurrencies">
+        <div>
           <div class="flex flex-row">
-            <div v-if="step[0] === 'outgoing'" class="text-sm text-red-500">
-              {{ step[1] + ' ' + step[2] }}
+            <div class="text-sm text-green-500">
+              {{ presentFlow(getInflow(record.involvedCurrencies)) }}
             </div>
-            <div v-if="step[0] === 'incoming'" class="text-sm text-green-500">
-              {{ step[1] + ' ' + step[2] }}
-            </div>
-            <div v-if="step[0] === 'exchange'" class="text-grey-500 text-sm">
-              {{ step[1] + ' ' + step[2] }}
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <template #currencyOutColumn="{ record }">
+      <div class="grid grid-cols-1 gap-2">
+        <div>
+          <div class="flex flex-row">
+            <div class="text-sm text-red-500">
+              {{ presentFlow(getOutflow(record.involvedCurrencies)) }}
             </div>
           </div>
         </div>
@@ -52,10 +58,14 @@ import AddressLookup from '@/components/AddressLookup.vue';
 import TransDetails from '@/components/TransDetails.vue';
 import { defineComponent } from 'vue';
 import { useStore } from 'vuex';
-import type { PropType } from 'vue';
 import dateFormat, { masks } from 'dateformat';
 import Immutable from 'immutable';
 import { TxHash, Transaction } from '@/types';
+
+type FlowDirection = string
+type FlowAmount = string
+type FlowCurrency = string
+type Steps = [FlowDirection, FlowAmount, FlowCurrency]
 
 export default defineComponent({
   setup() {
@@ -126,6 +136,42 @@ export default defineComponent({
       }
     });
 
+    const getInflow = (involved: Array<Steps> | undefined): Steps | undefined  => {
+      if (involved === undefined) {
+        return undefined
+      } else {
+        return involved.find((triplet: Steps) => triplet[0] === 'incoming')
+      }
+    }
+
+    const getOutflow = (involved: Array<Steps> | undefined): Steps | undefined => {
+      if (involved === undefined) {
+        return undefined
+      } else {
+        return involved.find((triplet: Steps) => triplet[0] === 'outgoing')
+      }
+    }
+
+    // TODO: unclear how to use
+    const getExchange = (involved: Array<Steps>): Steps | undefined  => {
+      return involved.find((triplet: Steps) => triplet[0] === 'exchange')
+    }
+
+    const presentFlow = (steps: Steps | undefined): string => {
+      if (steps === undefined) {
+        return ''
+      } else {
+        const direction = steps[0]
+        const amount = steps[1]
+        const currency = steps[2]
+        if ( direction === 'outgoing' ) {
+          return `- (${ amount }) ${ currency }`
+        } else {
+          return `${ amount } ${ currency }`
+        }
+      }
+    }
+
     const nameChek = (addy) => {
       //  First, get arrays of addy, name for utility
       const myne = myWallets.value
@@ -154,28 +200,49 @@ export default defineComponent({
       }
     };
 
-    const involvedWallets = computed(() => {
-      return Array.from(
-        new Set(
-          orderedTransactions.value.map(w => w[1].primaryWallet)
-        )
-      ).map((addy) => {
-        const nick = nameChek(addy)
-        return {
-          text: nick,
-          value: addy
-        }
-      })
-    })
-
-    const allCurrencies = computed(() => {
+    const inCurrencies = computed(() => {
       const uniqCurrencies = Array.from(
         new Set(
           data.value
             .map((t) => {
-              return t.involvedCurrencies.map((c) => c[2])
+              const inf = getInflow(t.involvedCurrencies)
+              if (inf && inf[2] !== '') {
+                return inf[2]
+              }
             })
             .flat()
+            .filter(item => { // Remove empties
+              if (item !== undefined && Object.keys(item).length !== 0) {
+                return true
+              }
+            })
+        )
+      )
+      const mapped = uniqCurrencies.map((currency) => {
+        return {
+          text: currency,
+          value: currency,
+        }
+      })
+      return mapped
+    });
+
+    const outCurrencies = computed(() => {
+      const uniqCurrencies = Array.from(
+        new Set(
+          data.value
+            .map((t) => {
+              const out = getOutflow(t.involvedCurrencies)
+              if (out && out[2] !== '') {
+                return out[2]
+              }
+            })
+            .flat()
+            .filter(item => { // Remove empties
+              if (item !== undefined && Object.keys(item).length !== 0) {
+                return true
+              }
+            })
         )
       )
       const mapped = uniqCurrencies.map((currency) => {
@@ -207,14 +274,31 @@ export default defineComponent({
           // }
         },
         {
-          title: 'Involved Currencies',
-          dataIndex: 'involvedCurrencies',
+          title: 'In',
+          dataIndex: ['involvedCurrencies', '[2]'],
           slots: {
-            customRender: 'currencyColumn',
+            customRender: 'currencyInColumn',
           },
-          filters: allCurrencies.value,
+          filters: inCurrencies.value,
           onFilter: (soughtCurrency, txn) => {
-            return txn.involvedCurrencies.map((c) => c[2]).includes(soughtCurrency)
+            const inf = getInflow(txn.involvedCurrencies)
+            if (inf !== undefined) {
+              return inf[2] === soughtCurrency
+            }
+          }
+        },
+        {
+          title: 'Out',
+          dataIndex: ['involvedCurrencies', '[2]'],
+          slots: {
+            customRender: 'currencyOutColumn',
+          },
+          filters: outCurrencies.value,
+          onFilter: (soughtCurrency, txn) => {
+            const out = getOutflow(txn.involvedCurrencies)
+            if (out !== undefined) {
+              return out[2] === soughtCurrency
+            }
           }
         },
         {
@@ -239,8 +323,11 @@ export default defineComponent({
       nameChek,
       columns,
       data,
-      // involvedWallets,
-      allCurrencies,
+      inCurrencies,
+      outCurrencies,
+      getInflow,
+      getOutflow,
+      presentFlow,
     };
   },
 
