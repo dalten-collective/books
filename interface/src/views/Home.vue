@@ -42,31 +42,38 @@
           :pagination="false"
         >
           <template #title>Recent Transactions</template>
-          <template #addressColumn="{ record }">
-            <AddressLookup :addy="record.primaryWallet" />
+          <template #dateColumn="{ record }">
+            <div class="grid grid-cols-1 gap-2">
+              <div>
+                {{ record.timeStamp.split(" ")[0] }}
+              </div>
+            </div>
           </template>
 
-          <template #currencyColumn="{ record }">
+          <template #addressColumn="{ record }">
+            <AddressLookup
+              :addy="record.primaryWallet"
+            />
+          </template>
+
+          <template #currencyInColumn="{ record }">
             <div class="grid grid-cols-1 gap-2">
-              <div v-for="step in record.involvedCurrencies">
+              <div>
                 <div class="flex flex-row">
-                  <div
-                    v-if="step[0] === 'outgoing'"
-                    class="text-sm text-red-500"
-                  >
-                    {{ step[1] + ' ' + step[2] }}
+                  <div class="text-sm text-green-500">
+                    {{ presentFlow(getInflow(record.involvedCurrencies)) }}
                   </div>
-                  <div
-                    v-if="step[0] === 'incoming'"
-                    class="text-sm text-green-500"
-                  >
-                    {{ step[1] + ' ' + step[2] }}
-                  </div>
-                  <div
-                    v-if="step[0] === 'exchange'"
-                    class="text-grey-500 text-sm"
-                  >
-                    {{ step[1] + ' ' + step[2] }}
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <template #currencyOutColumn="{ record }">
+            <div class="grid grid-cols-1 gap-2">
+              <div>
+                <div class="flex flex-row">
+                  <div class="text-sm text-red-500">
+                    {{ presentFlow(getOutflow(record.involvedCurrencies)) }}
                   </div>
                 </div>
               </div>
@@ -74,9 +81,10 @@
           </template>
 
           <template #expandedRowRender="{ record }">
-            <div class="flex flex-row">
+            <div class="flex">
               <div class="flex-auto basis-1/2">
                 <TransDetails
+                  :timestamp="record.timeStamp"
                   :description="record.description"
                   :nonce="record.nonce"
                   :input="record.input"
@@ -132,31 +140,68 @@ export default defineComponent({
     const activeKey = ref([]);
 
     //  Transaction Data
-    const columns = [
-      {
-        title: 'Timestamp',
-        dataIndex: 'timeStamp',
-        sorter: (a, b) => a.timeOriginal - b.timeOriginal,
-      },
-      {
-        title: 'Primary Wallet',
-        dataIndex: 'primaryWallet',
-        slots: {
-          customRender: 'addressColumn',
+    // const columns = [
+    //   {
+    //     title: 'Timestamp',
+    //     dataIndex: 'timeStamp',
+    //     sorter: (a, b) => a.timeOriginal - b.timeOriginal,
+    //   },
+    //   {
+    //     title: 'Primary Wallet',
+    //     dataIndex: 'primaryWallet',
+    //     slots: {
+    //       customRender: 'addressColumn',
+    //     },
+    //   },
+    //   {
+    //     title: 'Involved Currencies',
+    //     dataIndex: 'involvedCurrencies',
+    //     slots: {
+    //       customRender: 'currencyColumn',
+    //     },
+    //   },
+    //   {
+    //     title: 'Action',
+    //     dataIndex: 'shortDescription',
+    //   },
+    // ];
+    const columns = computed(() => {
+      return [
+        {
+          title: 'Date',
+          dataIndex: 'timeStamp',
+          slots: {
+            customRender: 'dateColumn',
+          }
         },
-      },
-      {
-        title: 'Involved Currencies',
-        dataIndex: 'involvedCurrencies',
-        slots: {
-          customRender: 'currencyColumn',
+        {
+          title: 'Primary Wallet',
+          dataIndex: 'primaryWallet',
+          slots: {
+            customRender: 'addressColumn',
+          },
         },
-      },
-      {
-        title: 'Action',
-        dataIndex: 'shortDescription',
-      },
-    ];
+        {
+          title: 'In',
+          dataIndex: ['involvedCurrencies', '[2]'],
+          slots: {
+            customRender: 'currencyInColumn',
+          },
+        },
+        {
+          title: 'Out',
+          dataIndex: ['involvedCurrencies', '[2]'],
+          slots: {
+            customRender: 'currencyOutColumn',
+          },
+        },
+        {
+          title: 'Action',
+          dataIndex: 'shortDescription',
+        },
+      ]
+    })
+
     const data = computed(() => {
       if (undefined === pageFrontTransactions.value) {
         return null;
@@ -276,6 +321,91 @@ export default defineComponent({
       }
     };
 
+    const getInflow = (involved: Array<Steps> | undefined): Steps | undefined  => {
+      if (involved === undefined) {
+        return undefined
+      } else {
+        return involved.find((triplet: Steps) => triplet[0] === 'incoming')
+      }
+    }
+
+    const getOutflow = (involved: Array<Steps> | undefined): Steps | undefined => {
+      if (involved === undefined) {
+        return undefined
+      } else {
+        return involved.find((triplet: Steps) => triplet[0] === 'outgoing')
+      }
+    }
+
+    const presentFlow = (steps: Steps | undefined): string => {
+      if (steps === undefined) {
+        return ''
+      } else {
+        const direction = steps[0]
+        const amount = steps[1]
+        const currency = steps[2]
+        if ( direction === 'outgoing' ) {
+          return `- (${ amount }) ${ currency }`
+        } else {
+          return `${ amount } ${ currency }`
+        }
+      }
+    }
+
+    const inCurrencies = computed(() => {
+      const uniqCurrencies = Array.from(
+        new Set(
+          data.value
+            .map((t) => {
+              const inf = getInflow(t.involvedCurrencies)
+              if (inf && inf[2] !== '') {
+                return inf[2]
+              }
+            })
+            .flat()
+            .filter(item => { // Remove empties
+              if (item !== undefined && Object.keys(item).length !== 0) {
+                return true
+              }
+            })
+        )
+      )
+      const mapped = uniqCurrencies.map((currency) => {
+        return {
+          text: currency,
+          value: currency,
+        }
+      })
+      return mapped
+    });
+
+    const outCurrencies = computed(() => {
+      const uniqCurrencies = Array.from(
+        new Set(
+          data.value
+            .map((t) => {
+              const out = getOutflow(t.involvedCurrencies)
+              if (out && out[2] !== '') {
+                return out[2]
+              }
+            })
+            .flat()
+            .filter(item => { // Remove empties
+              if (item !== undefined && Object.keys(item).length !== 0) {
+                return true
+              }
+            })
+        )
+      )
+      const mapped = uniqCurrencies.map((currency) => {
+        return {
+          text: currency,
+          value: currency,
+        }
+      })
+      return mapped
+    });
+
     return {
       subscriptions,
       pageFrontTransactions,
@@ -287,6 +417,11 @@ export default defineComponent({
       onTabChange,
       nameChek,
       activeKey,
+      inCurrencies,
+      outCurrencies,
+      getInflow,
+      getOutflow,
+      presentFlow,
     };
   },
 

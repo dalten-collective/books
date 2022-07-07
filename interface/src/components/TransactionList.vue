@@ -279,11 +279,6 @@ export default defineComponent({
           slots: {
             customRender: 'addressColumn',
           },
-          // doesn't like the nameChek helper
-          // filters: involvedWallets.value,
-          // onFilter: (soughtAddress: string, wallet) => {
-          //   return wallet.primaryWallet == soughtAddress
-          // }
         },
         {
           title: 'In',
