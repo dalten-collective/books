@@ -1,5 +1,13 @@
 <template>
   <a-table :columns="columns" :data-source="data" :scroll="{ x: 1000 }">
+    <template #dateColumn="{ record }">
+      <div class="grid grid-cols-1 gap-2">
+        <div>
+          {{ record.timeStamp.split(" ")[0] }}
+        </div>
+      </div>
+    </template>
+
     <template #addressColumn="{ record }">
       <AddressLookup
         :addy="record.primaryWallet"
@@ -34,6 +42,7 @@
       <div class="flex">
         <div class="flex-auto basis-1/2">
           <TransDetails
+            :timestamp="record.timeStamp"
             :description="record.description"
             :nonce="record.nonce"
             :input="record.input"
@@ -141,6 +150,9 @@ export default defineComponent({
         title: 'Timestamp',
         dataIndex: 'timeStamp',
         sorter: (a, b) => a.timeOriginal - b.timeOriginal,
+        slots: {
+          customRender: 'dateColumn',
+        }
       },
       {
         title: 'Primary Wallet',
