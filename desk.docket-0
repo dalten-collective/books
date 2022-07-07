@@ -1,9 +1,0 @@
-:~  title+'books'
-    info+'racks on racks on racks'
-    color+0x0
-    site+/apps/books
-    base+'books'
-    version+[0 0 1]
-    website+'https://urbit.org'
-    license+'A boring regular license type'
-==

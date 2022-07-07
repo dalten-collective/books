@@ -1,13 +1,6 @@
-# Vite/Vue3/Typescript/Tailwind/Urbit template
+# Books Vue3/Ant Design interface
 
-To install this elsewhere:
-
-```
-npx degit vcavallo/vite-vue-urbit-template your-project-name
-cd your-project-name
-
-npm install
-```
+- `npm install`
 
 Then:
 
