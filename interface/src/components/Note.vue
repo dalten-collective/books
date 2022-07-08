@@ -58,13 +58,28 @@
     >
       <a-textarea v-model:value="formState.annotation" />
     </a-form-item>
+    <a-form-item
+      label="Tags: "
+      :style="[formState.annotated ? '' : 'display: none']"
+    >
+      <template v-for="tag in formState.tags" :key="tag">
+        <a-tag
+          closable
+          @close="handleCloseTag(tag)"
+          color="#475668"
+        >
+          {{ tag }}
+        </a-tag>
+      </template>
+      <a-input v-model:value="newTag" type="text" size="small" :style="{ width: '78px' }" @pressEnter="onSubmit" />
+    </a-form-item>
     <a-button
       type="primary"
       class="bg-slate-600"
       @click="onSubmit"
       :style="[formState.annotated ? '' : 'display: none']"
       :loading="annotationPending"
-      :disabled="annotationPending"
+      :disabled="annotationPending || noChanges"
 
     >
       Save
@@ -95,6 +110,37 @@ export default defineComponent({
     const annotations = computed(() => {
       return Immutable.Map(notes.value);
     });
+
+    const hoonedNewTags = computed(() => {
+      if (newTag.value === '') {
+        return []
+      } else {
+        return newTag.value.split(" ")
+      }
+    })
+
+    const noChanges = computed(() => {
+      const prevBasis = parseInt(
+        Immutable.get(annotations.value, props.hash)
+          .basis.toSignificantDigits(5)
+      )
+      const newBasis = parseInt(formState.basis)
+
+      // doing this weird 'join' business to prepare for when this has multiple counterparties
+      // TODO: still might not work with multiple counterparties
+      const prevCounterparties = Immutable.get(annotations.value, props.hash)
+        .to.sort().join(',')
+      const newCounterparties = [].concat(formState.to).sort().join(',')
+
+      const prevAnnotation = Immutable.get(annotations.value, props.hash).annotation
+      const newAnnotation = formState.annotation
+
+      const basisUnchanged = newBasis === prevBasis
+      const counterpartiesUnchanged = newCounterparties === prevCounterparties
+      const annotationUnchanged = newAnnotation === prevAnnotation
+
+      return basisUnchanged && counterpartiesUnchanged && annotationUnchanged
+    })
 
     const people = computed(() => {
       const friends = (() => {
@@ -151,6 +197,8 @@ export default defineComponent({
     //  Refs
     const annotationPending = ref(false);
     const formRef = ref();
+    const newTag = ref('');
+    const thing = ref('hello');
 
     console.log('notes', notes.value);
     console.log('props', props.hash);
@@ -163,10 +211,9 @@ export default defineComponent({
       })(),
       basis: (() => {
         if (Immutable.has(annotations.value, props.hash)) {
-          return Immutable.get(
-            annotations.value,
-            props.hash
-          ).basis.toSignificantDigits(5).toString() as string;
+          return Immutable.get(annotations.value, props.hash)
+            .basis.toSignificantDigits(5)
+            .toString() as string;
         } else {
           return '0' as string;
         }
@@ -180,12 +227,21 @@ export default defineComponent({
       })() as Address | null,
       annotation: (() => {
         if (Immutable.has(annotations.value, props.hash)) {
-          return Immutable.get(annotations.value, props.hash).annotation as string;
+          return Immutable.get(annotations.value, props.hash)
+            .annotation as string;
         } else {
           return '' as string;
         }
       })(),
-      tags: [] as Array<[string]>,
+      tags: (() => {
+        if (Immutable.has(annotations.value, props.hash)) {
+          return Immutable.get(annotations.value, props.hash).tags as Array<
+            [string]
+          >;
+        } else {
+          return [] as Array<[string]>;
+        }
+      })() as Array<[string]>,
     });
     const rules = {
       annotation: [
@@ -224,17 +280,46 @@ export default defineComponent({
       }
     };
 
-    const onSubmit = () => {
+    const handleCloseTag = (killedTag) => {
+      // remove from formState.tags
+      const newTags = formState.tags.filter(t => t !== killedTag)
+      formState.tags = newTags
       annotationPending.value = true;
+      pushAnnotation(props.hash, {
+        basis: new Decimal(toRaw(formState.basis)).toSignificantDigits(5),
+        to: toRaw(formState.to),
+        annotation: toRaw(formState.annotation),
+        tags: tagsForUpdate(),
+      }).finally((r) => {
+        annotationPending.value = false;
+      });
+    }
+
+    const tagsForUpdate = () => {
+      // not making changes - keep whatever tags already exist
+      if (hoonedNewTags.value.length === 0) {
+        return formState.tags
+      } else {
+        // otherwise, concat in our new tags to existing.
+        return formState.tags.concat(hoonedNewTags.value).flat()
+      }
+    }
+
+    const onSubmit = () => {
+      console.log('formState.tags ', formState.tags)
+      console.log('new tag ', newTag)
+      console.log('new tag value', newTag.value)
+      annotationPending.value = true;
+      
       formRef.value
         .validate()
         .then(() => {
           console.log('values', formState, toRaw(formState));
           pushAnnotation(props.hash, {
-            basis: Decimal(toRaw(formState.basis)).toSignificantDigits(5),
+            basis: new Decimal(toRaw(formState.basis)).toSignificantDigits(5),
             to: toRaw(formState.to),
             annotation: toRaw(formState.annotation),
-            tags: [],
+            tags: tagsForUpdate(),
           }).finally((r) => {
             annotationPending.value = false;
           });
@@ -256,6 +341,10 @@ export default defineComponent({
       formRef,
       annotationPending,
       rules,
+      newTag,
+      handleCloseTag,
+      hoonedNewTags,
+      noChanges,
       labelCol: { span: 4 },
       wrapperCol: { span: 8 },
     };

@@ -41,7 +41,14 @@ export default defineComponent({
   setup(props) {
     const newTag = ref('');
     const handleInput = () => {
-      const tNew = props.record.tags.slice().concat(newTag.value.split(' '));
+      const regex = /\s+/g;
+      const tNew = props.record.tags.slice().concat(
+        newTag.value
+          .split(',')
+          .slice()
+          .map((nt) => nt.trim().replace(regex, ''))
+      );
+      console.log(newTag.value.split(',').map((item) => item.trim().replace(regex, '-')));
       pushTags(props.record.key, tNew)
         .then((r) => {
           console.log('res: ', r);
