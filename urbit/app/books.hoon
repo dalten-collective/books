@@ -399,7 +399,7 @@
           :~  hash+s+(scot %ux h)
               basis+s+(scot %rd basis.n)
               to+?~(to.n ~ s+(scot %ux u.to.n))
-              annotation+s+(scot %t annotation.n)
+              annotation+s+annotation.n
               tags+a+(turn ~(tap in tags.n) (lead %s))
           ==
       ==
