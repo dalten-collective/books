@@ -14,7 +14,7 @@ and this project adheres to
 - Add fees column
 - Add sort to In/Out/Fee columns
 - Add loading state on annotations save button
-- Add tags to annotations
+- Add tags to annotations; filtering for same
 
 ## 0.1.0
 
