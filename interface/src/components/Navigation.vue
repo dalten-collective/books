@@ -18,7 +18,7 @@
       </router-link>
     </li>
     <li class="flex-1 mr-3">
-      <router-link :to="{ name: 'transactions' }">
+      <router-link :to="{ name: 'transactions' }" class="text-black">
         <div
           class="flex items-center p-2 my-6 rounded-lg transition ease-in-out hover:scale-110 hover:text-yellow-400"
           v-bind:class="[nav === 2 ? 'bg-gray-600 dark:bg-gray-800' : '']"
@@ -35,7 +35,7 @@
       </router-link>
     </li>
     <li class="flex-1 mr-3">
-      <router-link :to="{ name: 'wallets' }">
+      <router-link :to="{ name: 'wallets' }" class="text-black">
         <div
           class="flex items-center p-2 my-6 rounded-lg transition ease-in-out hover:scale-110 hover:text-yellow-400"
           v-bind:class="[nav === 1 ? 'bg-gray-600 dark:bg-gray-800' : '']"
@@ -52,7 +52,7 @@
       </router-link>
     </li>
     <li class="flex-1 mr-3">
-      <router-link :to="{ name: 'rolodex' }">
+      <router-link :to="{ name: 'rolodex' }" class="text-black">
         <div
           class="flex items-center p-2 my-6 rounded-lg transition ease-in-out hover:scale-110 hover:text-yellow-400"
           v-bind:class="[nav === 3 ? 'bg-gray-600 dark:bg-gray-800' : '']"
