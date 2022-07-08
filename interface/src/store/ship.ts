@@ -42,6 +42,11 @@ export default {
 
   actions: {
     openAirlockToAgent({ dispatch }, agentName: string) {
+      dispatch(
+        'books/startAwaitingUrbitData',
+        null,
+        { root: true }
+      );
       airlock.openAirlockTo(
         agentName,
         (data: Page) => {
@@ -118,7 +123,6 @@ export default {
               );
             case 'annotation':
               const reformNote = data.new.slice().map((item) => {
-                console.log("item", item)
                 return [
                     '0x' + item.hash.split('0x')[1].replace(regex, '').padStart(64, '0'),
                     {
@@ -129,7 +133,6 @@ export default {
                     }
                   ]
               });
-              console.log(reformNote);
               return dispatch(
                 'books/handleSetAnnotation',
                 { notes: reformNote },
