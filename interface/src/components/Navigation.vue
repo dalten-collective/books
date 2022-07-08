@@ -69,7 +69,16 @@
     </li>
     <li>
       <div class="md:hidden">
-        test
+        <div class="flex flex-row-reverse float-right text-right md:inline-block md:h-12">
+          <a-tooltip title="Built by Quartus" placement="left">
+            <a href="https://urbit.org/ids/~dalten" class="text-right" target="_blank">
+              <QuartusLogo
+                height="100"
+                width="100"
+              />
+            </a>
+          </a-tooltip>
+        </div>
       </div>
     </li>
   </ul>
@@ -78,6 +87,7 @@
 <script lang="ts">
 import { defineComponent, computed } from 'vue';
 import { useStore } from 'vuex';
+import QuartusLogo from '@/components/QuartusLogo.vue';
 
 import {
   BookOutlined,
@@ -92,6 +102,7 @@ export default defineComponent({
     BankOutlined,
     WalletOutlined,
     ContactsOutlined,
+    QuartusLogo,
   },
   setup() {
     //  boiler

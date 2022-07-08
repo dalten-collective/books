@@ -1,5 +1,5 @@
 <template>
-    <svg id="quartus-logo" version="1.0" xmlns="http://www.w3.org/2000/svg"
+    <svg class="transition ease-in-out" id="quartus-logo" version="1.0" xmlns="http://www.w3.org/2000/svg"
      width="100px" height="100px" viewBox="0 0 3075.000000 3048.000000"
      preserveAspectRatio="xMidYMid meet" fill="#000000">
     <g transform="translate(0.000000,3048.000000) scale(0.100000,-0.100000)"
@@ -1695,8 +1695,12 @@ export default {
 </script>
 
 <style>
+  #quartus-logo {
+    opacity: 0.45;
+  }
   #quartus-logo:hover {
     /* fill: #EAB308; */
     fill: #D3A107;
+    opacity: 1;
   }
 </style>

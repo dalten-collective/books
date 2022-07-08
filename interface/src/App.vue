@@ -10,13 +10,15 @@
       </div>
       <div class="md:w-5/6 md:mt-12">
         <div class="flex flex-row-reverse hidden float-right text-right md:inline-block md:h-12">
-          <a href="#" class="text-right">
-            <QuartusLogo
-              height="100"
-              width="100"
-              style="position: relative; top: -50px"
-            />
-          </a>
+          <a-tooltip title="Built by Quartus" placement="left">
+            <a href="https://urbit.org/ids/~dalten" class="text-right" target="_blank">
+              <QuartusLogo
+                height="100"
+                width="100"
+                style="position: relative; top: -50px"
+              />
+            </a>
+          </a-tooltip>
         </div>
         <router-view class=""/>
       </div>
