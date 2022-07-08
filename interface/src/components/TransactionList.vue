@@ -1,5 +1,5 @@
 <template>
-  <a-table :columns="columns" :data-source="data" :scroll="{ x: 1000 }">
+  <a-table :columns="columns" :data-source="data" :scroll="{ x: 1000 }" expand-row-by-click>
     <template #dateColumn="{ record }">
       <div class="grid grid-cols-1 gap-2">
         <div>
@@ -8,10 +8,40 @@
       </div>
     </template>
 
+    <template #noteColumn="{ record }">
+      <div class='grid grid-cols-1'>
+        <a-tooltip
+          placement="topRight"
+        >
+          <template #title>
+            <span>{{ recordAnnotation(record) }}</span>
+          </template>
+          <form-outlined v-if="hasNote(record)" :style="{ color: '#EAB304' }"/>
+        </a-tooltip>
+      </div>
+    </template>
+
     <template #addressColumn="{ record }">
-      <AddressLookup
-        :addy="record.primaryWallet"
-      />
+      <div class="flex flex-row">
+        <AddressLookup
+          :addy="record.primaryWallet"
+          class="mr-2"
+        />
+      </div>
+    </template>
+
+    <template #counterpartyColumn="{ record }">
+      <div class="flex flex-row">
+        <div
+          v-if="recordCounterparties(record).length > 0"
+        >
+          <AddressLookup
+            v-for="cp in recordCounterparties(record)"
+            :key="cp"
+            :addy="cp"
+          />
+        </div>
+      </div>
     </template>
 
     <template #currencyInColumn="{ record }">
@@ -38,6 +68,26 @@
       </div>
     </template>
 
+    <template #actionsColumn="{ record }">
+      <a-tooltip
+        title="View on etherscan"
+      >
+      <a :href="'https://etherscan.io/tx/' + record.hash" target="_blank">
+        <div class="flex flex-row">
+          <span class="pr-2">
+            {{ record.shortDescription }}
+          </span>
+          <svg height="20" width="20" viewBox="0 0 30 30">
+            <path
+              d="M 25.980469 2.9902344 A 1.0001 1.0001 0 0 0 25.869141 3 L 20 3 A 1.0001 1.0001 0 1 0 20 5 L 23.585938 5 L 13.292969 15.292969 A 1.0001 1.0001 0 1 0 14.707031 16.707031 L 25 6.4140625 L 25 10 A 1.0001 1.0001 0 1 0 27 10 L 27 4.1269531 A 1.0001 1.0001 0 0 0 25.980469 2.9902344 z M 6 7 C 4.9069372 7 4 7.9069372 4 9 L 4 24 C 4 25.093063 4.9069372 26 6 26 L 21 26 C 22.093063 26 23 25.093063 23 24 L 23 14 L 23 11.421875 L 21 13.421875 L 21 16 L 21 24 L 6 24 L 6 9 L 14 9 L 16 9 L 16.578125 9 L 18.578125 7 L 16 7 L 14 7 L 6 7 z"
+              fill="#EAB308"
+            />
+          </svg>
+        </div>
+      </a>
+      </a-tooltip>
+    </template>
+
     <template #expandedRowRender="{ record }">
       <div class="flex">
         <div class="flex-auto basis-1/2">
@@ -59,6 +109,8 @@
 </template>
 
 <script lang="ts">
+import { Decimal } from 'decimal.js';
+import { FormOutlined } from '@ant-design/icons-vue';
 import Note from '@/components/Note.vue';
 import { defineComponent, computed, ref } from 'vue';
 import { useStore } from 'vuex';
@@ -69,7 +121,8 @@ import { defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import dateFormat, { masks } from 'dateformat';
 import Immutable from 'immutable';
-import { TxHash, Transaction } from '@/types';
+import { Address, Transaction } from '@/types';
+import { Note as ANote } from '@/types';
 
 type FlowDirection = string
 type FlowAmount = string
@@ -87,6 +140,7 @@ export default defineComponent({
     );
     const myWallets = computed(() => store.state.books.myWallets);
     const myFriends = computed(() => store.state.books.myFriends);
+    const notes = computed(() => store.state.books.notes);
 
     //  mounted-actions
     store.dispatch('books/handleSwitchNav', 2);
@@ -181,6 +235,30 @@ export default defineComponent({
       }
     }
 
+    const hasNote = (record: Transaction): boolean => {
+      return Immutable.has(Immutable.Map(notes.value), record.hash);
+    }
+    const annotations = (record: Transaction): ANote | Object => {
+      if (hasNote(record)) {
+        return Immutable.Map(notes.value).get(record.hash, {});
+      }
+      return {}
+    }
+    const recordCounterparties = (record: Transaction): Address[] => {
+      const notes = annotations(record)
+      if (Object.keys(notes).length === 0) {
+        return []
+      }
+      return notes.to.filter((c) => c !== null)
+    }
+    const recordAnnotation = (record: Transaction): string => {
+      const notes = annotations(record)
+      if (Object.keys(notes).length === 0) {
+        return ""
+      }
+      return notes.annotation
+    }
+
     const nameChek = (addy) => {
       //  First, get arrays of addy, name for utility
       const myne = myWallets.value
@@ -208,6 +286,25 @@ export default defineComponent({
         }
       }
     };
+
+    const allCounterparties = computed(() => {
+      const myne = myWallets.value
+        .slice()
+        .map((i) => i[0])
+      const yurs = myFriends.value
+        .slice()
+        .map((i) => i[0])
+      const everyone = myne.concat(yurs)
+
+      const mapped = everyone.map((addy) => {
+        const text = nameChek(addy)
+        return {
+          text: text,
+          value: addy,
+        }
+      })
+      return mapped
+    })
 
     const inCurrencies = computed(() => {
       const uniqCurrencies = Array.from(
@@ -266,6 +363,12 @@ export default defineComponent({
     const columns = computed(() => {
       return [
         {
+          title: '',
+          slots: {
+            customRender: 'noteColumn'
+          }
+        },
+        {
           title: 'Date',
           dataIndex: 'timeStamp',
           sorter: (a, b) => a.timeOriginal - b.timeOriginal,
@@ -281,6 +384,18 @@ export default defineComponent({
           },
         },
         {
+          title: 'Counterparty',
+          dataIndex: '',
+          slots: {
+            customRender: 'counterpartyColumn',
+          },
+          filters: allCounterparties.value,
+          onFilter: (soughtParty, txn) => {
+            const cps = recordCounterparties(txn)
+            return cps.includes(soughtParty)
+          }
+        },
+        {
           title: 'In',
           dataIndex: ['involvedCurrencies', '[2]'],
           slots: {
@@ -291,6 +406,16 @@ export default defineComponent({
             const inf = getInflow(txn.involvedCurrencies)
             if (inf !== undefined) {
               return inf[2] === soughtCurrency
+            }
+          },
+          sorter: {
+            compare: (a, b) => {
+              let ain = getInflow(a.involvedCurrencies) || 0
+              let bin = getInflow(b.involvedCurrencies) || 0
+              if (ain !== undefined && ain[1] !== undefined) { ain = ain[1] } else { ain = 0 }
+              if (bin !== undefined && bin[1] !== undefined) { bin = bin[1] } else { bin = 0 }
+
+              return Decimal.sub(ain, bin)
             }
           }
         },
@@ -306,11 +431,32 @@ export default defineComponent({
             if (out !== undefined) {
               return out[2] === soughtCurrency
             }
+          },
+          sorter: {
+            compare: (a, b) => {
+              let aout = getOutflow(a.involvedCurrencies) || 0
+              let bout = getOutflow(b.involvedCurrencies) || 0
+              if (aout !== undefined && aout[1] !== undefined) { aout = aout[1] } else { aout = 0 }
+              if (bout !== undefined && bout[1] !== undefined) { bout = bout[1] } else { bout = 0 }
+
+              return Decimal.sub(aout, bout)
+            }
           }
+        },
+        {
+          title: 'Fee',
+          dataIndex: 'fee',
+          sorter: (a, b) => a.fee - b.fee,
+          // slots: {
+          //   customRender: 'currencyOutColumn',
+          // },
         },
         {
           title: 'Action',
           dataIndex: 'shortDescription',
+          slots: {
+            customRender: 'actionsColumn'
+          }
         },
       ]
     })
@@ -335,6 +481,10 @@ export default defineComponent({
       getInflow,
       getOutflow,
       presentFlow,
+      hasNote,
+      annotations,
+      recordCounterparties,
+      recordAnnotation,
     };
   },
 
@@ -342,6 +492,7 @@ export default defineComponent({
     Note,
     AddressLookup,
     TransDetails,
+    FormOutlined,
   },
 });
 </script>

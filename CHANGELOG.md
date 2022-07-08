@@ -8,6 +8,14 @@ and this project adheres to
 
 ## UNRELEASED
 
+### Added
+
+- Add counterparty column and filter
+- Add fees column
+- Add sort to In/Out/Fee columns
+- Add loading state on annotations save button
+- Add tags to annotations
+
 ## 0.1.0
 
 ### Added

@@ -1,6 +1,6 @@
 <template>
   <a-tooltip :title="addy" color="gold" placement="topLeft">
-    {{ checkAddress(myWallets, myFriends, addy) }}
+    <div class="cursor-pointer">{{ checkAddress(myWallets, myFriends, addy) }}</div>
   </a-tooltip>
 </template>
 

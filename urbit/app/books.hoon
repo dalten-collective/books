@@ -132,7 +132,7 @@
         +.p.p.+.sign
       :_  this(transactions p.upd)
       =,  enjs:format
-      =-  ~&  >>  -  [%give %fact ~[/website] json+!>(`json`-)]~
+      =-  [%give %fact ~[/website] json+!>(`json`-)]~
         %-  pairs
         :~  head+s+'del-transactions'
             tran+a+(transactions:en-json:is p.upd)
@@ -195,9 +195,10 @@
       ::
           [%when ~]
         ?>  ?=([%khan %arow *] sign)
-        ?.  ?=(%& -.p.+.sign)  ((slog +.p.p.+.sign) `this)
-        ?>  ?=(%noun -.p.p.+.sign)
-        =/  upd  ::=[p=((mop ,[p=@da q=@ux] transaction) gth-hex) q=(list [[@da @ux] transaction])]
+        ?.  ?=(%& -.p.sign)
+          ((slog +.p.p.sign) `this)
+        ?>  ?=(%noun -.p.p.sign)
+        =/  upd
           !<  $:  p=((mop ,[p=@da q=@ux] transaction) gth-hex)
                   q=(list [[@da @ux] transaction])
               ==
