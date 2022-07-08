@@ -21,6 +21,8 @@
         >
           <template #title>
             <span>{{ recordAnnotation(record) }}</span>
+            <br />
+            <span v-if="annotations(record).tags.length > 0">Tags: {{ annotations(record).tags.join(", ") }}</span>
           </template>
           <form-outlined v-if="hasNote(record)" :style="{ color: '#EAB304' }"/>
         </a-tooltip>
