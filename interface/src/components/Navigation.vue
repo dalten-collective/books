@@ -67,6 +67,11 @@
         </div>
       </router-link>
     </li>
+    <li>
+      <div class="md:hidden">
+        test
+      </div>
+    </li>
   </ul>
 </template>
 
