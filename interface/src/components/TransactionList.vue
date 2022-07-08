@@ -287,6 +287,23 @@ export default defineComponent({
       }
     };
 
+    const allTags = computed(() => {
+      const aT = Array.from(
+        new Set(
+          notes.value.map((a) => {
+            return a[1].tags
+          }).flat()
+        )
+      )
+      const mapped = aT.map((tag) => {
+        return {
+          text: tag,
+          value: tag,
+        }
+      })
+      return mapped
+    })
+
     const allCounterparties = computed(() => {
       const myne = myWallets.value
         .slice()
@@ -363,10 +380,17 @@ export default defineComponent({
     const columns = computed(() => {
       return [
         {
-          title: '',
+          title: 'Tags',
           slots: {
             customRender: 'noteColumn'
-          }
+          },
+          filters: allTags.value,
+          onFilter: (soughtTag, txn) => {
+            const tags = annotations(txn).tags
+            if (tags !== undefined && Object.keys(tags).length > 0) {
+              return tags.includes(soughtTag)
+            }
+          },
         },
         {
           title: 'Date',
@@ -478,6 +502,7 @@ export default defineComponent({
       data,
       inCurrencies,
       outCurrencies,
+      allTags,
       getInflow,
       getOutflow,
       presentFlow,
