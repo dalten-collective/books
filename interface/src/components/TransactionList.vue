@@ -1,5 +1,11 @@
 <template>
-  <a-table :columns="columns" :data-source="data" :scroll="{ x: 1000 }" expand-row-by-click>
+  <a-table
+    :columns="columns"
+    :data-source="data"
+    :scroll="{ x: 1000 }"
+    expand-row-by-click
+    :loading="awaitingUrbitData"
+  >
     <template #dateColumn="{ record }">
       <div class="grid grid-cols-1 gap-2">
         <div>
@@ -112,13 +118,11 @@
 import { Decimal } from 'decimal.js';
 import { FormOutlined } from '@ant-design/icons-vue';
 import Note from '@/components/Note.vue';
-import { defineComponent, computed, ref } from 'vue';
 import { useStore } from 'vuex';
 import dateFormat, { masks } from 'dateformat';
 import AddressLookup from '@/components/AddressLookup.vue';
 import TransDetails from '@/components/TransDetails.vue';
-import { defineComponent } from 'vue';
-import { useStore } from 'vuex';
+import { computed, defineComponent, ref } from 'vue';
 import dateFormat, { masks } from 'dateformat';
 import Immutable from 'immutable';
 import { Address, Transaction } from '@/types';
@@ -141,6 +145,8 @@ export default defineComponent({
     const myWallets = computed(() => store.state.books.myWallets);
     const myFriends = computed(() => store.state.books.myFriends);
     const notes = computed(() => store.state.books.notes);
+
+    const awaitingUrbitData = computed(() => store.state.books.awaitingUrbitData);
 
     //  mounted-actions
     store.dispatch('books/handleSwitchNav', 2);
@@ -510,6 +516,7 @@ export default defineComponent({
       annotations,
       recordCounterparties,
       recordAnnotation,
+      awaitingUrbitData,
     };
   },
 

@@ -33,13 +33,14 @@
         </div>
       </div>
     </div>
-    <div class="w-full justify-center">
+    <div class="justify-center w-full">
       <div class="flex flex-col">
         <a-table
           :columns="columns"
           :data-source="data"
           :scroll="{ x: 1000 }"
           :pagination="false"
+          :loading="awaitingUrbitData"
         >
           <template #title>Recent Transactions</template>
           <template #dateColumn="{ record }">
@@ -98,7 +99,7 @@
             </div>
           </template>
           <template #footer>
-            <div class="grid justify-items-end text-yellow-500">
+            <div class="text-yellow-500 grid justify-items-end">
               <router-link :to="{ name: 'transactions' }">
                 see more...
               </router-link>
@@ -135,6 +136,7 @@ export default defineComponent({
     );
     const myWallets = computed(() => store.state.books.myWallets);
     const myFriends = computed(() => store.state.books.myFriends);
+    const awaitingUrbitData = computed(() => store.state.books.awaitingUrbitData);
 
     //  Tabs
     const activeKey = ref([]);
@@ -422,6 +424,7 @@ export default defineComponent({
       getInflow,
       getOutflow,
       presentFlow,
+      awaitingUrbitData,
     };
   },
 

@@ -19,6 +19,7 @@ export default {
       //  state objects
       etherscanKey: '3NJSFSVR8PZRN6CTIIXERD88YBKCIXXMW7',
       havUrbData: false as boolean,
+      awaitingUrbitData: false as boolean,
       urbitData: [] as Array<[[number, TxHash], Transaction]>,
       notes: [] as Array<[TxHash, Note]>,
       myFriends: [] as Array<[Address, WalletDetails]>,
@@ -247,9 +248,25 @@ export default {
         }, Immutable.OrderedMap([[[battery.trans.timeStamp, battery.trans.hash], battery.trans]]))
         .toArray();
     },
+    setAwaitingUrbitData(state, waiting: boolean) {
+      console.log('waiting ', waiting)
+      state.awaitingUrbitData = waiting;
+    },
+    setHavUrbData(state, hav: boolean) {
+      state.havUrbData = hav;
+    }
   },
 
   actions: {
+    startAwaitingUrbitData({ commit }) {
+      commit('setAwaitingUrbitData', true)
+      commit('setHavUrbData', false)
+    },
+    stopAwaitingUrbitData({ commit }) {
+      commit('setAwaitingUrbitData', false)
+      commit('setHavUrbData', true)
+    },
+
     handleSwitchPage({ commit }, battery: number) {
       commit('setTransPage', battery);
     },
@@ -276,12 +293,13 @@ export default {
       commit('setAnnotations', { notes: battery.notes });
     },
     handleSetTransactions(
-      { commit },
+      { state, commit, dispatch },
       battery: {
         tran: Array<Transaction>;
       }
     ) {
       console.log('battery', battery.tran);
+      dispatch('stopAwaitingUrbitData')
       commit('setTransactions', { tran: battery.tran });
     },
     handleUnSetTransactions(

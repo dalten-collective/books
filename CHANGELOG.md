@@ -15,6 +15,7 @@ and this project adheres to
 - Add sort to In/Out/Fee columns
 - Add loading state on annotations save button
 - Add tags to annotations; filtering for same
+- Add loading state to Ledger table and Home mini-table
 
 ## 0.1.0
 
