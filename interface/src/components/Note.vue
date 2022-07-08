@@ -120,6 +120,11 @@ export default defineComponent({
     })
 
     const noChanges = computed(() => {
+      // if no annotations
+      if (Immutable.get(annotations.value, props.hash) === undefined) {
+        return false
+      }
+
       const prevBasis = parseInt(
         Immutable.get(annotations.value, props.hash)
           .basis.toSignificantDigits(5)
