@@ -1,3 +1,4 @@
 interface/node_modules/
 interface/build
 interface/.env
+dist/
