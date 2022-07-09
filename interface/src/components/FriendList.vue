@@ -1,59 +1,87 @@
 <template>
-  <a-table
-    bordered
-    :columns="columns"
-    :data-source="friends"
-    :scroll="{ x: 750 }"
-    :loading="overallLoading"
-  >
-    <template #tags="{ record }">
-      <template v-for="tag in record.tags">
-        <a-tag :closable="!!tag" @close="handleClose(record.key, tag)">{{
-          tag
-        }}</a-tag>
+  <div>
+    <a-table
+      bordered
+      :columns="columns"
+      :data-source="friends"
+      :scroll="{ x: 750 }"
+      :loading="overallLoading"
+    >
+      <template #tags="{ record }">
+        <template v-for="tag in record.tags">
+          <a-tag :closable="!!tag" @close="handleClose(record.key, tag)">{{
+            tag
+          }}</a-tag>
+        </template>
+        <a-input
+          ref="inputRef"
+          type="text"
+          size="small"
+          :style="{ width: '78px' }"
+          @keyup.enter="handleInput(record.key, $event)"
+        />
       </template>
-      <a-input
-        ref="inputRef"
-        type="text"
-        size="small"
-        :style="{ width: '78px' }"
-        @keyup.enter="handleInput(record.key, $event)"
-      />
-    </template>
-    <template #actions="{ record }">
-      <a-popconfirm
-        title="Are you sure you want to remove this wallet?"
-        @confirm="onDelete(record.key)"
-      >
-        <a>Delete</a>
-      </a-popconfirm>
-    </template>
-  </a-table>
-  <a-form
-    ref="formRef"
-    :rules="rules"
-    :layout="formState.layout"
-    :model="formState"
-  >
-    <a-form-item label="Nickname: " ref="nick" name="nick">
-      <a-input v-model:value="formState.nick" placeholder="UnBankedKing" />
-    </a-form-item>
-    <a-form-item label="Address: " ref="address" name="address">
-      <a-input
-        v-model:value="formState.address"
-        placeholder="0xeeee111122223333444455556666777788889999"
-      />
-    </a-form-item>
-    <a-form-item label="Who (@p - optional): " ref="who" name="who">
-      <a-input v-model:value="formState.who" placeholder="~dalten-dalten" />
-    </a-form-item>
-    <a-form-item label="Tags: " ref="tags" name="tags">
-      <a-input v-model:value="formState.tags" placeholder="abc one-two three" />
-    </a-form-item>
-    <a-button type="primary" class="bg-slate-600" @click="onSubmit">
-      Add Friend (Untracked)
-    </a-button>
-  </a-form>
+      <template #actions="{ record }">
+        <a-popconfirm
+          title="Are you sure you want to remove this wallet?"
+          @confirm="onDelete(record.key)"
+        >
+          <a>Delete</a>
+        </a-popconfirm>
+      </template>
+    </a-table>
+    <a-form
+      ref="formRef"
+      :rules="rules"
+      :model="formState"
+      layout="horizontal"
+      :label-col="{ span: 8 }"
+      :wrapper-col="{ span: 16 }"
+    >
+      <a-row>
+        <a-col :span="12">
+          <a-form-item label="Nickname: " ref="nick" name="nick">
+            <a-input v-model:value="formState.nick" placeholder="UnBankedKing" />
+          </a-form-item>
+        </a-col>
+        <a-col :span="12">
+          <a-form-item label="Address: " ref="address" name="address">
+            <a-input
+              v-model:value="formState.address"
+              placeholder="0xeeee111122223333444455556666777788889999"
+            />
+          </a-form-item>
+        </a-col>
+      </a-row>
+
+      <a-row>
+        <a-col :span="12">
+          <a-form-item label="Who (@p - optional): " ref="who" name="who">
+            <a-input v-model:value="formState.who" placeholder="~dalten-dalten" />
+          </a-form-item>
+        </a-col>
+        <a-col :span="12">
+          <a-form-item label="Tags: " ref="tags" name="tags">
+            <a-input v-model:value="formState.tags" placeholder="abc one-two three" />
+          </a-form-item>
+        </a-col>
+      </a-row>
+
+      <a-row>
+        <a-col :span="24" style="text-align: right;">
+          <a-button
+            type="primary"
+            class="bg-slate-600"
+            @click="onSubmit"
+            :loading="awaitingNewFriend"
+            :disabled="awaitingNewFriend"
+          >
+            Add Friend (Untracked)
+          </a-button>
+        </a-col>
+      </a-row>
+    </a-form>
+  </div>
 </template>
 
 <script lang="ts">
@@ -75,6 +103,7 @@ export default defineComponent({
     const overallLoading = ref(false);
     const formRef = ref();
     const inputRef = ref();
+    const awaitingNewFriend = ref(false);
 
     //  table columns, data
     const columns = [
@@ -185,6 +214,7 @@ export default defineComponent({
 
     const onSubmit = () => {
       overallLoading.value = true;
+      awaitingNewFriend.value = true;
       formRef.value
         .validate()
         .then(() => {
@@ -204,6 +234,7 @@ export default defineComponent({
             })
             .finally(() => {
               overallLoading.value = false;
+              awaitingNewFriend.value = false;
               formRef.value.resetFields();
             });
         })
@@ -220,7 +251,8 @@ export default defineComponent({
       rules,
       onSubmit,
       onDelete,
-      overallLoading
+      overallLoading,
+      awaitingNewFriend
     };
   },
 });
