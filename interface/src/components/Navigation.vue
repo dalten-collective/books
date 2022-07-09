@@ -1,13 +1,19 @@
 <template>
   <ul class="flex flex-row text-center md:flex-col">
     <li class="h-24 mr-3">
-      <router-link :to="{ name: 'home' }">
+      <router-link :to="{ name: 'home' }" class="hover:no-underline">
         <div
-          class="block py-1 pl-1 no-underline border-b-2 md:py-3 align-left transition ease-in-out hover:scale-110 hover:border-yellow-400 hover:text-yellow-400"
+          id="nav-item-books"
+          v-bind:style="
+            nav === 0
+              ? 'border-bottom: 2px solid #EAB308;'
+              : 'border-bottom: 2px solid black;'
+          "
+          class="block py-1 pl-1 no-underline border border-b-2 md:py-3 align-left transition ease-in-out hover:scale-110 hover:text-yellow-400"
           v-bind:class="[
             nav === 0
-              ? 'text-yellow-500 md:border-yellow-500'
-              : 'text-neutral-900 md:border-neutral-900',
+              ? 'nav-books-selected'
+              : 'nav-books-unselected',
           ]"
         >
           <div class="flex items-center justify-start mx-2 mt-6 md:mt-10">
@@ -18,7 +24,7 @@
       </router-link>
     </li>
     <li class="flex-1 mr-3">
-      <router-link :to="{ name: 'transactions' }" class="text-black">
+      <router-link :to="{ name: 'transactions' }" class="text-black hover:no-underline">
         <div
           class="flex items-center p-2 my-6 rounded-lg transition ease-in-out hover:scale-110 hover:text-yellow-400"
           v-bind:class="[nav === 2 ? 'bg-gray-600 dark:bg-gray-800' : '']"
@@ -35,7 +41,7 @@
       </router-link>
     </li>
     <li class="flex-1 mr-3">
-      <router-link :to="{ name: 'wallets' }" class="text-black">
+      <router-link :to="{ name: 'wallets' }" class="text-black hover:no-underline">
         <div
           class="flex items-center p-2 my-6 rounded-lg transition ease-in-out hover:scale-110 hover:text-yellow-400"
           v-bind:class="[nav === 1 ? 'bg-gray-600 dark:bg-gray-800' : '']"
@@ -52,7 +58,7 @@
       </router-link>
     </li>
     <li class="flex-1 mr-3">
-      <router-link :to="{ name: 'rolodex' }" class="text-black">
+      <router-link :to="{ name: 'rolodex' }" class="text-black hover:no-underline">
         <div
           class="flex items-center p-2 my-6 rounded-lg transition ease-in-out hover:scale-110 hover:text-yellow-400"
           v-bind:class="[nav === 3 ? 'bg-gray-600 dark:bg-gray-800' : '']"

@@ -9,6 +9,17 @@
     @apply text-yellow-400;
     @apply underline;
   }
+  #nav-item-books:hover {
+    @apply hover:border-yellow-400 !important;
+  }
+  .nav-books-selected {
+    @apply text-yellow-500;
+    @apply md:border-yellow-500;
+  }
+  .nav-books-unselected {
+    @apply text-neutral-900;
+    @apply md:border-neutral-900;
+  }
 }
 .anticon .anticon-close .ant-tag-close-icon {
   vertical-align: .20ex;
@@ -53,4 +64,3 @@ ul {
   margin: 0;
   padding: 0;
 }
-
