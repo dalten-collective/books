@@ -4,6 +4,7 @@ import { Transaction, Address, TxHash } from '@/types';
 import Decimal from 'decimal.js';
 
 export function pushWallet(address: Address, nick: string, tags: string) {
+  const regex = /\s+/g;
   return urbitAPI.poke({
     //   return {
     app: 'books',
@@ -12,7 +13,10 @@ export function pushWallet(address: Address, nick: string, tags: string) {
       'add-wallet': {
         address: address.toLowerCase(),
         nick: nick,
-        tags: tags.split(' ').map((item) => item.toLowerCase()),
+        tags: tags
+          .split(',')
+          .slice()
+          .map((item) => item.trim().replace(regex, '-').toLowerCase()),
       },
     },
     //   }
@@ -31,7 +35,7 @@ export function pullWallet(address: Address) {
     })
     .catch((e) => {
       console.log('err ', e);
-    })
+    });
 }
 
 export function pushFriend(
@@ -40,6 +44,7 @@ export function pushFriend(
   who: string,
   tags: string
 ) {
+  const regex = /\s+/g;
   return urbitAPI.poke({
     app: 'books',
     mark: 'books-page',
@@ -48,7 +53,9 @@ export function pushFriend(
         address: address.toLowerCase(),
         nick: nick,
         who: who,
-        tags: tags.split(' ').map((item) => item.toLowerCase()),
+        tags: tags
+          .split(',')
+          .map((item) => item.trim().replace(regex, '-').toLowerCase()),
       },
     },
   });
@@ -66,7 +73,7 @@ export function pullFriend(address: Address) {
     })
     .catch((e) => {
       console.log('err ', e);
-    })
+    });
 }
 
 export function pushTags(address: Address, tags: []) {
@@ -85,12 +92,20 @@ export function pushName(address: Address, name: string) {
   });
 }
 
-export function pushAnnotation(hash: TxHash, note: {basis: Decimal, to: Address | null, annotation: string, tags: Array<string>}) {
+export function pushAnnotation(
+  hash: TxHash,
+  note: {
+    basis: Decimal;
+    to: Address | null;
+    annotation: string;
+    tags: Array<string>;
+  }
+) {
   return urbitAPI.poke({
     app: 'books',
     mark: 'books-page',
-    json: { 'annotation': { hash: hash, note: note }},
-  })
+    json: { annotation: { hash: hash, note: note } },
+  });
 }
 
 export function pushTransaction(trans: Transaction) {

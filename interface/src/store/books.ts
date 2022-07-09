@@ -230,7 +230,7 @@ export default {
       }
     ) {
       console.log('del-friend', battery.remove);
-      state.myWallets = Immutable.Map(state.myFriends)
+      state.myFriends = Immutable.Map(state.myFriends)
         .delete(battery.remove)
         .toArray();
     },

@@ -7,19 +7,30 @@
       :scroll="{ x: 750 }"
       :loading="overallLoading"
     >
+      <template #name="{ text, record }">
+        <div class="editable-cell">
+          <div
+            v-if="editableData[record.key]"
+            class="editable-cell-input-wrapper"
+          >
+            <a-input
+              v-model:value="editableData[record.key].name"
+              @pressEnter="save(record.key)"
+            />
+            <check-outlined
+              class="editable-cell-icon-check"
+              @click="save(record.key)"
+            />
+          </div>
+          <div v-else class="editable-cell-text-wrapper">
+            {{ text || ' ' }}
+            <edit-outlined class="editable-cell-icon" @click="edit(record.key)" />
+          </div>
+        </div>
+      </template>
+
       <template #tags="{ record }">
-        <template v-for="tag in record.tags">
-          <a-tag :closable="!!tag" @close="handleClose(record.key, tag)">{{
-            tag
-          }}</a-tag>
-        </template>
-        <a-input
-          ref="inputRef"
-          type="text"
-          size="small"
-          :style="{ width: '78px' }"
-          @keyup.enter="handleInput(record.key, $event)"
-        />
+        <FriendTagEdit :record="record" />
       </template>
       <template #actions="{ record }">
         <a-popconfirm
@@ -85,10 +96,11 @@
 </template>
 
 <script lang="ts">
+import Immutable from 'immutable';
+import FriendTagEdit from '@/components/WalletTagEdit.vue';
 import { computed, defineComponent, reactive, ref, toRaw } from 'vue';
 import { mapState, useStore } from 'vuex';
-import { pushFriend, pullFriend } from '@/api/books.ts';
-import Immutable from 'immutable';
+import { pushFriend, pullFriend, pushName } from '@/api/books.ts';
 import { CheckOutlined, EditOutlined } from '@ant-design/icons-vue';
 import { cloneDeep } from 'lodash-es';
 import { Address } from '@/types';
@@ -207,9 +219,9 @@ export default defineComponent({
       tags: [
         {
           required: false,
-          pattern: /^[a-zA-Z0-9\-\_\s]+$/,
+          pattern: /^[a-zA-Z0-9\,\-\_\s]+$/,
           trigger: 'blur',
-          message: "a-z, 0-9, '-' and '_' only, separated by spaces",
+          message: "a-z, 0-9, ' ', '-' and '_' only, comma delimited",
         },
       ],
     };
@@ -222,14 +234,20 @@ export default defineComponent({
         friends.value.filter((item) => key === item.key)[0],
         editableData[key]
       );
-
+      pushName(key, editableData[key].name)
+        .then((r) => {
+          console.log('res: ', r);
+        })
+        .catch((e) => {
+          console.log('err: ', e);
+        });
       delete editableData[key];
     };
 
     const edit = (key) => {
       editableData[key] = cloneDeep(
-        friends.data.filter((item) => key === item.key)[0]
-      )
+        friends.value.filter((item) => key === item.key)[0]
+      );
     };
 
     const cancel = (key) => {
@@ -291,5 +309,12 @@ export default defineComponent({
       awaitingNewFriend
     };
   },
+  components: {
+    CheckOutlined,
+    EditOutlined,
+    FriendTagEdit,
+  },
 });
+
+
 </script>

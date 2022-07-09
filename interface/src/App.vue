@@ -10,7 +10,7 @@
       </div>
       <div class="md:w-5/6 md:mt-12">
         <div class="flex flex-row-reverse hidden float-right text-right md:inline-block md:h-12">
-          <a-tooltip title="Built by Quartus" placement="left">
+          <a-tooltip title="Built by Quartus" placement="left" :align="{offset: [0, -100]}">
             <a href="https://urbit.org/ids/~dalten" class="text-right" target="_blank">
               <QuartusLogo
                 height="100"

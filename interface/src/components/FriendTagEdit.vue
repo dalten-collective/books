@@ -31,6 +31,7 @@ type UIWallet = {
   address: Address;
   name: string;
   tags: Array<string>;
+  patP: string;
 };
 
 export default defineComponent({
