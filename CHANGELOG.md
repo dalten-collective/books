@@ -17,6 +17,10 @@ and this project adheres to
 - Add tags to annotations; filtering for same
 - Add loading state to Ledger table and Home mini-table
 
+### Fixed
+
+- Annotations changes not entering vuex on set-annotations
+
 ## 0.1.0
 
 ### Added
