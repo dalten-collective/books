@@ -1,9 +1,9 @@
 :~  title+'books'
     info+'it just makes cents'
     color+0xee.561c
+    glob-http+['https://freedom-club.sfo2.digitaloceanspaces.com/glob-0v8pq1e.2dqdn.vutv5.vve4g.509jv.glob' 0v8pq1e.2dqdn.vutv5.vve4g.509jv]
     base+'books'
-    glob-http+['https://bootstrap.urbit.org/glob-0v5.hurm4.ejod5.ngg9h.iub9i.n1j7o.glob' 0v5.hurm4.ejod5.ngg9h.iub9i.n1j7o]
-    version+[0 0 1]
+    version+[0 0 2]
     website+'https://dalten.org/'
     license+'Get Rekt'
 ==
