@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="line-height: 2em">
     <a-tag
       v-for="tag in record.tags"
       :key="tag"

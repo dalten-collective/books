@@ -1,67 +1,90 @@
 <template>
-  <a-table
-    bordered
-    :columns="columns"
-    :data-source="wallets"
-    :scroll="{ x: 750 }"
-    :loading="overallLoading"
-  >
-    <template #name="{ text, record }">
-      <div class="editable-cell">
-        <div
-          v-if="editableData[record.key]"
-          class="editable-cell-input-wrapper"
+  <div>
+    <a-table
+      bordered
+      :columns="columns"
+      :data-source="wallets"
+      :scroll="{ x: 750 }"
+      :loading="overallLoading"
+    >
+      <template #name="{ text, record }">
+        <div class="editable-cell">
+          <div
+            v-if="editableData[record.key]"
+            class="editable-cell-input-wrapper"
+          >
+            <a-input
+              v-model:value="editableData[record.key].name"
+              @pressEnter="save(record.key)"
+            />
+            <check-outlined
+              class="editable-cell-icon-check"
+              @click="save(record.key)"
+            />
+          </div>
+          <div v-else class="editable-cell-text-wrapper">
+            {{ text || ' ' }}
+            <edit-outlined class="editable-cell-icon" @click="edit(record.key)" />
+          </div>
+        </div>
+      </template>
+      <template #tags="{ record }">
+        <WalletTagEdit :record="record" />
+      </template>
+      <template #actions="{ record }">
+        <a-popconfirm
+          title="Are you sure you want to remove this wallet?"
+          @confirm="onDelete(record.key)"
         >
-          <a-input
-            v-model:value="editableData[record.key].name"
-            @pressEnter="save(record.key)"
-          />
-          <check-outlined
-            class="editable-cell-icon-check"
-            @click="save(record.key)"
-          />
-        </div>
-        <div v-else class="editable-cell-text-wrapper">
-          {{ text || ' ' }}
-          <edit-outlined class="editable-cell-icon" @click="edit(record.key)" />
-        </div>
-      </div>
-    </template>
-    <template #tags="{ record }">
-      <WalletTagEdit :record="record" />
-    </template>
-    <template #actions="{ record }">
-      <a-popconfirm
-        title="Are you sure you want to remove this wallet?"
-        @confirm="onDelete(record.key)"
-      >
-        <a class="hover:text-yellow-500">Delete</a>
-      </a-popconfirm>
-    </template>
-  </a-table>
+          <a class="hover:text-yellow-500">Delete</a>
+        </a-popconfirm>
+      </template>
+    </a-table>
 
-  <a-form
-    ref="formRef"
-    :rules="rules"
-    :layout="formState.layout"
-    :model="formState"
-  >
-    <a-form-item label="Nickname: " ref="nick" name="nick">
-      <a-input v-model:value="formState.nick" placeholder="UnBankedKing" />
-    </a-form-item>
-    <a-form-item label="Address: " ref="address" name="address">
-      <a-input
-        v-model:value="formState.address"
-        placeholder="0xeeee111122223333444455556666777788889999"
-      />
-    </a-form-item>
-    <a-form-item label="Tags: " ref="tags" name="tags">
-      <a-input v-model:value="formState.tags" placeholder="abc one-two three" />
-    </a-form-item>
-    <a-button type="primary" class="bg-slate-600" @click="onSubmit">
-      Add Tracked Wallet
-    </a-button>
-  </a-form>
+    <a-form
+      ref="formRef"
+      :rules="rules"
+      layout="horizontal"
+      :model="formState"
+      :label-col="{ span: 8 }"
+      :wrapper-col="{ span: 16 }"
+    >
+      <a-row>
+        <a-col :span="8">
+          <a-form-item label="Nickname: " ref="nick" name="nick">
+            <a-input v-model:value="formState.nick" placeholder="UnBankedKing" />
+          </a-form-item>
+        </a-col>
+        <a-col :span="8">
+          <a-form-item label="Address: " ref="address" name="address">
+            <a-input
+              v-model:value="formState.address"
+              placeholder="0xeeee111122223333444455556666777788889999"
+            />
+          </a-form-item>
+        </a-col>
+        <a-col :span="8">
+          <a-form-item label="Tags: " ref="tags" name="tags">
+            <a-input v-model:value="formState.tags" placeholder="abc one-two three" />
+          </a-form-item>
+        </a-col>
+      </a-row>
+
+      <a-row>
+        <a-col :span="24" style="text-align: right">
+          <a-button
+            type="primary"
+            class="bg-slate-600"
+            @click="onSubmit"
+            :loading="awaitingNewWallet"
+            :disabled="awaitingNewWallet"
+          >
+            Add Tracked Wallet
+          </a-button>
+        </a-col>
+      </a-row>
+    </a-form>
+  </div>
 </template>
 
 <script lang="ts">
@@ -162,6 +185,7 @@ export default defineComponent({
     const overallLoading = ref(false);
     const formRef = ref();
     const inputRef = ref();
+    const awaitingNewWallet = ref(false);
 
     //  handlers
     const handleInput = (k, t) => {
@@ -269,6 +293,7 @@ export default defineComponent({
 
     //  methods
     const onSubmit = () => {
+      awaitingNewWallet.value = true;
       overallLoading.value = true;
       formRef.value
         .validate()
@@ -288,6 +313,7 @@ export default defineComponent({
             })
             .finally(() => {
               overallLoading.value = false;
+              awaitingNewWallet.value = false;
               formRef.value.resetFields();
             });
         })
@@ -315,6 +341,7 @@ export default defineComponent({
       allTags,
       columns,
       overallLoading,
+      awaitingNewWallet,
     };
   },
 
