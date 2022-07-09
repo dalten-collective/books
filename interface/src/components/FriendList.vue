@@ -41,6 +41,7 @@
         </a-popconfirm>
       </template>
     </a-table>
+
     <a-form
       ref="formRef"
       :rules="rules"

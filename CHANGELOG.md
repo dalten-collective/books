@@ -20,6 +20,7 @@ and this project adheres to
 ### Fixed
 
 - Annotations changes not entering vuex on set-annotations
+- Friends tags
 
 ## 0.1.0
 

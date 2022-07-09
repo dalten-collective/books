@@ -42,7 +42,7 @@
           :pagination="false"
           :loading="awaitingUrbitData"
         >
-          <template #title>Recent Transactions</template>
+          <template #title><h3>Recent Transactions</h3></template>
           <template #dateColumn="{ record }">
             <div class="grid grid-cols-1 gap-2">
               <div>
