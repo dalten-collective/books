@@ -178,12 +178,11 @@ export default {
       }
     ) {
       console.log('set-annotation');
-      const prevNotesMap = Immutable.Map(state.notes)
-      let newNotesMap = Immutable.Map({})
-      battery.notes.forEach((n) => {
-        newNotesMap = newNotesMap.set(n[0], n[1])
-      })
-      state.notes = newNotesMap.toArray()
+      state.notes = state.notes.concat(
+        battery.notes.filter((item) => {
+          return !Immutable.Map(state.notes).has(item[0]);
+        })
+      );
     },
 
     addWallet(
