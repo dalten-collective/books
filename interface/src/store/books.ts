@@ -178,9 +178,9 @@ export default {
       }
     ) {
       console.log('set-annotation');
-      state.notes = state.notes.concat(
-        battery.notes.filter((item) => {
-          return !Immutable.Map(state.notes).has(item[0]);
+      state.notes = battery.notes.concat(
+        state.notes.filter((item) => {
+          return !Immutable.Map(battery.notes).has(item[0]);
         })
       );
     },
