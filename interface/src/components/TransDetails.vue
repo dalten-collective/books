@@ -75,15 +75,20 @@
         <a-descriptions-item label="Nonce">
           {{ nonce }}
         </a-descriptions-item>
-        <a-descriptions-item label="View on Etherscan">
-          <a :href="'https://etherscan.io/tx/' + hash" target="_blank">
-            <svg class="cursor-pointer" height="20" width="20" viewBox="0 0 48 48">
-              <path
-                d="M24 44q-4.15 0-7.8-1.575-3.65-1.575-6.35-4.275-2.7-2.7-4.275-6.35Q4 28.15 4 24t1.575-7.8Q7.15 12.55 9.85 9.85q2.7-2.7 6.35-4.275Q19.85 4 24 4t7.8 1.575q3.65 1.575 6.35 4.275 2.7 2.7 4.275 6.35Q44 19.85 44 24t-1.575 7.8q-1.575 3.65-4.275 6.35-2.7 2.7-6.35 4.275Q28.15 44 24 44Zm-2.15-3.05v-4.1q-1.75 0-2.95-1.3-1.2-1.3-1.2-3.05v-2.2L7.45 20.05q-.25 1-.35 1.975Q7 23 7 24q0 6.5 4.225 11.35t10.625 5.6Zm14.7-5.4q2.2-2.4 3.325-5.375T41 24q0-5.3-2.9-9.625T30.35 8.05v.9q0 1.75-1.2 3.05-1.2 1.3-2.95 1.3h-4.35v4.35q0 .85-.675 1.4-.675.55-1.525.55H15.5V24h12.9q.85 0 1.4.65.55.65.55 1.5v6.35h2.15q1.45 0 2.55.85 1.1.85 1.5 2.2Z"
-                fill="#EAB308"
-              />
-            </svg>
-          </a>
+        <a-descriptions-item label="Transaction Hash">
+          <a-tooltip :title="hash" color="gold" placement="top">
+            <a :href="'https://etherscan.io/tx/' + hash" target="_blank">
+              <div class="flex">
+                {{ truncateHash(hash) }}
+                <svg class="cursor-pointer" height="20" width="20" viewBox="0 0 48 48">
+                  <path
+                    d="M24 44q-4.15 0-7.8-1.575-3.65-1.575-6.35-4.275-2.7-2.7-4.275-6.35Q4 28.15 4 24t1.575-7.8Q7.15 12.55 9.85 9.85q2.7-2.7 6.35-4.275Q19.85 4 24 4t7.8 1.575q3.65 1.575 6.35 4.275 2.7 2.7 4.275 6.35Q44 19.85 44 24t-1.575 7.8q-1.575 3.65-4.275 6.35-2.7 2.7-6.35 4.275Q28.15 44 24 44Zm-2.15-3.05v-4.1q-1.75 0-2.95-1.3-1.2-1.3-1.2-3.05v-2.2L7.45 20.05q-.25 1-.35 1.975Q7 23 7 24q0 6.5 4.225 11.35t10.625 5.6Zm14.7-5.4q2.2-2.4 3.325-5.375T41 24q0-5.3-2.9-9.625T30.35 8.05v.9q0 1.75-1.2 3.05-1.2 1.3-2.95 1.3h-4.35v4.35q0 .85-.675 1.4-.675.55-1.525.55H15.5V24h12.9q.85 0 1.4.65.55.65.55 1.5v6.35h2.15q1.45 0 2.55.85 1.1.85 1.5 2.2Z"
+                    fill="#EAB308"
+                  />
+                </svg>
+              </div>
+            </a>
+          </a-tooltip>
         </a-descriptions-item>
       </a-descriptions>
     </a-tab-pane>
@@ -113,6 +118,19 @@ export default defineComponent({
     const activeKey = ref('1');
 
     //  Methods
+    const truncateHash = (hash) => {
+      try {
+        const truncateRegex =
+          /^(0x[a-zA-Z0-9]{4})[a-zA-Z0-9]+([a-zA-Z0-9]{4})$/;
+        const match = hash.match(truncateRegex);
+        if (match) {
+          return `${match[1]}…${match[2]}`;
+        }
+      } catch (e) {
+        return hash;
+      }
+    };
+
     const nameChek = (addy) => {
       //  First, get arrays of addy, name for utility
       const myne = myWallets.value
@@ -144,6 +162,7 @@ export default defineComponent({
     return {
       nameChek,
       activeKey,
+      truncateHash,
     };
   },
 
