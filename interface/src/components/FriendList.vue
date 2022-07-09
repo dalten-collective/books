@@ -6,11 +6,34 @@
     :scroll="{ x: 750 }"
     :loading="overallLoading"
   >
+    <template #name="{ text, record }">
+      <div class="editable-cell">
+        <div
+          v-if="editableData[record.key]"
+          class="editable-cell-input-wrapper"
+        >
+          "hi"
+          <a-input
+            v-model:value="editableData[record.key].name"
+            @pressEnter="save(record.key)"
+          />
+          <check-outlined
+            class="editable-cell-icon-check"
+            @click="save(record.key)"
+          />
+        </div>
+        <div v-else class="editable-cell-text-wrapper">
+          "low"
+          {{ text || ' ' }}
+          <edit-outlined class="editable-cell-icon" @click="edit(record.key)" />
+        </div>
+      </div>
+    </template>
     <template #tags="{ record }">
       <template v-for="tag in record.tags">
-        <a-tag :closable="!!tag" @close="handleClose(record.key, tag)">{{
-          tag
-        }}</a-tag>
+        <a-tag :closable="!!tag" @close="handleClose(record.key, tag)">
+          {{ tag }}
+        </a-tag>
       </template>
       <a-input
         ref="inputRef"
@@ -61,6 +84,8 @@ import { computed, defineComponent, reactive, ref, toRaw } from 'vue';
 import { mapState, useStore } from 'vuex';
 import { pushFriend, pullFriend } from '@/api/books.ts';
 import Immutable from 'immutable';
+import { CheckOutlined, EditOutlined } from '@ant-design/icons-vue';
+import { cloneDeep } from 'lodash-es';
 import { Address } from '@/types';
 
 export default defineComponent({
@@ -71,10 +96,30 @@ export default defineComponent({
     //  mounted-actions
     store.dispatch('books/handleSwitchNav', 3);
 
+    //  mapState and mapGetters replacements
+    const myFriends = computed(() => store.state.books.myFriends);
+    const friends = computed(() => {
+      return myFriends.value.map((item) => {
+        return {
+          key: item[0],
+          name: item[1].nick,
+          address: item[0],
+          tags: item[1].tags,
+          patP: [!item[1].who ? '' : item[1].who],
+        };
+      });
+    });
+    const frenMap = computed(() => {
+      return Immutable.Map(myFriends.value);
+    });
+
+
     // Refs
     const overallLoading = ref(false);
     const formRef = ref();
     const inputRef = ref();
+
+    const editableData = reactive({});
 
     //  table columns, data
     const columns = [
@@ -110,21 +155,9 @@ export default defineComponent({
         width: '10%',
         slots: {
           customRender: 'actions',
-        }
+        },
       },
     ];
-    const myFriends = computed(() => store.state.books.myFriends);
-    const friends = computed(() => {
-      return myFriends.value.map((item) => {
-        return {
-          key: item[0],
-          name: item[1].nick,
-          address: item[0],
-          tags: item[1].tags,
-          patP: [!item[1].who ? '' : item[1].who],
-        };
-      });
-    });
 
     //  form
     const formState = reactive({
@@ -176,6 +209,28 @@ export default defineComponent({
     };
 
     //  methods
+
+    const save = (key) => {
+      console.log('on-save');
+      Object.assign(
+        friends.value.filter((item) => key === item.key)[0],
+        editableData[key]
+      );
+
+      delete editableData[key];
+    };
+
+    const edit = (key) => {
+      editableData[key] = cloneDeep(
+        friends.data.filter((item) => key === item.key)[0]
+      )
+    };
+
+    const cancel = (key) => {
+      delete editableData[key];
+    };
+
+
     const onDelete = (key) => {
       overallLoading.value = true;
       pullFriend(key).finally(() => {
@@ -220,7 +275,11 @@ export default defineComponent({
       rules,
       onSubmit,
       onDelete,
-      overallLoading
+      overallLoading,
+      editableData,
+      save,
+      edit,
+      cancel
     };
   },
 });
