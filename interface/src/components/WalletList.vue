@@ -24,7 +24,10 @@
           </div>
           <div v-else class="editable-cell-text-wrapper">
             {{ text || ' ' }}
-            <edit-outlined class="editable-cell-icon" @click="edit(record.key)" />
+            <edit-outlined
+              class="editable-cell-icon"
+              @click="edit(record.key)"
+            />
           </div>
         </div>
       </template>
@@ -52,7 +55,10 @@
       <a-row>
         <a-col :span="8">
           <a-form-item label="Nickname: " ref="nick" name="nick">
-            <a-input v-model:value="formState.nick" placeholder="UnBankedKing" />
+            <a-input
+              v-model:value="formState.nick"
+              placeholder="UnBankedKing"
+            />
           </a-form-item>
         </a-col>
         <a-col :span="8">
@@ -65,7 +71,10 @@
         </a-col>
         <a-col :span="8">
           <a-form-item label="Tags: " ref="tags" name="tags">
-            <a-input v-model:value="formState.tags" placeholder="abc one-two three" />
+            <a-input
+              v-model:value="formState.tags"
+              placeholder="abc one-two three"
+            />
           </a-form-item>
         </a-col>
       </a-row>
@@ -317,9 +326,9 @@ export default defineComponent({
               formRef.value.resetFields();
             });
         })
-      .catch((error) => {
-        console.log('error', error);
-      });
+        .catch((error) => {
+          console.log('error', error);
+        });
     };
 
     return {
@@ -344,7 +353,6 @@ export default defineComponent({
       awaitingNewWallet,
     };
   },
-
 
   components: {
     CheckOutlined,

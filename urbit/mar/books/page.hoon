@@ -12,7 +12,7 @@
   ++  noun  page
   ++  json
     |=  jon=^json
-    ~&  >>>  jon
+    ~&  >  jon
     %-  page
     =<  (to-noun jon)
     |%
@@ -51,10 +51,7 @@
             tags+(ci |=(a=(set @tas) `(~(dif in a) (sy [%$ ~]))) (as so))
         ==
       ::
-        :-  %del-wallet
-        %-  ot
-        :~  address+(su ;~(pfix (jest '0x') hex))
-        ==
+        [%del-wallet (ot address+(su ;~(pfix (jest '0x') hex)) ~)]
       ::
         :-  %add-friend
         %-  ot
@@ -80,6 +77,9 @@
                 tags+(ci |=(a=(set @tas) `(~(dif in a) (sy [%$ ~]))) (as so))
             ==
         ==
+      ::
+        [%del-a-note (ot hash+(su ;~(pfix (jest '0x') hex)) ~)]
+        
       ::
         :-  %add-transaction
         %-  ot

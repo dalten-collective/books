@@ -108,6 +108,17 @@ export function pushAnnotation(
   });
 }
 
+export function clearAnnotation(
+  hash: TxHash,
+) {
+  return urbitAPI.poke({
+    app: 'books',
+    mark: 'books-page',
+    json: { 'del-a-note': { hash: hash } },
+  });
+}
+
+
 export function pushTransaction(trans: Transaction) {
   const reformTrans = {
     network: trans.network,

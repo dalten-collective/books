@@ -24,7 +24,10 @@
           </div>
           <div v-else class="editable-cell-text-wrapper">
             {{ text || ' ' }}
-            <edit-outlined class="editable-cell-icon" @click="edit(record.key)" />
+            <edit-outlined
+              class="editable-cell-icon"
+              @click="edit(record.key)"
+            />
           </div>
         </div>
       </template>
@@ -53,7 +56,10 @@
       <a-row>
         <a-col :span="12">
           <a-form-item label="Nickname: " ref="nick" name="nick">
-            <a-input v-model:value="formState.nick" placeholder="UnBankedKing" />
+            <a-input
+              v-model:value="formState.nick"
+              placeholder="UnBankedKing"
+            />
           </a-form-item>
         </a-col>
         <a-col :span="12">
@@ -69,18 +75,24 @@
       <a-row>
         <a-col :span="12">
           <a-form-item label="Who (@p - optional): " ref="who" name="who">
-            <a-input v-model:value="formState.who" placeholder="~dalten-dalten" />
+            <a-input
+              v-model:value="formState.who"
+              placeholder="~dalten-dalten"
+            />
           </a-form-item>
         </a-col>
         <a-col :span="12">
           <a-form-item label="Tags: " ref="tags" name="tags">
-            <a-input v-model:value="formState.tags" placeholder="abc one-two three" />
+            <a-input
+              v-model:value="formState.tags"
+              placeholder="abc one-two three"
+            />
           </a-form-item>
         </a-col>
       </a-row>
 
       <a-row>
-        <a-col :span="24" style="text-align: right;">
+        <a-col :span="24" style="text-align: right">
           <a-button
             type="primary"
             class="bg-slate-600"
@@ -130,7 +142,6 @@ export default defineComponent({
     const frenMap = computed(() => {
       return Immutable.Map(myFriends.value);
     });
-
 
     // Refs
     const overallLoading = ref(false);
@@ -255,7 +266,6 @@ export default defineComponent({
       delete editableData[key];
     };
 
-
     const onDelete = (key) => {
       overallLoading.value = true;
       pullFriend(key).finally(() => {
@@ -307,7 +317,7 @@ export default defineComponent({
       save,
       edit,
       cancel,
-      awaitingNewFriend
+      awaitingNewFriend,
     };
   },
   components: {
@@ -316,6 +326,4 @@ export default defineComponent({
     FriendTagEdit,
   },
 });
-
-
 </script>

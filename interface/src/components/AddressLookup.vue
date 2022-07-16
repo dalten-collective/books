@@ -1,6 +1,8 @@
 <template>
   <a-tooltip :title="addy" color="gold" placement="topLeft">
-    <div class="cursor-pointer">{{ checkAddress(myWallets, myFriends, addy) }}</div>
+    <div class="cursor-pointer">
+      {{ checkAddress(myWallets, myFriends, addy) }}
+    </div>
   </a-tooltip>
 </template>
 
@@ -25,7 +27,7 @@ export default defineComponent({
       if (null === addy) {
         return 'Unknown';
       }
-      
+
       const myWal = Immutable.Map(map) as Map<
         [Address, { nickname: string; tags: Array<string> }]
       >;

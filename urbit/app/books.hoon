@@ -102,7 +102,6 @@
   ::
   ++  on-watch
     |=  pat=path
-    ~&  pat
     ?+    pat  (on-watch:def pat)
         [%website ~]
       :_  this
@@ -113,7 +112,6 @@
     ==
   ++  on-arvo
     |=  [=wire sign=sign-arvo]
-    ~&  >>>  wire
     ?+    wire  (on-arvo:def wire sign)
         [%books %timer ~]
       =+  new=(add now.bowl ~m30)
@@ -181,9 +179,6 @@
           uni:((on ,[@da @ux] transaction) gth-hex)
         :_  this
         =,  enjs:format
-        ~&  >>  ~(wyt by p.upd)
-        ~&  >>  ~(wyt by (gas:((on ,[p=@da q=@ux] transaction) gth-hex) *((mop ,[p=@da q=@ux] transaction) gth-hex) q.upd))
-        ~&  >>  (lent (transactions:en-json:is (gas:((on ,[p=@da q=@ux] transaction) gth-hex) *((mop ,[p=@da q=@ux] transaction) gth-hex) q.upd)))
         =-  [%give %fact ~[/website] json+!>(`json`-)]~
         %-  pairs
         :~  head+s+'transactions'
@@ -407,8 +402,12 @@
   ++  rub-rub
     |=  h=@ux
     ^-  (quip card _state)
-    :_  state(elucidations (~(del by elucidations) h))
-    =-  [%give %fact ~[/website] json+!>(`json`-)]~
+    =.  elucidations
+      (~(del by elucidations) h)
+    :_  state
+    =-  :~  [%give %fact ~[/website] json+!>(`json`-)]
+            
+        ==
     %-  pairs:enjs:format
     :~  head+s+'del-a-note'
         status+s+(crip "Deleted Annotation For: {(scow %ux h)}")

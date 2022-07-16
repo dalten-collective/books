@@ -150,7 +150,9 @@ export default {
       }
     ) {
       console.log('set-transaction');
-      const newt = battery.tran.slice().map((t) => [[t.timeStamp, t.hash], t]) as Array<
+      const newt = battery.tran
+        .slice()
+        .map((t) => [[t.timeStamp, t.hash], t]) as Array<
         [[number, TxHash], Transaction]
       >;
       state.urbitData = state.urbitData.concat(
@@ -159,18 +161,22 @@ export default {
         })
       );
     },
-    unSetTransactions (
+
+    unSetTransactions(
       state,
       battery: {
         tran: Array<Transaction>;
       }
     ) {
       console.log('unset-transaction');
-      const newt = battery.tran.slice().map((t) => [[t.timeStamp, t.hash], t]) as Array<
+      const newt = battery.tran
+        .slice()
+        .map((t) => [[t.timeStamp, t.hash], t]) as Array<
         [[number, TxHash], Transaction]
       >;
       state.urbitData = newt;
     },
+
     setAnnotations(
       state,
       battery: {
@@ -183,6 +189,16 @@ export default {
           return !Immutable.Map(battery.notes).has(item[0]);
         })
       );
+    },
+
+    unSetAnnotations(
+      state,
+      battery: {
+        hash: TxHash;
+      }
+    ) {
+      console.log('un-set-annotation');
+      state.notes = state.notes.filter;
     },
 
     addWallet(
@@ -249,22 +265,22 @@ export default {
         .toArray();
     },
     setAwaitingUrbitData(state, waiting: boolean) {
-      console.log('waiting ', waiting)
+      console.log('waiting ', waiting);
       state.awaitingUrbitData = waiting;
     },
     setHavUrbData(state, hav: boolean) {
       state.havUrbData = hav;
-    }
+    },
   },
 
   actions: {
     startAwaitingUrbitData({ commit }) {
-      commit('setAwaitingUrbitData', true)
-      commit('setHavUrbData', false)
+      commit('setAwaitingUrbitData', true);
+      commit('setHavUrbData', false);
     },
     stopAwaitingUrbitData({ commit }) {
-      commit('setAwaitingUrbitData', false)
-      commit('setHavUrbData', true)
+      commit('setAwaitingUrbitData', false);
+      commit('setHavUrbData', true);
     },
 
     handleSwitchPage({ commit }, battery: number) {
@@ -292,6 +308,10 @@ export default {
       console.log('battery', battery.notes);
       commit('setAnnotations', { notes: battery.notes });
     },
+    handleUnSetAnnotation({ commit }, battery: { hash: TxHash }) {
+      console.log('battery', battery.hash);
+      commit('unSetAnnotations', { notes: battery.hash });
+    },
     handleSetTransactions(
       { state, commit, dispatch },
       battery: {
@@ -299,7 +319,7 @@ export default {
       }
     ) {
       console.log('battery', battery.tran);
-      dispatch('stopAwaitingUrbitData')
+      dispatch('stopAwaitingUrbitData');
       commit('setTransactions', { tran: battery.tran });
     },
     handleUnSetTransactions(
@@ -309,7 +329,7 @@ export default {
       }
     ) {
       console.log('unsetting', battery.tran);
-      commit('unSetTransactions', { tran: battery.tran })
+      commit('unSetTransactions', { tran: battery.tran });
     },
     handleAddWallet(
       { commit },
@@ -336,8 +356,5 @@ export default {
     handleAddTransaction({ commit }, battery: { transaction: Transaction }) {
       commit('addTransaction', { trans: battery.transaction });
     },
-    // handleAddNote(
-    //   { commit }
-    // )
   },
 };
