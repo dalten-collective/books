@@ -130,31 +130,30 @@ export default defineComponent({
     })
 
     const noChanges = computed(() => {
-      // if no annotations
-      if (Immutable.get(annotations.value, props.hash) === undefined) {
-        return false
-      }
+      // TODO: remove function
+      return
+      // // if no annotations
+      // if (Immutable.get(annotations.value, props.hash) === undefined) {
+      //   return false
+      // }
 
-      const prevBasis = parseInt(
-        Immutable.get(annotations.value, props.hash)
-          .basis.toSignificantDigits(5)
-      )
-      const newBasis = parseInt(formState.basis)
+      // const prevBasis = parseInt(
+      //   Immutable.get(annotations.value, props.hash)
+      //     .basis.toSignificantDigits(5)
+      // )
+      // const newBasis = parseInt(formState.basis)
 
-      // doing this weird 'join' business to prepare for when this has multiple counterparties
-      // TODO: still might not work with multiple counterparties
-      const prevCounterparties = Immutable.get(annotations.value, props.hash)
-        .to.sort().join(',')
-      const newCounterparties = [].concat(formState.to).sort().join(',')
+      // const prevCounterparties = Immutable.get(annotations.value, props.hash).to
+      // const newCounterparties = formState.to
+      // const counterpartiesUnchanged = newCounterparties === prevCounterparties
 
-      const prevAnnotation = Immutable.get(annotations.value, props.hash).annotation
-      const newAnnotation = formState.annotation
+      // const prevAnnotation = Immutable.get(annotations.value, props.hash).annotation
+      // const newAnnotation = formState.annotation
 
-      const basisUnchanged = newBasis === prevBasis
-      const counterpartiesUnchanged = newCounterparties === prevCounterparties
-      const annotationUnchanged = newAnnotation === prevAnnotation
+      // const basisUnchanged = newBasis === prevBasis
+      // const annotationUnchanged = newAnnotation === prevAnnotation
 
-      return basisUnchanged && counterpartiesUnchanged && annotationUnchanged
+      // return basisUnchanged && counterpartiesUnchanged && annotationUnchanged
     })
 
     const people = computed(() => {
@@ -238,11 +237,11 @@ export default defineComponent({
       })(),
       to: (() => {
         if (Immutable.has(annotations.value, props.hash)) {
-          return Immutable.get(annotations.value, props.hash).to as Address;
+          return Immutable.get(annotations.value, props.hash).to as Array<string>;
         } else {
-          return null as null;
+          return [] as Array<string>;
         }
-      })() as Address | null,
+      })() as Array<string> | null,
       annotation: (() => {
         if (Immutable.has(annotations.value, props.hash)) {
           return Immutable.get(annotations.value, props.hash)
@@ -278,13 +277,13 @@ export default defineComponent({
       ],
       newTag: [
         {
-          // pattern: /^[a-zA-Z0-9\-\_\s]*$/,
-          required: true,
-          pattern: new RegExp("^[a-zA-Z0-9\-\_\s]+$"),
+          required: false,
+          pattern: /^[a-zA-Z0-9\-\_\s]*$/,
           message: "a-z, 0-9, '-' and '_' only, separated by spaces",
         },
       ],
     });
+
 
     //  methods
     const truncateAddress = (address) => {
@@ -300,6 +299,14 @@ export default defineComponent({
       }
     };
 
+    const toForUpdate = () => {
+      if (Array.isArray(formState.to)) {
+        return formState.to[0]
+      } else {
+        return formState.to
+      }
+    }
+
     const handleCloseTag = (killedTag) => {
       // remove from formState.tags
       const newTags = formState.tags.filter(t => t !== killedTag)
@@ -307,7 +314,7 @@ export default defineComponent({
       annotationPending.value = true;
       pushAnnotation(props.hash, {
         basis: new Decimal(toRaw(formState.basis)).toSignificantDigits(5),
-        to: toRaw(formState.to),
+        to: toForUpdate(),
         annotation: toRaw(formState.annotation),
         tags: tagsForUpdate(),
       }).finally((r) => {
@@ -332,25 +339,19 @@ export default defineComponent({
     const onSubmit = () => {
       annotationPending.value = true;
 
-      console.log('formstate tags ', formState.tags)
-      console.log('newTag', newTag)
       validate().then(() => {
-        console.log('validate happened!')
-        console.log(toRaw(formState))
         pushAnnotation(props.hash, {
           basis: new Decimal(toRaw(formState.basis)).toSignificantDigits(5),
-          to: toRaw(formState.to),
+          to: toForUpdate(),
           annotation: toRaw(formState.annotation),
           tags: tagsForUpdate(),
         }).finally((r) => {
-          console.log('finally ', r)
           annotationPending.value = false;
         });
       }).catch(err => {
         // Validation failed
         console.log('validate error ', err);
       }).finally(() => {
-        console.log('validation finished either way')
         annotationPending.value = false;
       })
 
