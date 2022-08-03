@@ -19,6 +19,8 @@
 
     <a-form-item
       :style="[formState.annotated ? '' : 'display: none']"
+      name="to"
+      v-bind="validateInfos.to"
     >
       <template #label>
         <div class="flex flex-row align-middle">
@@ -54,6 +56,8 @@
 
     <a-form-item
       label="Annotation: "
+      name="annotation"
+      v-bind="validateInfos.annotation"
       :style="[formState.annotated ? '' : 'display: none']"
     >
       <a-textarea v-model:value="formState.annotation" />
@@ -61,6 +65,8 @@
     <a-form-item
       label="Tags: "
       :style="[formState.annotated ? '' : 'display: none']"
+      name="newTag"
+      v-bind="validateInfos.newTag"
     >
       <template v-for="tag in formState.tags" :key="tag">
         <a-tag
@@ -71,15 +77,15 @@
           {{ tag }}
         </a-tag>
       </template>
-      <a-input v-model:value="newTag" type="text" size="small" :style="{ width: '78px' }" @pressEnter="onSubmit" />
+      <a-input v-model:value="formState.newTag" type="text" size="small" :style="{ width: '78px' }" @pressEnter="onSubmit" />
     </a-form-item>
     <a-button
       type="primary"
       class="bg-slate-600"
-      @click="onSubmit"
+      @click.prevent="onSubmit"
       :style="[formState.annotated ? '' : 'display: none']"
       :loading="annotationPending"
-      :disabled="annotationPending || noChanges"
+      :disabled="annotationPending"
 
     >
       Save
@@ -97,7 +103,11 @@ import { TxHash } from '@/types';
 import Immutable, { OrderedMap, Map } from 'immutable';
 import { Decimal } from 'decimal.js';
 
+import { Form } from 'ant-design-vue';
+const useForm = Form.useForm
+
 export default defineComponent({
+
   setup(props) {
     //  boiler
     const store = useStore();
@@ -112,10 +122,10 @@ export default defineComponent({
     });
 
     const hoonedNewTags = computed(() => {
-      if (newTag.value === '') {
+      if (formState.newTag === '') {
         return []
       } else {
-        return newTag.value.split(" ")
+        return formState.newTag.split(" ")
       }
     })
 
@@ -201,7 +211,9 @@ export default defineComponent({
 
     //  Refs
     const annotationPending = ref(false);
+
     const formRef = ref();
+
     const newTag = ref('');
     const thing = ref('hello');
 
@@ -209,6 +221,7 @@ export default defineComponent({
     console.log('props', props.hash);
     console.log('has', Immutable.has(Immutable.Map(notes.value), props.hash));
     console.log('has-alt', Immutable.has(annotations.value, props.hash));
+
     //  form stuff
     const formState = reactive({
       annotated: (() => {
@@ -247,29 +260,31 @@ export default defineComponent({
           return [] as Array<[string]>;
         }
       })() as Array<[string]>,
+      newTag: (() => {
+        return ''
+      })(),
     });
-    const rules = {
+
+    const rules = reactive({
       annotation: [
         {
           required: false,
-          trigger: blur,
         },
       ],
       to: [
         {
           required: false,
-          trigger: 'blur',
         },
       ],
-      tags: [
+      newTag: [
         {
-          required: false,
-          pattern: /^[a-zA-Z0-9\-\_\s]+$/,
-          trigger: 'blur',
+          // pattern: /^[a-zA-Z0-9\-\_\s]*$/,
+          required: true,
+          pattern: new RegExp("^[a-zA-Z0-9\-\_\s]+$"),
           message: "a-z, 0-9, '-' and '_' only, separated by spaces",
         },
       ],
-    };
+    });
 
     //  methods
     const truncateAddress = (address) => {
@@ -310,28 +325,43 @@ export default defineComponent({
       }
     }
 
+    const { resetFields, validate, validateInfos } = useForm(formState, rules, {
+      onValidate: (...args) => console.log(...args),
+    });
+
     const onSubmit = () => {
-      console.log('formState.tags ', formState.tags)
-      console.log('new tag ', newTag)
-      console.log('new tag value', newTag.value)
       annotationPending.value = true;
-      
-      formRef.value
-        .validate()
-        .then(() => {
-          console.log('values', formState, toRaw(formState));
-          pushAnnotation(props.hash, {
-            basis: new Decimal(toRaw(formState.basis)).toSignificantDigits(5),
-            to: toRaw(formState.to),
-            annotation: toRaw(formState.annotation),
-            tags: tagsForUpdate(),
-          }).finally((r) => {
-            annotationPending.value = false;
-          });
-        })
-        .catch((error) => {
-          console.log('error', error);
+
+      console.log('formstate tags ', formState.tags)
+      console.log('newTag', newTag)
+      validate().then(() => {
+        console.log('validate happened!')
+        console.log(toRaw(formState))
+        pushAnnotation(props.hash, {
+          basis: new Decimal(toRaw(formState.basis)).toSignificantDigits(5),
+          to: toRaw(formState.to),
+          annotation: toRaw(formState.annotation),
+          tags: tagsForUpdate(),
+        }).finally((r) => {
+          console.log('finally ', r)
+          annotationPending.value = false;
         });
+      }).catch(err => {
+        // Validation failed
+        console.log('validate error ', err);
+      }).finally(() => {
+        console.log('validation finished either way')
+        annotationPending.value = false;
+      })
+
+      //formRef.value
+      //  .validate()
+      //  .then(() => {
+      //    console.log('values', formState, toRaw(formState));
+      //  })
+      //  .catch((error) => {
+      //    console.log('error', error);
+      //  });
     };
 
     return {
@@ -343,6 +373,9 @@ export default defineComponent({
       formState,
       truncateAddress,
       onSubmit,
+      validateInfos,
+      resetFields,
+      formState,
       formRef,
       annotationPending,
       rules,
