@@ -350,7 +350,6 @@ export default defineComponent({
         });
       }).catch(err => {
         // Validation failed
-        console.log('validate error ', err);
       }).finally(() => {
         annotationPending.value = false;
       })
