@@ -307,10 +307,18 @@ export default defineComponent({
     };
 
     const toForUpdate = () => {
+      let counterparty: string | null = '';
+
       if (Array.isArray(formState.to)) {
-        return formState.to[0]
+        counterparty = formState.to[0]
       } else {
-        return formState.to
+        counterparty = formState.to
+      }
+
+      if (counterparty === null || counterparty === undefined) {
+        return ''
+      } else {
+        return counterparty
       }
     }
 
@@ -358,14 +366,6 @@ export default defineComponent({
         annotationPending.value = false;
       })
 
-      //formRef.value
-      //  .validate()
-      //  .then(() => {
-      //    console.log('values', formState, toRaw(formState));
-      //  })
-      //  .catch((error) => {
-      //    console.log('error', error);
-      //  });
     };
 
     return {
@@ -379,7 +379,6 @@ export default defineComponent({
       onSubmit,
       validateInfos,
       resetFields,
-      formState,
       formRef,
       annotationPending,
       rules,
