@@ -1,99 +1,128 @@
 <template>
-  <a-form ref="formRef" :rules="rules" :model="formState" :label-col="labelCol">
-    <a-form-item label="Annotated: ">
-      <a-switch
-        v-model:checked="formState.annotated"
-        :style="[formState.annotated ? 'background-color: #EAB304' : '']"
-      />
-    </a-form-item>
-
-    <a-form-item
-      label="Basis: "
-      name="basis"
-      v-bind="validateInfos.basis"
-      :style="[formState.annotated ? '' : 'display: none']"
-    >
-      <a-input-number
-        v-model:value="formState.basis"
-        :formatter="(value) => `${value}`.replace(/(\d)(?=(\d{3})+\.)/g, '$1,')"
-      />
-    </a-form-item>
-
-    <a-form-item
-      :style="[formState.annotated ? '' : 'display: none']"
-      name="to"
-      v-bind="validateInfos.to"
-    >
-      <template #label>
-        <div class="flex flex-row align-middle">
-          <div class="mr-2">
-            To
-          </div>
-          <div>
-            <user-outlined />
-          </div>
+  <div v-if="!editing">
+    <a-descriptions title="Annotations" bordered column="24" class="ml-2">
+      <template #extra>
+        <div class="flex">
+          <a-button @click="editing = true">
+            <span v-if="ourAnnotations.exist">
+              Edit
+            </span>
+            <span v-else>
+              Add annotation
+            </span>
+          </a-button>
         </div>
       </template>
-      <a-select
-        v-model:value="formState.to"
-        allowClear
-        show-search
-        placeholder="Select a Destination/Counterparty"
-        style="width: 300px"
-        :options="people"
-        :filterOption="
-          (input, option) => {
-            return (
-              option.value.toLowerCase().indexOf(input.toLowerCase()) >=
-                0 ||
-              option.nick.toLowerCase().indexOf(input.toLowerCase()) >= 0
-            );
-          }
-        "
-        @focus="handleFocus"
-        @blur="handleBlur"
-        @change="handleChange"
-      >
-      </a-select>
-    </a-form-item>
-
-    <a-form-item
-      label="Annotation: "
-      name="annotation"
-      v-bind="validateInfos.annotation"
-      :style="[formState.annotated ? '' : 'display: none']"
-    >
-      <a-textarea v-model:value="formState.annotation" />
-    </a-form-item>
-    <a-form-item
-      label="Tags: "
-      :style="[formState.annotated ? '' : 'display: none']"
-      name="newTag"
-      v-bind="validateInfos.newTag"
-    >
-      <template v-for="tag in formState.tags" :key="tag">
+      <a-descriptions-item span="12" label="Basis">
+        {{ ourAnnotations.basis }}
+      </a-descriptions-item>
+      <a-descriptions-item span="12" label="Counterparty">
+        <AddressLookup
+          v-for="cp in ourAnnotations.counterparties"
+          :key="cp"
+          :addy="cp"
+        />
+      </a-descriptions-item>
+      <a-descriptions-item span="12" label="Annotation">
+        {{ ourAnnotations.note }}
+      </a-descriptions-item>
+      <a-descriptions-item span="12" label="Tags">
         <a-tag
-          closable
-          @close="handleCloseTag(tag)"
+          v-for="tag in ourAnnotations.tags" :key="tag"
           color="#475668"
         >
           {{ tag }}
         </a-tag>
-      </template>
-      <a-input v-model:value="formState.newTag" type="text" size="small" :style="{ width: '78px' }" @pressEnter="onSubmit" />
-    </a-form-item>
-    <a-button
-      type="primary"
-      class="bg-slate-600"
-      @click.prevent="onSubmit"
-      :style="[formState.annotated ? '' : 'display: none']"
-      :loading="annotationPending"
-      :disabled="annotationPending"
+      </a-descriptions-item>
+    </a-descriptions>
+  </div>
 
-    >
-      Save
-    </a-button>
-  </a-form>
+  <div v-else>
+    <a-form ref="formRef" :rules="rules" :model="formState" :label-col="labelCol">
+      <a-form-item
+        label="Basis: "
+        name="basis"
+        v-bind="validateInfos.basis"
+      >
+        <a-input-number
+          v-model:value="formState.basis"
+          :formatter="(value) => `${value}`.replace(/(\d)(?=(\d{3})+\.)/g, '$1,')"
+        />
+      </a-form-item>
+
+      <a-form-item
+        name="to"
+        v-bind="validateInfos.to"
+      >
+        <template #label>
+          <div class="flex flex-row align-middle">
+            <div class="mr-2">
+              To
+            </div>
+            <div>
+              <user-outlined />
+            </div>
+          </div>
+        </template>
+        <a-select
+          v-model:value="formState.to"
+          allowClear
+          show-search
+          placeholder="Select a Destination/Counterparty"
+          style="width: 300px"
+          :options="people"
+          :filterOption="
+            (input, option) => {
+              return (
+                option.value.toLowerCase().indexOf(input.toLowerCase()) >=
+                  0 ||
+                option.nick.toLowerCase().indexOf(input.toLowerCase()) >= 0
+              );
+            }
+          "
+          @focus="handleFocus"
+          @blur="handleBlur"
+          @change="handleChange"
+        >
+        </a-select>
+      </a-form-item>
+
+      <a-form-item
+        label="Annotation: "
+        name="annotation"
+        v-bind="validateInfos.annotation"
+      >
+        <a-textarea v-model:value="formState.annotation" />
+      </a-form-item>
+      <a-form-item
+        label="Tags: "
+        name="newTag"
+        v-bind="validateInfos.newTag"
+      >
+        <template v-for="tag in formState.tags" :key="tag">
+          <a-tag
+            closable
+            @close="handleCloseTag(tag)"
+            color="#475668"
+          >
+            {{ tag }}
+          </a-tag>
+        </template>
+        <a-input v-model:value="formState.newTag" type="text" size="small" :style="{ width: '78px' }" @pressEnter="onSubmit" />
+      </a-form-item>
+      <a-button
+        type="primary"
+        class="bg-slate-600"
+        @click.prevent="onSubmit"
+        :loading="annotationPending"
+        :disabled="annotationPending"
+
+      >
+        Save
+      </a-button>
+    </a-form>
+    <a-button @click="editing = false">Cancel</a-button>
+  </div>
 </template>
 
 <script lang="ts">
@@ -105,6 +134,8 @@ import { pushAnnotation } from '@/api/books.ts';
 import { TxHash } from '@/types';
 import Immutable, { OrderedMap, Map } from 'immutable';
 import { Decimal } from 'decimal.js';
+
+import AddressLookup from '@/components/AddressLookup.vue';
 
 import { Form } from 'ant-design-vue';
 const useForm = Form.useForm
@@ -122,6 +153,55 @@ export default defineComponent({
 
     const annotations = computed(() => {
       return Immutable.Map(notes.value);
+    });
+
+    const ourAnnotations = computed(() => {
+      let note: string;
+      let basis: string;
+      let counterparties: Array<string>;
+      let tags: Array<[string]>;
+
+      if (Immutable.has(annotations.value, props.hash)) {
+        note = Immutable.get(annotations.value, props.hash)
+          .annotation as string;
+      } else {
+        note = ''
+      }
+
+      if (Immutable.has(annotations.value, props.hash)) {
+        basis = Immutable.get(annotations.value, props.hash)
+          .basis.toSignificantDigits(5)
+          .toString() as string;
+      } else {
+        basis = '' as string;
+      }
+
+      if (Immutable.has(annotations.value, props.hash)) {
+        counterparties = Immutable.get(annotations.value, props.hash).to as Array<string>;
+      } else {
+        counterparties = [] as Array<string>;
+      }
+      counterparties = counterparties.filter((c) => c !== null)
+
+      if (Immutable.has(annotations.value, props.hash)) {
+        tags = Immutable.get(annotations.value, props.hash).tags as Array<
+          [string]
+        >;
+      } else {
+        tags = [] as Array<[string]>;
+      }
+
+      const exist = Immutable.has(annotations.value, props.hash) as boolean;
+
+      return {
+        exist,
+        note,
+        basis,
+        counterparties,
+        tags,
+      }
+
+
     });
 
     const hoonedNewTags = computed(() => {
@@ -215,6 +295,7 @@ export default defineComponent({
     const annotationPending = ref(false);
 
     const formRef = ref();
+    const editing = ref(false);
 
     const newTag = ref('');
     const thing = ref('hello');
@@ -332,7 +413,11 @@ export default defineComponent({
         tags: tagsForUpdate(),
       }).finally((r) => {
         annotationPending.value = false;
+        editing.value = false;
       });
+    }
+
+    const updateFormState = () => {
     }
 
     const handleCloseTag = (killedTag) => {
@@ -340,6 +425,7 @@ export default defineComponent({
       const newTags = formState.tags.filter(t => t !== killedTag)
       formState.tags = newTags
       saveAnnotation()
+      updateFormState()
     }
 
     const tagsForUpdate = () => {
@@ -365,6 +451,7 @@ export default defineComponent({
         // Validation failed
       }).finally(() => {
         annotationPending.value = false;
+        updateFormState()
       })
 
     };
@@ -387,30 +474,14 @@ export default defineComponent({
       handleCloseTag,
       hoonedNewTags,
       noChanges,
+      ourAnnotations,
+      editing,
       labelCol: { span: 4 },
       wrapperCol: { span: 8 },
     };
   },
 
   methods: {
-    hasNote(hash) {
-      return Immutable.has(annotations, hash) as boolean;
-    },
-    getBasis(hash) {
-      if (Immutable.has(annotations, hash)) {
-        return Immutable.get(annotations, hash).basis as Decimal;
-      } else {
-        return 0x0 as Decimal;
-      }
-    },
-    getTo(hash) {
-      if (Immutable.has(annotation, hash)) {
-        return Immutable.get(annotations, hash).to as Address | null;
-      } else {
-        return null as Address | null;
-      }
-    },
-
     handleChange(value) {
       console.log('selected', value);
     },
@@ -431,6 +502,7 @@ export default defineComponent({
 
   components: {
     UserOutlined,
+    AddressLookup,
   },
 });
 </script>
