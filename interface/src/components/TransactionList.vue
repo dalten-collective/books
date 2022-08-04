@@ -19,9 +19,14 @@
         <a-tooltip
           placement="topRight"
         >
-          <template #title>
-            <span>{{ recordAnnotation(record) }}</span>
-            <br />
+          <template
+            #title
+            v-if="recordAnnotation(record) != '' || (annotations(record).tags && annotations(record).tags.length > 0)"
+          >
+            <div v-if="recordAnnotation(record)">
+              <span>{{ recordAnnotation(record) }}</span>
+              <br />
+            </div>
             <span v-if="annotations(record).tags.length > 0">Tags: {{ annotations(record).tags.join(", ") }}</span>
           </template>
           <form-outlined v-if="hasNote(record)" :style="{ color: '#EAB304' }"/>
