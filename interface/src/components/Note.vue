@@ -1,9 +1,17 @@
 <template>
   <div v-if="!editing">
-    <a-descriptions title="Annotations" bordered column="24" class="ml-2">
+    <a-descriptions :bordered="ourAnnotations.exist" column="24" class="ml-2">
+      <template #title>
+        <span v-if="ourAnnotations.exist">
+          Annotations
+        </span>
+        <span v-else>
+          No annotations yet
+        </span>
+      </template>
       <template #extra>
         <div class="flex">
-          <a-button @click="editing = true">
+          <a-button @click="editing = true" type="primary" class="bg-slate-600">
             <span v-if="ourAnnotations.exist">
               Edit
             </span>
@@ -13,20 +21,24 @@
           </a-button>
         </div>
       </template>
-      <a-descriptions-item span="12" label="Basis">
+
+      <a-descriptions-item v-if="ourAnnotations.basis" span="12" label="Basis">
         {{ ourAnnotations.basis }}
       </a-descriptions-item>
-      <a-descriptions-item span="12" label="Counterparty">
+
+      <a-descriptions-item v-if="ourAnnotations.counterparties.length > 0" span="12" label="Counterparty">
         <AddressLookup
           v-for="cp in ourAnnotations.counterparties"
           :key="cp"
           :addy="cp"
         />
       </a-descriptions-item>
-      <a-descriptions-item span="12" label="Annotation">
+
+      <a-descriptions-item v-if="ourAnnotations.note" span="12" label="Annotation">
         {{ ourAnnotations.note }}
       </a-descriptions-item>
-      <a-descriptions-item span="12" label="Tags">
+
+      <a-descriptions-item v-if="ourAnnotations.tags.length > 0" span="12" label="Tags">
         <a-tag
           v-for="tag in ourAnnotations.tags" :key="tag"
           color="#475668"
@@ -110,18 +122,20 @@
         </template>
         <a-input v-model:value="formState.newTag" type="text" size="small" :style="{ width: '78px' }" @pressEnter="onSubmit" />
       </a-form-item>
-      <a-button
-        type="primary"
-        class="bg-slate-600"
-        @click.prevent="onSubmit"
-        :loading="annotationPending"
-        :disabled="annotationPending"
+      <div class="flex">
+        <a-button
+          type="primary"
+          class="bg-slate-600 "
+          @click.prevent="onSubmit"
+          :loading="annotationPending"
+          :disabled="annotationPending"
 
-      >
-        Save
-      </a-button>
+        >
+          Save
+        </a-button>
+        <a-button class="ml-2" @click="editing = false">Cancel</a-button>
+      </div>
     </a-form>
-    <a-button @click="editing = false">Cancel</a-button>
   </div>
 </template>
 
