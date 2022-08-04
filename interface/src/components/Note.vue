@@ -9,6 +9,8 @@
 
     <a-form-item
       label="Basis: "
+      name="basis"
+      v-bind="validateInfos.basis"
       :style="[formState.annotated ? '' : 'display: none']"
     >
       <a-input-number
@@ -265,6 +267,11 @@ export default defineComponent({
     });
 
     const rules = reactive({
+      basis: [
+        {
+          required: true,
+        },
+      ],
       annotation: [
         {
           required: false,
