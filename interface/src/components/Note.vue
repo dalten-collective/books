@@ -36,6 +36,7 @@
       </template>
       <a-select
         v-model:value="formState.to"
+        allowClear
         show-search
         placeholder="Select a Destination/Counterparty"
         style="width: 300px"
