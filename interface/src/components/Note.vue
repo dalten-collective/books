@@ -307,10 +307,7 @@ export default defineComponent({
       }
     }
 
-    const handleCloseTag = (killedTag) => {
-      // remove from formState.tags
-      const newTags = formState.tags.filter(t => t !== killedTag)
-      formState.tags = newTags
+    const saveAnnotation = () => {
       annotationPending.value = true;
       pushAnnotation(props.hash, {
         basis: new Decimal(toRaw(formState.basis)).toSignificantDigits(5),
@@ -320,6 +317,13 @@ export default defineComponent({
       }).finally((r) => {
         annotationPending.value = false;
       });
+    }
+
+    const handleCloseTag = (killedTag) => {
+      // remove from formState.tags
+      const newTags = formState.tags.filter(t => t !== killedTag)
+      formState.tags = newTags
+      saveAnnotation()
     }
 
     const tagsForUpdate = () => {
@@ -340,14 +344,7 @@ export default defineComponent({
       annotationPending.value = true;
 
       validate().then(() => {
-        pushAnnotation(props.hash, {
-          basis: new Decimal(toRaw(formState.basis)).toSignificantDigits(5),
-          to: toForUpdate(),
-          annotation: toRaw(formState.annotation),
-          tags: tagsForUpdate(),
-        }).finally((r) => {
-          annotationPending.value = false;
-        });
+        saveAnnotation()
       }).catch(err => {
         // Validation failed
       }).finally(() => {
