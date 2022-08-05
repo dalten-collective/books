@@ -1,35 +1,37 @@
-import urbitAPI from './urbitAPI';
-import { Scry } from '@urbit/http-api';
-import { Transaction, Address, TxHash } from '@/types';
-import Decimal from 'decimal.js';
+import urbitAPI from "./urbitAPI";
+import { Scry } from "@urbit/http-api";
+import { Transaction, Address, TxHash } from "@/types";
+import Decimal from "decimal.js";
 
 export function arrayAndHepTags(tags: string): Array<string> {
   const regex = /\s+/g;
   return tags
-    .split(',')
+    .split(",")
     .slice()
-    .map((tag) => tag.trim().replace(regex, '-').toLowerCase())
+    .map((tag) => tag.trim().replace(regex, "-").toLowerCase());
 }
 
 export function concatOldTagsNewTagString(
   oldTags: Array<string>,
   newTagString: string
 ): Array<string> {
-  return oldTags.slice().concat(
-    arrayAndHepTags(newTagString)
-  )
+  return oldTags.slice().concat(arrayAndHepTags(newTagString));
 }
 
-export function pushWallet(address: Address, nick: string, tags: Array<string>) {
+export function pushWallet(
+  address: Address,
+  nick: string,
+  tags: Array<string>
+) {
   return urbitAPI.poke({
     //   return {
-    app: 'books',
-    mark: 'books-page',
+    app: "books",
+    mark: "books-page",
     json: {
-      'add-wallet': {
+      "add-wallet": {
         address: address.toLowerCase(),
         nick: nick,
-        tags: tags
+        tags: tags,
       },
     },
     //   }
@@ -39,15 +41,15 @@ export function pushWallet(address: Address, nick: string, tags: Array<string>) 
 export function pullWallet(address: Address) {
   return urbitAPI
     .poke({
-      app: 'books',
-      mark: 'books-page',
-      json: { 'del-wallet': { address } },
+      app: "books",
+      mark: "books-page",
+      json: { "del-wallet": { address } },
     })
     .then((r) => {
       return r;
     })
     .catch((e) => {
-      console.log('err ', e);
+      console.log("err ", e);
     });
 }
 
@@ -58,14 +60,14 @@ export function pushFriend(
   tags: Array<string>
 ) {
   return urbitAPI.poke({
-    app: 'books',
-    mark: 'books-page',
+    app: "books",
+    mark: "books-page",
     json: {
-      'add-friend': {
+      "add-friend": {
         address: address.toLowerCase(),
         nick: nick,
         who: who,
-        tags: tags
+        tags: tags,
       },
     },
   });
@@ -74,31 +76,31 @@ export function pushFriend(
 export function pullFriend(address: Address) {
   return urbitAPI
     .poke({
-      app: 'books',
-      mark: 'books-page',
-      json: { 'del-friend': { address } },
+      app: "books",
+      mark: "books-page",
+      json: { "del-friend": { address } },
     })
     .then((r) => {
       return r;
     })
     .catch((e) => {
-      console.log('err ', e);
+      console.log("err ", e);
     });
 }
 
 export function pushTags(address: Address, tags: Array<string>) {
   return urbitAPI.poke({
-    app: 'books',
-    mark: 'books-page',
-    json: { 'set-tags': { address: address, tags: tags } },
+    app: "books",
+    mark: "books-page",
+    json: { "set-tags": { address: address, tags: tags } },
   });
 }
 
 export function pushName(address: Address, name: string) {
   return urbitAPI.poke({
-    app: 'books',
-    mark: 'books-page',
-    json: { 'set-nick': { address: address, nick: name } },
+    app: "books",
+    mark: "books-page",
+    json: { "set-nick": { address: address, nick: name } },
   });
 }
 
@@ -112,8 +114,8 @@ export function pushAnnotation(
   }
 ) {
   return urbitAPI.poke({
-    app: 'books',
-    mark: 'books-page',
+    app: "books",
+    mark: "books-page",
     json: { annotation: { hash: hash, note: note } },
   });
 }
@@ -152,16 +154,16 @@ export function pushTransaction(trans: Transaction) {
   urbitAPI
     .poke({
       //   return {
-      app: 'books',
-      mark: 'books-page',
-      json: { 'add-transaction': reformTrans },
+      app: "books",
+      mark: "books-page",
+      json: { "add-transaction": reformTrans },
       //   }
     })
     .then((r) => {
-      console.log('res ', r);
+      console.log("res ", r);
     })
     .catch((e) => {
       console.log(reformTrans);
-      console.log('err ', e);
+      console.log("err ", e);
     });
 }

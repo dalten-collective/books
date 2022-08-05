@@ -1,4 +1,4 @@
-import { Decimal } from 'decimal.js';
+import { Decimal } from "decimal.js";
 
 //  Sidebar
 export enum Navi {
@@ -26,12 +26,12 @@ export type Page =
 
 // Interfaces for Tagged Union
 export interface Wallets {
-  head: 'wallets';
+  head: "wallets";
   fren: Array<[string, WalletDetails]>;
   mine: Array<[string, { nick: string; tags: Array<string> }]>;
 }
 export interface Transactions {
-  head: 'transactions';
+  head: "transactions";
   tran: Array<{
     network: Network;
     hash: string;
@@ -61,7 +61,7 @@ export interface Transactions {
   }>;
 }
 export interface AdjustTransactions {
-  head: 'del-transactions';
+  head: "del-transactions";
   tran: Array<{
     network: Network;
     hash: string;
@@ -98,12 +98,12 @@ export interface AdjustTransactions {
 //   status: string,
 // }
 export interface EtherscanKey {
-  head: 'etherscan-key';
+  head: "etherscan-key";
   key: string;
   status: string;
 }
 export interface AddTransaction {
-  head: 'add-transaction';
+  head: "add-transaction";
   status: string;
   transaction: {
     network: Network;
@@ -134,37 +134,43 @@ export interface AddTransaction {
   };
 }
 export interface AddWallet {
-  head: 'add-wallet';
+  head: "add-wallet";
   new: [string, { nick: string; tags: Array<string> }];
   status: string;
 }
 export interface DelWallet {
-  head: 'del-wallet';
+  head: "del-wallet";
   remove: string;
   status: string;
 }
 export interface AddFriend {
-  head: 'add-friend';
+  head: "add-friend";
   new: [string, WalletDetails];
   status: string;
 }
 export interface DelFriend {
-  head: 'del-friend';
+  head: "del-friend";
   remove: string;
   status: string;
 }
 export interface Annotation {
-  head: 'annotation';
-  new: Array<{hash: string, basis: string, to: string | null, annotation: string, tags: Array<string>}>;
+  head: "annotation";
+  new: Array<{
+    hash: string;
+    basis: string;
+    to: string | null;
+    annotation: string;
+    tags: Array<string>;
+  }>;
   status: string;
 }
 export interface DelANote {
-  head: 'del-a-note';
+  head: "del-a-note";
   remove: string;
   status: string;
 }
 export interface JustStatus {
-  head: 'just-status';
+  head: "just-status";
   status: string;
 }
 

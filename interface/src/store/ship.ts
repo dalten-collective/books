@@ -1,5 +1,5 @@
-import airlock from '../api';
-import BigNumber from 'bignumber.js';
+import airlock from "../api";
+import BigNumber from "bignumber.js";
 
 import {
   AgentSubscription,
@@ -10,9 +10,9 @@ import {
   Page,
   SubTx,
   Transaction,
-} from '@/types';
-import Decimal from 'decimal.js';
-import { basicProps } from 'ant-design-vue/lib/layout/layout';
+} from "@/types";
+import Decimal from "decimal.js";
+import { basicProps } from "ant-design-vue/lib/layout/layout";
 
 export default {
   namespaced: true,
@@ -34,7 +34,7 @@ export default {
     },
 
     unsetSubscription(state, subscription: AgentSubscription) {
-      console.log('unset subscription');
+      console.log("unset subscription");
       const sub = state.subscriptions.find((s) => s === subscription);
       state.subscriptions = state.subscriptions.filter((s) => s != sub);
     },
@@ -42,11 +42,7 @@ export default {
 
   actions: {
     openAirlockToAgent({ dispatch }, agentName: string) {
-      dispatch(
-        'books/startAwaitingUrbitData',
-        null,
-        { root: true }
-      );
+      dispatch("books/startAwaitingUrbitData", null, { root: true });
       airlock.openAirlockTo(
         agentName,
         (data: Page) => {
@@ -57,96 +53,108 @@ export default {
           // Remove hoon dots
           const regex = /\./g;
           switch (data.head) {
-            case 'wallets':
+            case "wallets":
               const modFren = data.fren.map((fren) => [
-                '0x' +
-                  fren[0].split('0x')[1].replace(regex, '').padStart(40, '0'),
+                "0x" +
+                  fren[0].split("0x")[1].replace(regex, "").padStart(40, "0"),
                 fren[1],
               ]);
               const modMine = data.mine.map((mine) => [
-                '0x' +
-                  mine[0].split('0x')[1].replace(regex, '').padStart(40, '0'),
+                "0x" +
+                  mine[0].split("0x")[1].replace(regex, "").padStart(40, "0"),
                 mine[1],
               ]);
 
               return dispatch(
-                'books/handleSetWallets',
+                "books/handleSetWallets",
                 { fren: modFren, mine: modMine },
                 { root: true }
               );
-            case 'add-wallet':
+            case "add-wallet":
               const conType = [
-                '0x' +
+                "0x" +
                   data.new[0]
-                    .split('0x')[1]
-                    .replace(regex, '')
-                    .padStart(40, '0'),
+                    .split("0x")[1]
+                    .replace(regex, "")
+                    .padStart(40, "0"),
                 data.new[1],
               ];
               return dispatch(
-                'books/handleAddWallet',
+                "books/handleAddWallet",
                 { new: conType },
                 { root: true }
               );
-            case 'del-wallet':
+            case "del-wallet":
               const remType =
-                '0x' +
-                data.remove.split('0x')[1].replace(regex, '').padStart(40, '0');
+                "0x" +
+                data.remove.split("0x")[1].replace(regex, "").padStart(40, "0");
               return dispatch(
-                'books/handleDelWallet',
+                "books/handleDelWallet",
                 { remove: remType },
                 { root: true }
               );
-            case 'add-friend':
+            case "add-friend":
               return dispatch(
-                'books/handleAddFriend',
+                "books/handleAddFriend",
                 {
                   new: [
-                    '0x' +
+                    "0x" +
                       data.new[0]
-                        .split('0x')[1]
-                        .replace(regex, '')
-                        .padStart(40, '0'),
+                        .split("0x")[1]
+                        .replace(regex, "")
+                        .padStart(40, "0"),
                     data.new[1],
                   ],
                 },
                 { root: true }
               );
-            case 'del-friend':
+            case "del-friend":
               const fremType =
-                '0x' +
-                data.remove.split('0x')[1].replace(regex, '').padStart(40, '0');
+                "0x" +
+                data.remove.split("0x")[1].replace(regex, "").padStart(40, "0");
               return dispatch(
-                'books/handleDelFriend',
+                "books/handleDelFriend",
                 { remove: fremType },
                 { root: true }
               );
-            case 'annotation':
+            case "annotation":
               const reformNote = data.new.slice().map((item) => {
                 return [
-                    '0x' + item.hash.split('0x')[1].replace(regex, '').padStart(64, '0'),
-                    {
-                      basis: new Decimal(item.basis.split('.~')[1]),
-                      to: [ item.to !== null ? '0x' + item.to.split('0x')[1].replace(regex, '').padStart(40, '0') : null],
-                      annotation: item.annotation,
-                      tags: item.tags
-                    }
-                  ]
+                  "0x" +
+                    item.hash
+                      .split("0x")[1]
+                      .replace(regex, "")
+                      .padStart(64, "0"),
+                  {
+                    basis: new Decimal(item.basis.split(".~")[1]),
+                    to: [
+                      item.to !== null
+                        ? "0x" +
+                          item.to
+                            .split("0x")[1]
+                            .replace(regex, "")
+                            .padStart(40, "0")
+                        : null,
+                    ],
+                    annotation: item.annotation,
+                    tags: item.tags,
+                  },
+                ];
               });
               return dispatch(
-                'books/handleSetAnnotation',
+                "books/handleSetAnnotation",
                 { notes: reformNote },
                 { root: true }
               );
-            case 'transactions':
+            case "transactions":
               const reformTran = data.tran.map(function (tran) {
                 return {
                   network: tran.network as Network,
-                  hash: ('0x' +
+                  hash: ("0x" +
                     tran.hash
-                      .split('0x')[1]
-                      .replace(regex, '')
-                      .padStart(64, '0')) as TxHash,
+                      .split("0x")[1]
+                      .replace(regex, "")
+                      .padStart(64, "0")) as TxHash,
                   blockNumber: tran.blocknumber,
                   name: tran.name,
                   direction: tran.direction as Direction,
@@ -156,35 +164,35 @@ export default {
                     if (tran.address === null) {
                       return null;
                     } else {
-                      return ('0x' +
+                      return ("0x" +
                         tran.address
-                          .split('0x')[1]
-                          .replace(regex, '')
-                          .padStart(40, '0')) as Address;
+                          .split("0x")[1]
+                          .replace(regex, "")
+                          .padStart(40, "0")) as Address;
                     }
                   })() as Address | null,
                   amount: new Decimal(tran.amount),
                   from:
-                    '0x' +
+                    "0x" +
                     tran.from
-                      .split('0x')[1]
-                      .replace(regex, '')
-                      .padStart(40, '0'),
+                      .split("0x")[1]
+                      .replace(regex, "")
+                      .padStart(40, "0"),
                   destination:
-                    '0x' +
+                    "0x" +
                     tran.destination
-                      .split('0x')[1]
-                      .replace(regex, '')
-                      .padStart(40, '0'),
+                      .split("0x")[1]
+                      .replace(regex, "")
+                      .padStart(40, "0"),
                   contract: (() => {
                     if (tran.contract === null) {
                       return null as null;
                     } else {
-                      return ('0x' +
+                      return ("0x" +
                         tran.contract
-                          .split('0x')[1]
-                          .replace(regex, '')
-                          .padStart(40, '0')) as Address;
+                          .split("0x")[1]
+                          .replace(regex, "")
+                          .padStart(40, "0")) as Address;
                     }
                   })() as unknown as Address | null,
                   subTransactions: tran.subtransactions.map((subt) => {
@@ -196,11 +204,11 @@ export default {
                         if (tran.address === null) {
                           return null as null;
                         } else {
-                          return ('0x' +
+                          return ("0x" +
                             tran.address
-                              .split('0x')[1]
-                              .replace(regex, '')
-                              .padStart(40, '0')) as Address;
+                              .split("0x")[1]
+                              .replace(regex, "")
+                              .padStart(40, "0")) as Address;
                         }
                       })() as unknown as Address | null,
                     } as SubTx;
@@ -230,26 +238,26 @@ export default {
                   fee: new Decimal(tran.fee),
                   txSuccessful: tran.txsuccessful,
                   primaryWallet:
-                    '0x' +
+                    "0x" +
                     tran.primarywallet
-                      .split('0x')[1]
-                      .replace(regex, '')
-                      .padStart(40, '0'),
+                      .split("0x")[1]
+                      .replace(regex, "")
+                      .padStart(40, "0"),
                 } as Transaction;
               });
               return dispatch(
-                'books/handleSetTransactions',
+                "books/handleSetTransactions",
                 { tran: reformTran },
                 { root: true }
               );
-            case 'add-transaction':
+            case "add-transaction":
               const reformTrans = {
                 network: data.transaction.network as Network,
-                hash: ('0x' +
+                hash: ("0x" +
                   data.transaction.hash
-                    .split('0x')[1]
-                    .replace(regex, '')
-                    .padStart(64, '0')) as TxHash,
+                    .split("0x")[1]
+                    .replace(regex, "")
+                    .padStart(64, "0")) as TxHash,
                 blockNumber: data.transaction.blocknumber,
                 name: data.transaction.name,
                 direction: data.transaction.direction as Direction,
@@ -259,33 +267,33 @@ export default {
                   if (data.transaction.address === null) {
                     return null as null;
                   } else {
-                    return ('0x' +
+                    return ("0x" +
                       data.transaction.address
-                        .split('0x')[1]
-                        .replace(regex, '')
-                        .padStart(40, '0')) as Address;
+                        .split("0x")[1]
+                        .replace(regex, "")
+                        .padStart(40, "0")) as Address;
                   }
                 }) as unknown as Address | null,
                 amount: new Decimal(data.transaction.amount),
                 from: data.transaction.from
-                  .split('0x')[1]
-                  .replace(regex, '')
-                  .padStart(40, '0'),
+                  .split("0x")[1]
+                  .replace(regex, "")
+                  .padStart(40, "0"),
                 destination:
-                  '0x' +
+                  "0x" +
                   data.transaction.destination
-                    .split('0x')[1]
-                    .replace(regex, '')
-                    .padStart(40, '0'),
+                    .split("0x")[1]
+                    .replace(regex, "")
+                    .padStart(40, "0"),
                 contract: (() => {
                   if (data.transaction.contract === null) {
                     return null as null;
                   } else {
-                    return ('0x' +
+                    return ("0x" +
                       data.transaction.contract
-                        .split('0x')[1]
-                        .replace(regex, '')
-                        .padStart(40, '0')) as Address;
+                        .split("0x")[1]
+                        .replace(regex, "")
+                        .padStart(40, "0")) as Address;
                   }
                 }) as unknown as Address | null,
                 subTransactions: data.transaction.subtransactions.map(
@@ -298,11 +306,11 @@ export default {
                         if (data.transaction.address === null) {
                           return null as null;
                         } else {
-                          return ('0x' +
+                          return ("0x" +
                             data.transaction.address
-                              .split('0x')[1]
-                              .replace(regex, '')
-                              .padStart(40, '0')) as Address;
+                              .split("0x")[1]
+                              .replace(regex, "")
+                              .padStart(40, "0")) as Address;
                         }
                       }) as unknown as Address | null,
                     } as SubTx;
@@ -333,22 +341,22 @@ export default {
                 fee: new Decimal(data.transaction.fee),
                 txSuccessful: data.transaction.txsuccessful,
                 primaryWallet:
-                  '0x' +
+                  "0x" +
                   data.transaction.primarywallet
-                    .split('0x')[1]
-                    .replace(regex, '')
-                    .padStart(40, '0'),
+                    .split("0x")[1]
+                    .replace(regex, "")
+                    .padStart(40, "0"),
               } as unknown as Transaction;
               return dispatch(
-                'books/handleAddTransaction',
+                "books/handleAddTransaction",
                 { transaction: reformTrans },
                 { root: true }
               );
           }
         },
         (subscriptionNumber: number) => {
-          console.log('got subscription number ', subscriptionNumber);
-          dispatch('addSubscription', {
+          console.log("got subscription number ", subscriptionNumber);
+          dispatch("addSubscription", {
             agentName,
             subscriptionNumber,
           } as AgentSubscription);
@@ -357,8 +365,8 @@ export default {
     },
 
     removeSubscription({ commit }, subscription: AgentSubscription) {
-      console.log('removesub');
-      commit('unsetSubscription', subscription);
+      console.log("removesub");
+      commit("unsetSubscription", subscription);
     },
 
     addSubscription({ state, commit, dispatch }, payload: AgentSubscription) {
@@ -367,9 +375,9 @@ export default {
           return s.agentName === payload.agentName;
         });
       existing.forEach((sub) => {
-        dispatch('removeSubscription', sub);
+        dispatch("removeSubscription", sub);
       });
-      commit('addSubscription', payload);
+      commit("addSubscription", payload);
     },
 
     closeAgentAirlocks({ commit, getters }) {
@@ -377,7 +385,7 @@ export default {
         getters.agentSubscriptions;
       agentSubscriptions.forEach((sub) => {
         airlock.closeAirlock(sub.subscriptionNumber, [
-          commit('unsetSubscription', sub),
+          commit("unsetSubscription", sub),
         ]);
       });
     },

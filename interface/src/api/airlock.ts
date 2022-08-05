@@ -4,7 +4,6 @@ interface onSubNumber {
   (subNumber: number): void;
 }
 
-
 export function openAirlockTo(
   agent: string,
   onEvent,

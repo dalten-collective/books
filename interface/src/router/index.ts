@@ -1,35 +1,31 @@
-import {
-  createRouter,
-  createWebHistory,
-  RouteRecordRaw,
-} from 'vue-router';
-import WalletList from '@/components/WalletList.vue';
-import FriendList from '@/components/FriendList.vue';
-import TransactionList from '@/components/TransactionList.vue';
-import Home from '@/views/Home.vue';
+import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
+import WalletList from "@/components/WalletList.vue";
+import FriendList from "@/components/FriendList.vue";
+import TransactionList from "@/components/TransactionList.vue";
+import Home from "@/views/Home.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
-    path: '/',
-    name: 'home',
+    path: "/",
+    name: "home",
     component: Home,
   },
 
   {
-    path: '/wallets',
-    name: 'wallets',
+    path: "/wallets",
+    name: "wallets",
     component: WalletList,
   },
 
   {
-    path: '/transactions',
-    name: 'transactions',
+    path: "/transactions",
+    name: "transactions",
     component: TransactionList,
   },
 
   {
-    path: '/rolodex',
-    name: 'rolodex',
+    path: "/rolodex",
+    name: "rolodex",
     component: FriendList,
   },
 
@@ -45,7 +41,7 @@ const routes: Array<RouteRecordRaw> = [
 ];
 
 const router = createRouter({
-  history: createWebHistory('/apps/books/'),
+  history: createWebHistory("/apps/books/"),
   routes,
 });
 

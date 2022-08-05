@@ -23,8 +23,11 @@
             />
           </div>
           <div v-else class="editable-cell-text-wrapper">
-            {{ text || ' ' }}
-            <edit-outlined class="editable-cell-icon" @click="edit(record.key)" />
+            {{ text || " " }}
+            <edit-outlined
+              class="editable-cell-icon"
+              @click="edit(record.key)"
+            />
           </div>
         </div>
       </template>
@@ -52,12 +55,25 @@
     >
       <a-row>
         <a-col :span="12">
-          <a-form-item label="Nickname: " ref="nick" name="nick" v-bind="validateInfos.nick">
-            <a-input v-model:value="formState.nick" placeholder="UnBankedKing" />
+          <a-form-item
+            label="Nickname: "
+            ref="nick"
+            name="nick"
+            v-bind="validateInfos.nick"
+          >
+            <a-input
+              v-model:value="formState.nick"
+              placeholder="UnBankedKing"
+            />
           </a-form-item>
         </a-col>
         <a-col :span="12">
-          <a-form-item label="Address: " ref="address" name="address" v-bind="validateInfos.address">
+          <a-form-item
+            label="Address: "
+            ref="address"
+            name="address"
+            v-bind="validateInfos.address"
+          >
             <a-input
               v-model:value="formState.address"
               placeholder="0xeeee111122223333444455556666777788889999"
@@ -69,18 +85,29 @@
       <a-row>
         <a-col :span="12">
           <a-form-item label="Who (@p - optional): " ref="who" name="who">
-            <a-input v-model:value="formState.who" placeholder="~dalten-dalten" />
+            <a-input
+              v-model:value="formState.who"
+              placeholder="~dalten-dalten"
+            />
           </a-form-item>
         </a-col>
         <a-col :span="12">
-          <a-form-item label="Tags: " ref="tags" name="tags" v-bind="validateInfos.tags">
-            <a-input v-model:value="formState.tags" placeholder="abc, one-two, three four" />
+          <a-form-item
+            label="Tags: "
+            ref="tags"
+            name="tags"
+            v-bind="validateInfos.tags"
+          >
+            <a-input
+              v-model:value="formState.tags"
+              placeholder="abc, one-two, three four"
+            />
           </a-form-item>
         </a-col>
       </a-row>
 
       <a-row>
-        <a-col :span="24" style="text-align: right;">
+        <a-col :span="24" style="text-align: right">
           <a-button
             type="primary"
             class="bg-slate-600"
@@ -97,15 +124,15 @@
 </template>
 
 <script lang="ts">
-import Immutable from 'immutable';
-import WalletTagEdit from '@/components/WalletTagEdit.vue';
-import { computed, defineComponent, reactive, ref, toRaw } from 'vue';
-import { mapState, useStore } from 'vuex';
-import { pushFriend, pullFriend, pushName } from '@/api/books';
-import { CheckOutlined, EditOutlined } from '@ant-design/icons-vue';
-import { cloneDeep } from 'lodash-es';
-import { Form } from 'ant-design-vue';
-import { arrayAndHepTags } from '@/api/books';
+import Immutable from "immutable";
+import WalletTagEdit from "@/components/WalletTagEdit.vue";
+import { computed, defineComponent, reactive, ref, toRaw } from "vue";
+import { mapState, useStore } from "vuex";
+import { pushFriend, pullFriend, pushName } from "@/api/books";
+import { CheckOutlined, EditOutlined } from "@ant-design/icons-vue";
+import { cloneDeep } from "lodash-es";
+import { Form } from "ant-design-vue";
+import { arrayAndHepTags } from "@/api/books";
 
 export default defineComponent({
   setup() {
@@ -113,7 +140,7 @@ export default defineComponent({
     const store = useStore();
 
     //  mounted-actions
-    store.dispatch('books/handleSwitchNav', 3);
+    store.dispatch("books/handleSwitchNav", 3);
 
     //  mapState and mapGetters replacements
     const myFriends = computed(() => store.state.books.myFriends);
@@ -124,11 +151,10 @@ export default defineComponent({
           name: item[1].nick,
           address: item[0],
           tags: item[1].tags,
-          patP: [!item[1].who ? '' : item[1].who],
+          patP: [!item[1].who ? "" : item[1].who],
         };
       });
     });
-
 
     // Refs
     const overallLoading = ref(false);
@@ -140,70 +166,70 @@ export default defineComponent({
     //  table columns, data
     const columns = [
       {
-        title: 'Name',
-        dataIndex: 'name',
-        width: '20%',
+        title: "Name",
+        dataIndex: "name",
+        width: "20%",
         sorter: (a, b) => a.name.localCompare(b.name),
         slots: {
-          customRender: 'name',
+          customRender: "name",
         },
       },
       {
-        title: 'Address',
-        dataIndex: 'address',
-        width: '30%',
+        title: "Address",
+        dataIndex: "address",
+        width: "30%",
       },
       {
-        title: 'Urbit ID (@p)',
-        dataIndex: 'patP',
-        width: '15%',
+        title: "Urbit ID (@p)",
+        dataIndex: "patP",
+        width: "15%",
       },
       {
-        title: 'Tags',
-        dataIndex: 'tags',
-        width: '25%',
+        title: "Tags",
+        dataIndex: "tags",
+        width: "25%",
         slots: {
-          customRender: 'tags',
+          customRender: "tags",
         },
       },
       {
-        dataIndex: 'actions',
-        width: '10%',
+        dataIndex: "actions",
+        width: "10%",
         slots: {
-          customRender: 'actions',
+          customRender: "actions",
         },
       },
     ];
 
     //  form
     const formState = reactive({
-      layout: 'inline',
-      nick: '',
-      address: '',
-      who: '',
-      tags: '',
+      layout: "inline",
+      nick: "",
+      address: "",
+      who: "",
+      tags: "",
     });
     const rules = {
       nick: [
         {
           required: true,
-          message: 'Nickname required',
+          message: "Nickname required",
         },
         {
           min: 2,
-          message: 'Nickname must be longer',
+          message: "Nickname must be longer",
         },
       ],
       address: [
         {
           required: true,
-          message: 'Address required',
+          message: "Address required",
         },
         {
           min: 42,
           max: 42,
           pattern: /^0x[a-fA-F0-9]{40}$/,
-          message: 'Provide valid wallet address',
+          message: "Provide valid wallet address",
         },
       ],
       who: [
@@ -225,17 +251,17 @@ export default defineComponent({
     //  methods
 
     const save = (key) => {
-      console.log('on-save');
+      console.log("on-save");
       Object.assign(
         friends.value.filter((item) => key === item.key)[0],
         editableData[key]
       );
       pushName(key, editableData[key].name)
         .then((r) => {
-          console.log('res: ', r);
+          console.log("res: ", r);
         })
         .catch((e) => {
-          console.log('err: ', e);
+          console.log("err: ", e);
         });
       delete editableData[key];
     };
@@ -250,7 +276,6 @@ export default defineComponent({
       delete editableData[key];
     };
 
-
     const onDelete = (key) => {
       overallLoading.value = true;
       pullFriend(key).finally(() => {
@@ -258,7 +283,7 @@ export default defineComponent({
       });
     };
 
-    const useForm = Form.useForm
+    const useForm = Form.useForm;
     const { resetFields, validate, validateInfos } = useForm(formState, rules, {
       onValidate: (...args) => console.log(...args),
     });
@@ -266,10 +291,10 @@ export default defineComponent({
     const onSubmit = () => {
       validate()
         .then(() => {
-          console.log('values', formState, toRaw(formState));
+          console.log("values", formState, toRaw(formState));
           overallLoading.value = true;
           awaitingNewFriend.value = true;
-          const safeTags = arrayAndHepTags(toRaw(formState).tags)
+          const safeTags = arrayAndHepTags(toRaw(formState).tags);
           pushFriend(
             toRaw(formState).address,
             toRaw(formState).nick,
@@ -277,10 +302,10 @@ export default defineComponent({
             safeTags
           )
             .then((r) => {
-              console.log('res: ', r);
+              console.log("res: ", r);
             })
             .catch((e) => {
-              console.log('err: ', e);
+              console.log("err: ", e);
             })
             .finally(() => {
               overallLoading.value = false;
@@ -290,7 +315,7 @@ export default defineComponent({
         })
         .catch((error) => {
           // validation failed
-          console.log('error', error);
+          console.log("error", error);
         });
     };
 
@@ -317,6 +342,4 @@ export default defineComponent({
     WalletTagEdit,
   },
 });
-
-
 </script>
