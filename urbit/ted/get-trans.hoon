@@ -74,7 +74,6 @@
     ==
   =/  error=(unit @t)
     ((ot:dejs-soft:format [%message so:dejs-soft:format]~) jon)
-  ~&  >>>  error
   ?.  ?=(~ error)  *(set almost-trans)
   =,  dejs:format
   %.  jon
@@ -150,8 +149,6 @@
   =,  bol.uber
   |-  ?~  addy
     =;  vaz=vase
-      %-  (slog leaf+"Length All: {<(lent (tap:((on ,[p=@da q=@ux] transaction) gth-hex) (gas:((on ,[p=@da q=@ux] transaction) gth-hex) trans.uber leg)))>}" ~)
-      %-  (slog leaf+"Length New: {<(lent ~(tap by (~(dif by (malt leg)) (malt (tap:((on ,[p=@da q=@ux] transaction) gth-hex) trans.uber)))))>}" ~)
       (pure:m vaz)
     !>  ^-  $:  ((mop ,[p=@da q=@ux] transaction) gth-hex)
                 (list [[@da @ux] transaction])
