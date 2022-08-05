@@ -28,5 +28,4 @@
           tags+a+`(list json)`(turn ~(tap in tg) (lead %s))
       ==
   ==
-%-  (slog leaf+"we did it, reddit" ~)
 (pure:m !>(jon))
