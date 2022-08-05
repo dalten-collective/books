@@ -32,10 +32,9 @@
 </template>
 
 <script lang="ts">
-import Immutable from 'immutable';
-import { mapState, useStore } from 'vuex';
-import { computed, defineComponent, reactive, ref, toRaw, PropType } from 'vue';
+import { computed, defineComponent, reactive, ref, PropType } from 'vue';
 import { pushTags } from '@/api/books';
+import { Address } from '@/types';
 
 import { Form } from 'ant-design-vue';
 import { concatOldTagsNewTagString } from '@/api/books';
@@ -74,7 +73,7 @@ export default defineComponent({
     });
 
     const useForm = Form.useForm
-    const { resetFields, validate, validateInfos } = useForm(formState, rules, {
+    const { validate, validateInfos } = useForm(formState, rules, {
       onValidate: (...args) => console.log(...args),
     });
 
@@ -83,7 +82,7 @@ export default defineComponent({
       validate().then(() => {
         const tNew = concatOldTagsNewTagString(props.record.tags, formState.newTag)
         pushTags(props.record.key, tNew)
-          .then((r) => {
+          .then(() => {
             formState.newTag = '';
           })
           .catch((e) => {
@@ -103,8 +102,7 @@ export default defineComponent({
         props.record.key,
         props.record.tags.filter((tOld) => tOld !== tag)
       )
-        .then((r) => {
-          console.log('res: ', r);
+        .then(() => {
         })
         .catch((e) => {
           console.log('err: ', e);

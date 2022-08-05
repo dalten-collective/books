@@ -8,8 +8,8 @@
 import { defineComponent, computed } from 'vue';
 import { useStore } from 'vuex';
 import type { PropType } from 'vue';
-import { Address, TxHash, Transaction } from '@/types';
-import Immutable, { OrderedMap, Map } from 'immutable';
+import { Address } from '@/types';
+import Immutable, { Map } from 'immutable';
 
 export default defineComponent({
   setup() {

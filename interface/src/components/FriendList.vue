@@ -101,10 +101,9 @@ import Immutable from 'immutable';
 import WalletTagEdit from '@/components/WalletTagEdit.vue';
 import { computed, defineComponent, reactive, ref, toRaw } from 'vue';
 import { mapState, useStore } from 'vuex';
-import { pushFriend, pullFriend, pushName } from '@/api/books.ts';
+import { pushFriend, pullFriend, pushName } from '@/api/books';
 import { CheckOutlined, EditOutlined } from '@ant-design/icons-vue';
 import { cloneDeep } from 'lodash-es';
-import { Address } from '@/types';
 import { Form } from 'ant-design-vue';
 import { arrayAndHepTags } from '@/api/books';
 
@@ -129,15 +128,11 @@ export default defineComponent({
         };
       });
     });
-    const frenMap = computed(() => {
-      return Immutable.Map(myFriends.value);
-    });
 
 
     // Refs
     const overallLoading = ref(false);
     const formRef = ref();
-    const inputRef = ref();
     const awaitingNewFriend = ref(false);
 
     const editableData = reactive({});

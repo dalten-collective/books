@@ -92,11 +92,10 @@ import Immutable from 'immutable';
 import WalletTagEdit from '@/components/WalletTagEdit.vue';
 import { CheckOutlined, EditOutlined } from '@ant-design/icons-vue';
 import { cloneDeep } from 'lodash-es';
-import { pushWallet, pullWallet, pushName } from '@/api/books.ts';
+import { pushWallet, pullWallet, pushName } from '@/api/books';
 import { computed, defineComponent, reactive, ref, toRaw } from 'vue';
-import { mapState, useStore } from 'vuex';
-import type { PropType } from 'vue';
-import { Address, WalletDetails } from '@/types';
+import { useStore } from 'vuex';
+import { WalletDetails } from '@/types';
 import { Form } from 'ant-design-vue';
 import { arrayAndHepTags } from '@/api/books';
 
@@ -111,11 +110,6 @@ export default defineComponent({
     //  mapState and mapGetters replacements
     const myWallets = computed(() => store.state.books.myWallets);
     const myFriends = computed(() => store.state.books.myFriends);
-    const namesInUse = computed(() => {
-      const myNames = this.myWallets.map((item) => item[1].nick);
-      const urNames = this.myFriends.map((item) => item[1].nick);
-      return myNames.concat(urNames);
-    });
 
     const count = computed(() => wallets.value.length + 1);
 
@@ -186,7 +180,6 @@ export default defineComponent({
     // Refs
     const overallLoading = ref(false);
     const formRef = ref();
-    const inputRef = ref();
     const awaitingNewWallet = ref(false);
 
     //  handlers
@@ -339,7 +332,6 @@ export default defineComponent({
       wallets,
       handleClose,
       handleInput,
-      namesInUse,
       allTags,
       columns,
       overallLoading,
