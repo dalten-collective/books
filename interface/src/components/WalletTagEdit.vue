@@ -23,7 +23,6 @@
             v-model:value="formState.newTag"
             type="text"
             size="small"
-            :style="{ width: '78px' }"
             @pressEnter="handleInput"
           />
         </a-form-item>
