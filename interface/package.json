@@ -5,7 +5,8 @@
   "scripts": {
     "serve": "vite --host",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prettier": "prettier --write ."
   },
   "dependencies": {
     "@urbit/api": "^2.1.0",

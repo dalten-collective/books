@@ -8,20 +8,20 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-import { mapState } from 'vuex';
-import { Address } from '@/types';
-import Immutable, { Map } from 'immutable';
+import { defineComponent } from "vue";
+import { mapState } from "vuex";
+import { Address } from "@/types";
+import Immutable, { Map } from "immutable";
 
 export default defineComponent({
   data() {
     return {
-      selected: '',
+      selected: "",
     };
   },
   watch: {
     selected(newVal, oldVal) {
-      if (newVal === '' || newVal) {
+      if (newVal === "" || newVal) {
         this.handleSetBrowse(newVal);
       }
     },
@@ -31,12 +31,12 @@ export default defineComponent({
   unmounted() {},
 
   computed: {
-    ...mapState('books', ['myWallets']),
+    ...mapState("books", ["myWallets"]),
   },
 
   methods: {
     handleSetBrowse(which) {
-      this.$store.dispatch('books/handleSwitchBrowse', which);
+      this.$store.dispatch("books/handleSwitchBrowse", which);
     },
 
     checkAddress(map, fmap, addy) {

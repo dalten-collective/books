@@ -2,22 +2,14 @@
   <div v-if="!editing">
     <a-descriptions :bordered="ourAnnotations.exist" column="24" class="ml-2">
       <template #title>
-        <span v-if="ourAnnotations.exist">
-          Annotations
-        </span>
-        <span v-else>
-          No annotations yet
-        </span>
+        <span v-if="ourAnnotations.exist"> Annotations </span>
+        <span v-else> No annotations yet </span>
       </template>
       <template #extra>
         <div class="flex">
           <a-button @click="editing = true" type="primary" class="bg-slate-600">
-            <span v-if="ourAnnotations.exist">
-              Edit
-            </span>
-            <span v-else>
-              Add annotation
-            </span>
+            <span v-if="ourAnnotations.exist"> Edit </span>
+            <span v-else> Add annotation </span>
           </a-button>
         </div>
       </template>
@@ -26,7 +18,11 @@
         {{ ourAnnotations.basis }}
       </a-descriptions-item>
 
-      <a-descriptions-item v-if="ourAnnotations.counterparties.length > 0" span="12" label="Counterparty">
+      <a-descriptions-item
+        v-if="ourAnnotations.counterparties.length > 0"
+        span="12"
+        label="Counterparty"
+      >
         <AddressLookup
           v-for="cp in ourAnnotations.counterparties"
           :key="cp"
@@ -34,15 +30,20 @@
         />
       </a-descriptions-item>
 
-      <a-descriptions-item v-if="ourAnnotations.note" span="12" label="Annotation">
+      <a-descriptions-item
+        v-if="ourAnnotations.note"
+        span="12"
+        label="Annotation"
+      >
         {{ ourAnnotations.note }}
       </a-descriptions-item>
 
-      <a-descriptions-item v-if="ourAnnotations.tags.length > 0" span="12" label="Tags">
-        <a-tag
-          v-for="tag in ourAnnotations.tags" :key="tag"
-          color="#475668"
-        >
+      <a-descriptions-item
+        v-if="ourAnnotations.tags.length > 0"
+        span="12"
+        label="Tags"
+      >
+        <a-tag v-for="tag in ourAnnotations.tags" :key="tag" color="#475668">
           {{ tag }}
         </a-tag>
       </a-descriptions-item>
@@ -50,27 +51,25 @@
   </div>
 
   <div v-else>
-    <a-form ref="formRef" :rules="rules" :model="formState" :label-col="labelCol">
-      <a-form-item
-        label="Basis: "
-        name="basis"
-        v-bind="validateInfos.basis"
-      >
+    <a-form
+      ref="formRef"
+      :rules="rules"
+      :model="formState"
+      :label-col="labelCol"
+    >
+      <a-form-item label="Basis: " name="basis" v-bind="validateInfos.basis">
         <a-input-number
           v-model:value="formState.basis"
-          :formatter="(value) => `${value}`.replace(/(\d)(?=(\d{3})+\.)/g, '$1,')"
+          :formatter="
+            (value) => `${value}`.replace(/(\d)(?=(\d{3})+\.)/g, '$1,')
+          "
         />
       </a-form-item>
 
-      <a-form-item
-        name="to"
-        v-bind="validateInfos.to"
-      >
+      <a-form-item name="to" v-bind="validateInfos.to">
         <template #label>
           <div class="flex flex-row align-middle">
-            <div class="mr-2">
-              To
-            </div>
+            <div class="mr-2">To</div>
             <div>
               <user-outlined />
             </div>
@@ -86,8 +85,7 @@
           :filterOption="
             (input, option) => {
               return (
-                option.value.toLowerCase().indexOf(input.toLowerCase()) >=
-                  0 ||
+                option.value.toLowerCase().indexOf(input.toLowerCase()) >= 0 ||
                 option.nick.toLowerCase().indexOf(input.toLowerCase()) >= 0
               );
             }
@@ -106,11 +104,7 @@
       >
         <a-textarea v-model:value="formState.annotation" />
       </a-form-item>
-      <a-form-item
-        label="Tags: "
-        name="newTag"
-        v-bind="validateInfos.newTag"
-      >
+      <a-form-item label="Tags: " name="newTag" v-bind="validateInfos.newTag">
         <div class="mb-2" v-if="formState.tags.length > 0">
           <a-tag
             v-for="tag in formState.tags"
@@ -134,11 +128,10 @@
       <div class="flex">
         <a-button
           type="primary"
-          class="bg-slate-600 "
+          class="bg-slate-600"
           @click.prevent="onSubmit"
           :loading="annotationPending"
           :disabled="annotationPending"
-
         >
           Save
         </a-button>
@@ -149,24 +142,23 @@
 </template>
 
 <script lang="ts">
-import { UserOutlined } from '@ant-design/icons-vue';
-import { defineComponent, reactive, computed, ref, toRaw } from 'vue';
-import { useStore } from 'vuex';
-import type { PropType } from 'vue';
-import { pushAnnotation } from '@/api/books';
-import { TxHash } from '@/types';
-import Immutable from 'immutable';
-import { Decimal } from 'decimal.js';
+import { UserOutlined } from "@ant-design/icons-vue";
+import { defineComponent, reactive, computed, ref, toRaw } from "vue";
+import { useStore } from "vuex";
+import type { PropType } from "vue";
+import { pushAnnotation } from "@/api/books";
+import { TxHash } from "@/types";
+import Immutable from "immutable";
+import { Decimal } from "decimal.js";
 
-import { concatOldTagsNewTagString } from '@/api/books';
+import { concatOldTagsNewTagString } from "@/api/books";
 
-import AddressLookup from '@/components/AddressLookup.vue';
+import AddressLookup from "@/components/AddressLookup.vue";
 
-import { Form } from 'ant-design-vue';
-const useForm = Form.useForm
+import { Form } from "ant-design-vue";
+const useForm = Form.useForm;
 
 export default defineComponent({
-
   setup(props) {
     //  boiler
     const store = useStore();
@@ -190,7 +182,7 @@ export default defineComponent({
         note = Immutable.get(annotations.value, props.hash)
           .annotation as string;
       } else {
-        note = ''
+        note = "";
       }
 
       if (Immutable.has(annotations.value, props.hash)) {
@@ -198,15 +190,16 @@ export default defineComponent({
           .basis.toSignificantDigits(5)
           .toString() as string;
       } else {
-        basis = '' as string;
+        basis = "" as string;
       }
 
       if (Immutable.has(annotations.value, props.hash)) {
-        counterparties = Immutable.get(annotations.value, props.hash).to as Array<string>;
+        counterparties = Immutable.get(annotations.value, props.hash)
+          .to as Array<string>;
       } else {
         counterparties = [] as Array<string>;
       }
-      counterparties = counterparties.filter((c) => c !== null)
+      counterparties = counterparties.filter((c) => c !== null);
 
       if (Immutable.has(annotations.value, props.hash)) {
         tags = Immutable.get(annotations.value, props.hash).tags as Array<
@@ -224,8 +217,7 @@ export default defineComponent({
         basis,
         counterparties,
         tags,
-      }
-
+      };
     });
 
     const people = computed(() => {
@@ -286,12 +278,12 @@ export default defineComponent({
     const formRef = ref();
     const editing = ref(false);
 
-    const newTag = ref('');
+    const newTag = ref("");
 
-    console.log('notes', notes.value);
-    console.log('props', props.hash);
-    console.log('has', Immutable.has(Immutable.Map(notes.value), props.hash));
-    console.log('has-alt', Immutable.has(annotations.value, props.hash));
+    console.log("notes", notes.value);
+    console.log("props", props.hash);
+    console.log("has", Immutable.has(Immutable.Map(notes.value), props.hash));
+    console.log("has-alt", Immutable.has(annotations.value, props.hash));
 
     //  form stuff
     const formState = reactive({
@@ -304,12 +296,13 @@ export default defineComponent({
             .basis.toSignificantDigits(5)
             .toString() as string;
         } else {
-          return '0' as string;
+          return "0" as string;
         }
       })(),
       to: (() => {
         if (Immutable.has(annotations.value, props.hash)) {
-          return Immutable.get(annotations.value, props.hash).to as Array<string>;
+          return Immutable.get(annotations.value, props.hash)
+            .to as Array<string>;
         } else {
           return [] as Array<string>;
         }
@@ -319,7 +312,7 @@ export default defineComponent({
           return Immutable.get(annotations.value, props.hash)
             .annotation as string;
         } else {
-          return '' as string;
+          return "" as string;
         }
       })(),
       tags: (() => {
@@ -332,7 +325,7 @@ export default defineComponent({
         }
       })() as Array<[string]>,
       newTag: (() => {
-        return ''
+        return "";
       })(),
     });
 
@@ -340,7 +333,7 @@ export default defineComponent({
       basis: [
         {
           required: true,
-          message: "Leave basis as 0 if unknown"
+          message: "Leave basis as 0 if unknown",
         },
       ],
       annotation: [
@@ -362,7 +355,6 @@ export default defineComponent({
       ],
     });
 
-
     //  methods
     const truncateAddress = (address) => {
       try {
@@ -378,24 +370,27 @@ export default defineComponent({
     };
 
     const toForUpdate = () => {
-      let counterparty: string | null = '';
+      let counterparty: string | null = "";
 
       if (Array.isArray(formState.to)) {
-        counterparty = formState.to[0]
+        counterparty = formState.to[0];
       } else {
-        counterparty = formState.to
+        counterparty = formState.to;
       }
 
       if (counterparty === null || counterparty === undefined) {
-        return ''
+        return "";
       } else {
-        return counterparty
+        return counterparty;
       }
-    }
+    };
 
     const saveAnnotation = () => {
       annotationPending.value = true;
-      const safeTags = concatOldTagsNewTagString(formState.tags, formState.newTag)
+      const safeTags = concatOldTagsNewTagString(
+        formState.tags,
+        formState.newTag
+      );
       pushAnnotation(props.hash, {
         basis: new Decimal(toRaw(formState.basis)).toSignificantDigits(5),
         to: toForUpdate(),
@@ -405,14 +400,14 @@ export default defineComponent({
         annotationPending.value = false;
         editing.value = false;
       });
-    }
+    };
 
     const handleCloseTag = (killedTag) => {
       // remove from formState.tags
-      const newTags = formState.tags.filter(t => t !== killedTag)
-      formState.tags = newTags
-      saveAnnotation()
-    }
+      const newTags = formState.tags.filter((t) => t !== killedTag);
+      formState.tags = newTags;
+      saveAnnotation();
+    };
 
     const { resetFields, validate, validateInfos } = useForm(formState, rules, {
       onValidate: (...args) => console.log(...args),
@@ -421,14 +416,16 @@ export default defineComponent({
     const onSubmit = () => {
       annotationPending.value = true;
 
-      validate().then(() => {
-        saveAnnotation()
-      }).catch(err => {
-        // Validation failed
-      }).finally(() => {
-        annotationPending.value = false;
-      })
-
+      validate()
+        .then(() => {
+          saveAnnotation();
+        })
+        .catch((err) => {
+          // Validation failed
+        })
+        .finally(() => {
+          annotationPending.value = false;
+        });
     };
 
     return {
@@ -456,20 +453,20 @@ export default defineComponent({
 
   methods: {
     handleChange(value) {
-      console.log('selected', value);
+      console.log("selected", value);
     },
     handleBlur() {
-      console.log('blur on select');
+      console.log("blur on select");
     },
     handleFocus() {
-      console.log('focus');
+      console.log("focus");
     },
   },
 
   props: {
     hash: {
       type: String as PropType<TxHash>,
-      default: '0x0',
+      default: "0x0",
     },
   },
 

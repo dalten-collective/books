@@ -1,15 +1,17 @@
 <template>
   <a-tooltip :title="addy" color="gold" placement="topLeft">
-    <div class="cursor-pointer">{{ checkAddress(myWallets, myFriends, addy) }}</div>
+    <div class="cursor-pointer">
+      {{ checkAddress(myWallets, myFriends, addy) }}
+    </div>
   </a-tooltip>
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from 'vue';
-import { useStore } from 'vuex';
-import type { PropType } from 'vue';
-import { Address } from '@/types';
-import Immutable, { Map } from 'immutable';
+import { defineComponent, computed } from "vue";
+import { useStore } from "vuex";
+import type { PropType } from "vue";
+import { Address } from "@/types";
+import Immutable, { Map } from "immutable";
 
 export default defineComponent({
   setup() {
@@ -23,9 +25,9 @@ export default defineComponent({
     //  methods
     const checkAddress = (map, fmap, addy) => {
       if (null === addy) {
-        return 'Unknown';
+        return "Unknown";
       }
-      
+
       const myWal = Immutable.Map(map) as Map<
         [Address, { nickname: string; tags: Array<string> }]
       >;
@@ -78,7 +80,7 @@ export default defineComponent({
   props: {
     addy: {
       type: String as PropType<Address>,
-      default: 'Null Address',
+      default: "Null Address",
     },
   },
 });

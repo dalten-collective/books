@@ -8,10 +8,20 @@
           </div>
         </div>
       </div>
-      <div class="md:w-5/6 md:mt-12">
-        <div class="flex flex-row-reverse hidden float-right text-right md:inline-block md:h-12">
-          <a-tooltip title="Built by Quartus" placement="left" :align="{offset: [0, -100]}">
-            <a href="https://urbit.org/ids/~dalten" class="text-right" target="_blank">
+      <div class="md:mt-12 md:w-5/6">
+        <div
+          class="float-right flex hidden flex-row-reverse text-right md:inline-block md:h-12"
+        >
+          <a-tooltip
+            title="Built by Quartus"
+            placement="left"
+            :align="{ offset: [0, -100] }"
+          >
+            <a
+              href="https://urbit.org/ids/~dalten"
+              class="text-right"
+              target="_blank"
+            >
               <QuartusLogo
                 height="100"
                 width="100"
@@ -31,9 +41,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-import Navigation from '@/components/Navigation.vue';
-import QuartusLogo from '@/components/QuartusLogo.vue';
+import { defineComponent } from "vue";
+import Navigation from "@/components/Navigation.vue";
+import QuartusLogo from "@/components/QuartusLogo.vue";
 import { BookOutlined } from "@ant-design/icons-vue";
 
 export default defineComponent({
@@ -52,17 +62,17 @@ export default defineComponent({
 
   methods: {
     startAirlock() {
-      this.$store.dispatch('ship/openAirlockToAgent', 'books');
+      this.$store.dispatch("ship/openAirlockToAgent", "books");
     },
     closeAirlock() {
-      this.$store.dispatch('ship/closeAgentAirlocks');
+      this.$store.dispatch("ship/closeAgentAirlocks");
     },
   },
 });
 </script>
 
 <style scoped>
-  .slide-fade-enter-active {
+.slide-fade-enter-active {
   transition: all 0.15s ease-out;
 }
 
@@ -75,5 +85,4 @@ export default defineComponent({
   transform: translateY(20px);
   opacity: 0;
 }
-
 </style>

@@ -6,8 +6,8 @@ import {
   TxHash,
   WalletDetails,
   Annotation,
-} from '@/types';
-import Immutable, { OrderedMap } from 'immutable';
+} from "@/types";
+import Immutable, { OrderedMap } from "immutable";
 
 export default {
   namespaced: true,
@@ -17,7 +17,7 @@ export default {
       hasUrbitSubscription: false as Boolean,
 
       //  state objects
-      etherscanKey: '3NJSFSVR8PZRN6CTIIXERD88YBKCIXXMW7',
+      etherscanKey: "3NJSFSVR8PZRN6CTIIXERD88YBKCIXXMW7",
       havUrbData: false as boolean,
       awaitingUrbitData: false as boolean,
       urbitData: [] as Array<[[number, TxHash], Transaction]>,
@@ -26,13 +26,13 @@ export default {
       myWallets: [] as Array<[Address, { nick: string; tags: Array<string> }]>,
       nav: 0 as Navi,
       transPage: 0 as number,
-      browsing: '' as Address,
+      browsing: "" as Address,
     };
   },
 
   getters: {
     friends(state): Array<string> {
-      return ['test'];
+      return ["test"];
     },
 
     pageFrontTransactions: (state, getters) => {
@@ -46,7 +46,7 @@ export default {
         Transaction
       >;
 
-      if (state.browsing === '') {
+      if (state.browsing === "") {
         return immuMap
           .sort((a: Transaction, b: Transaction) => {
             if (a.timeStamp > b.timeStamp) {
@@ -108,17 +108,17 @@ export default {
 
   mutations: {
     setBrowse(state, which) {
-      console.log('wallet: ', which);
+      console.log("wallet: ", which);
       state.browsing = which;
     },
 
     setTransPage(state, which) {
-      console.log('page: ', which);
+      console.log("page: ", which);
       state.transPage = which;
     },
 
     setNav(state, which) {
-      console.log('tab: ', which);
+      console.log("tab: ", which);
       state.nav = which;
     },
 
@@ -129,13 +129,13 @@ export default {
         mine: Array<[Address, { nickname: string; tags: Array<string> }]>;
       }
     ) {
-      console.log('setting my-wallets: ', battery.mine);
+      console.log("setting my-wallets: ", battery.mine);
       state.myWallets = Immutable.Map(state.myWallets)
         .mergeDeepWith((olds, news) => {
           return news;
         }, Immutable.Map(battery.mine))
         .toArray();
-      console.log('setting fren-wallets: ', battery.fren);
+      console.log("setting fren-wallets: ", battery.fren);
       state.myFriends = Immutable.Map(state.myFriends)
         .mergeDeepWith((olds, news) => {
           return news;
@@ -149,8 +149,10 @@ export default {
         tran: Array<Transaction>;
       }
     ) {
-      console.log('set-transaction');
-      const newt = battery.tran.slice().map((t) => [[t.timeStamp, t.hash], t]) as Array<
+      console.log("set-transaction");
+      const newt = battery.tran
+        .slice()
+        .map((t) => [[t.timeStamp, t.hash], t]) as Array<
         [[number, TxHash], Transaction]
       >;
       state.urbitData = state.urbitData.concat(
@@ -159,14 +161,16 @@ export default {
         })
       );
     },
-    unSetTransactions (
+    unSetTransactions(
       state,
       battery: {
         tran: Array<Transaction>;
       }
     ) {
-      console.log('unset-transaction');
-      const newt = battery.tran.slice().map((t) => [[t.timeStamp, t.hash], t]) as Array<
+      console.log("unset-transaction");
+      const newt = battery.tran
+        .slice()
+        .map((t) => [[t.timeStamp, t.hash], t]) as Array<
         [[number, TxHash], Transaction]
       >;
       state.urbitData = newt;
@@ -177,7 +181,7 @@ export default {
         notes: Array<[TxHash, Annotation]>;
       }
     ) {
-      console.log('set-annotation');
+      console.log("set-annotation");
       state.notes = battery.notes.concat(
         state.notes.filter((item) => {
           return !Immutable.Map(battery.notes).has(item[0]);
@@ -191,7 +195,7 @@ export default {
         new: [Address, { nickname: string; tags: Array<string> }];
       }
     ) {
-      console.log('add-wallet', battery.new[0]);
+      console.log("add-wallet", battery.new[0]);
       state.myWallets = Immutable.Map(state.myWallets)
         .delete(battery.new[0])
         .set(battery.new[0], battery.new[1])
@@ -204,7 +208,7 @@ export default {
         remove: Address;
       }
     ) {
-      console.log('del-wallet', battery.remove);
+      console.log("del-wallet", battery.remove);
       state.myWallets = Immutable.Map(state.myWallets)
         .delete(battery.remove)
         .toArray();
@@ -216,7 +220,7 @@ export default {
         new: [Address, WalletDetails];
       }
     ) {
-      console.log('add-friend', battery.new[0]);
+      console.log("add-friend", battery.new[0]);
       state.myFriends = Immutable.Map(state.myFriends)
         .delete(battery.new[0])
         .set(battery.new[0], battery.new[1])
@@ -229,7 +233,7 @@ export default {
         remove: Address;
       }
     ) {
-      console.log('del-friend', battery.remove);
+      console.log("del-friend", battery.remove);
       state.myFriends = Immutable.Map(state.myFriends)
         .delete(battery.remove)
         .toArray();
@@ -241,7 +245,7 @@ export default {
         trans: Transaction;
       }
     ) {
-      console.log('add-Transaction', battery.trans);
+      console.log("add-Transaction", battery.trans);
       state.urbitData = Immutable.OrderedMap(state.urbitData)
         .mergeDeepWith((olds, news) => {
           return news;
@@ -249,34 +253,34 @@ export default {
         .toArray();
     },
     setAwaitingUrbitData(state, waiting: boolean) {
-      console.log('waiting ', waiting)
+      console.log("waiting ", waiting);
       state.awaitingUrbitData = waiting;
     },
     setHavUrbData(state, hav: boolean) {
       state.havUrbData = hav;
-    }
+    },
   },
 
   actions: {
     startAwaitingUrbitData({ commit }) {
-      commit('setAwaitingUrbitData', true)
-      commit('setHavUrbData', false)
+      commit("setAwaitingUrbitData", true);
+      commit("setHavUrbData", false);
     },
     stopAwaitingUrbitData({ commit }) {
-      commit('setAwaitingUrbitData', false)
-      commit('setHavUrbData', true)
+      commit("setAwaitingUrbitData", false);
+      commit("setHavUrbData", true);
     },
 
     handleSwitchPage({ commit }, battery: number) {
-      commit('setTransPage', battery);
+      commit("setTransPage", battery);
     },
 
     handleSwitchBrowse({ commit }, battery: string) {
-      commit('setBrowse', battery);
+      commit("setBrowse", battery);
     },
 
     handleSwitchNav({ commit }, battery: Navi) {
-      commit('setNav', battery);
+      commit("setNav", battery);
     },
 
     handleSetWallets(
@@ -286,11 +290,11 @@ export default {
         mine: Array<[Address, { nickname: string; tags: Array<string> }]>;
       }
     ) {
-      commit('setWallets', { fren: battery.fren, mine: battery.mine });
+      commit("setWallets", { fren: battery.fren, mine: battery.mine });
     },
     handleSetAnnotation({ commit }, battery: { notes: Array<[TxHash, Note]> }) {
-      console.log('battery', battery.notes);
-      commit('setAnnotations', { notes: battery.notes });
+      console.log("battery", battery.notes);
+      commit("setAnnotations", { notes: battery.notes });
     },
     handleSetTransactions(
       { state, commit, dispatch },
@@ -298,9 +302,9 @@ export default {
         tran: Array<Transaction>;
       }
     ) {
-      console.log('battery', battery.tran);
-      dispatch('stopAwaitingUrbitData')
-      commit('setTransactions', { tran: battery.tran });
+      console.log("battery", battery.tran);
+      dispatch("stopAwaitingUrbitData");
+      commit("setTransactions", { tran: battery.tran });
     },
     handleUnSetTransactions(
       { commit },
@@ -308,8 +312,8 @@ export default {
         tran: Array<Transaction>;
       }
     ) {
-      console.log('unsetting', battery.tran);
-      commit('unSetTransactions', { tran: battery.tran })
+      console.log("unsetting", battery.tran);
+      commit("unSetTransactions", { tran: battery.tran });
     },
     handleAddWallet(
       { commit },
@@ -317,10 +321,10 @@ export default {
         new: [Address, { nickname: string; tags: Array<string> }];
       }
     ) {
-      commit('addWallet', { new: battery.new });
+      commit("addWallet", { new: battery.new });
     },
     handleDelWallet({ commit }, battery: { remove: Address }) {
-      commit('delWallet', { remove: battery.remove });
+      commit("delWallet", { remove: battery.remove });
     },
     handleAddFriend(
       { commit },
@@ -328,13 +332,13 @@ export default {
         new: [Address, WalletDetails];
       }
     ) {
-      commit('addFriend', { new: battery.new });
+      commit("addFriend", { new: battery.new });
     },
     handleDelFriend({ commit }, battery: { remove: Address }) {
-      commit('delFriend', { remove: battery.remove });
+      commit("delFriend", { remove: battery.remove });
     },
     handleAddTransaction({ commit }, battery: { transaction: Transaction }) {
-      commit('addTransaction', { trans: battery.transaction });
+      commit("addTransaction", { trans: battery.transaction });
     },
     // handleAddNote(
     //   { commit }

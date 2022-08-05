@@ -18,25 +18,25 @@
               </div>
             </template>
             <div class="flex flex-col gap-4">
-                <a-collapse v-if="Object.keys(contentList).length !== 0" v-model:activeKey="activeKey">
-                  <a-collapse-panel key="1" header="Tags">
-                    <a-tag
-                      v-for="tag in contentList[key].tags"
-                      :key="tag"
-                    >
-                      {{tag}}
-                    </a-tag>
-                  </a-collapse-panel>
-                  <a-collapse-panel key="2" header="Balances">
-                    {{contentList[key].balances}}
-                  </a-collapse-panel>
-                </a-collapse>
+              <a-collapse
+                v-if="Object.keys(contentList).length !== 0"
+                v-model:activeKey="activeKey"
+              >
+                <a-collapse-panel key="1" header="Tags">
+                  <a-tag v-for="tag in contentList[key].tags" :key="tag">
+                    {{ tag }}
+                  </a-tag>
+                </a-collapse-panel>
+                <a-collapse-panel key="2" header="Balances">
+                  {{ contentList[key].balances }}
+                </a-collapse-panel>
+              </a-collapse>
             </div>
           </a-card>
         </div>
       </div>
     </div>
-    <div class="justify-center w-full">
+    <div class="w-full justify-center">
       <div class="flex flex-col">
         <a-table
           :columns="columns"
@@ -55,9 +55,7 @@
           </template>
 
           <template #addressColumn="{ record }">
-            <AddressLookup
-              :addy="record.primaryWallet"
-            />
+            <AddressLookup :addy="record.primaryWallet" />
           </template>
 
           <template #currencyInColumn="{ record }">
@@ -102,7 +100,7 @@
             </div>
           </template>
           <template #footer>
-            <div class="text-yellow-500 grid justify-items-end">
+            <div class="grid justify-items-end text-yellow-500">
               <router-link :to="{ name: 'transactions' }">
                 see more...
               </router-link>
@@ -116,14 +114,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, ref } from 'vue';
-import Note from '@/components/Note.vue';
-import AddressLookup from '@/components/AddressLookup.vue';
-import TransDetails from '@/components/TransDetails.vue';
-import { useStore } from 'vuex';
-import Immutable from 'immutable';
-import dateFormat, { masks } from 'dateformat';
-import { Steps } from '@/types';
+import { defineComponent, computed, ref } from "vue";
+import Note from "@/components/Note.vue";
+import AddressLookup from "@/components/AddressLookup.vue";
+import TransDetails from "@/components/TransDetails.vue";
+import { useStore } from "vuex";
+import Immutable from "immutable";
+import dateFormat, { masks } from "dateformat";
+import { Steps } from "@/types";
 
 export default defineComponent({
   setup() {
@@ -131,16 +129,18 @@ export default defineComponent({
     const store = useStore();
 
     //  mounted-actions
-    store.dispatch('books/handleSwitchNav', 0);
+    store.dispatch("books/handleSwitchNav", 0);
 
     //  mapState and mapGetters replacements
     const subscriptions = computed(() => store.state.ship.subscriptions);
     const pageFrontTransactions = computed(
-      () => store.getters['books/pageFrontTransactions']
+      () => store.getters["books/pageFrontTransactions"]
     );
     const myWallets = computed(() => store.state.books.myWallets);
     const myFriends = computed(() => store.state.books.myFriends);
-    const awaitingUrbitData = computed(() => store.state.books.awaitingUrbitData);
+    const awaitingUrbitData = computed(
+      () => store.state.books.awaitingUrbitData
+    );
 
     //  Tabs
     const activeKey = ref([]);
@@ -148,39 +148,39 @@ export default defineComponent({
     const columns = computed(() => {
       return [
         {
-          title: 'Date',
-          dataIndex: 'timeStamp',
+          title: "Date",
+          dataIndex: "timeStamp",
           slots: {
-            customRender: 'dateColumn',
-          }
-        },
-        {
-          title: 'Primary Wallet',
-          dataIndex: 'primaryWallet',
-          slots: {
-            customRender: 'addressColumn',
+            customRender: "dateColumn",
           },
         },
         {
-          title: 'In',
-          dataIndex: ['involvedCurrencies', '[2]'],
+          title: "Primary Wallet",
+          dataIndex: "primaryWallet",
           slots: {
-            customRender: 'currencyInColumn',
+            customRender: "addressColumn",
           },
         },
         {
-          title: 'Out',
-          dataIndex: ['involvedCurrencies', '[2]'],
+          title: "In",
+          dataIndex: ["involvedCurrencies", "[2]"],
           slots: {
-            customRender: 'currencyOutColumn',
+            customRender: "currencyInColumn",
           },
         },
         {
-          title: 'Action',
-          dataIndex: 'shortDescription',
+          title: "Out",
+          dataIndex: ["involvedCurrencies", "[2]"],
+          slots: {
+            customRender: "currencyOutColumn",
+          },
         },
-      ]
-    })
+        {
+          title: "Action",
+          dataIndex: "shortDescription",
+        },
+      ];
+    });
 
     const data = computed(() => {
       if (undefined === pageFrontTransactions.value) {
@@ -209,11 +209,11 @@ export default defineComponent({
             })(),
             shortDescription: (() => {
               if (null === item[1].address) {
-                return item[1].name + ' Ethereum';
-              } else if (item[1].name === 'Exchange') {
-                return 'Token Swap';
+                return item[1].name + " Ethereum";
+              } else if (item[1].name === "Exchange") {
+                return "Token Swap";
               } else {
-                return 'Multipart Transaction';
+                return "Multipart Transaction";
               }
             })(),
             description: (() => {
@@ -232,7 +232,7 @@ export default defineComponent({
     });
 
     //  Wallet Data
-    const key = ref('0')
+    const key = ref("0");
     const tabList = computed(() => {
       if (undefined === myWallets.value) {
         return null;
@@ -249,12 +249,12 @@ export default defineComponent({
       if (undefined === myWallets.value) {
         return {};
       } else if (myWallets.value !== undefined) {
-        const obj = {}
+        const obj = {};
         myWallets.value.forEach((item, index) => {
           obj[index] = {
-              balances: 'coming soon',
-              tags: item[1].tags,
-            };
+            balances: "coming soon",
+            tags: item[1].tags,
+          };
         });
         return obj;
       }
@@ -264,9 +264,9 @@ export default defineComponent({
     const makeDate = (secs) => {
       let txDate = new Date(secs * 1000);
       let ftxDate =
-        dateFormat(txDate, 'paddedShortDate') +
-        ' ' +
-        dateFormat(txDate, 'h:MM:ss TT');
+        dateFormat(txDate, "paddedShortDate") +
+        " " +
+        dateFormat(txDate, "h:MM:ss TT");
       return ftxDate;
     };
     const onTabChange = (value) => {
@@ -284,7 +284,7 @@ export default defineComponent({
       const mapp = Immutable.Map(myne.concat(yurs));
 
       if (null === addy) {
-        return 'Unknown';
+        return "Unknown";
       } else if (mapp.has(addy)) {
         return Immutable.get(mapp, addy);
       } else {
@@ -301,62 +301,67 @@ export default defineComponent({
       }
     };
 
-    const getInflow = (involved: Array<Steps> | undefined): Steps | undefined  => {
+    const getInflow = (
+      involved: Array<Steps> | undefined
+    ): Steps | undefined => {
       if (involved === undefined) {
-        return undefined
+        return undefined;
       } else {
-        return involved.find((triplet: Steps) => triplet[0] === 'incoming')
+        return involved.find((triplet: Steps) => triplet[0] === "incoming");
       }
-    }
+    };
 
-    const getOutflow = (involved: Array<Steps> | undefined): Steps | undefined => {
+    const getOutflow = (
+      involved: Array<Steps> | undefined
+    ): Steps | undefined => {
       if (involved === undefined) {
-        return undefined
+        return undefined;
       } else {
-        return involved.find((triplet: Steps) => triplet[0] === 'outgoing')
+        return involved.find((triplet: Steps) => triplet[0] === "outgoing");
       }
-    }
+    };
 
     const presentFlow = (steps: Steps | undefined): string => {
       if (steps === undefined) {
-        return ''
+        return "";
       } else {
-        const direction = steps[0]
-        const amount = steps[1]
-        const currency = steps[2]
-        if ( direction === 'outgoing' ) {
-          return `- (${ amount }) ${ currency }`
+        const direction = steps[0];
+        const amount = steps[1];
+        const currency = steps[2];
+        if (direction === "outgoing") {
+          return `- (${amount}) ${currency}`;
         } else {
-          return `${ amount } ${ currency }`
+          return `${amount} ${currency}`;
         }
       }
-    }
+    };
 
     const inCurrencies = computed(() => {
       const uniqCurrencies = Array.from(
         new Set(
           data.value
             .map((t) => {
-              const inf = getInflow(t.involvedCurrencies)
-              if (inf && inf[2] !== '') {
-                return inf[2]
+              const inf = getInflow(t.involvedCurrencies);
+              if (inf && inf[2] !== "") {
+                return inf[2];
               }
             })
             .flat()
-            .filter(item => { // Remove empties
+            .filter((item) => {
+              // Remove empties
               if (item !== undefined && Object.keys(item).length !== 0) {
-                return true
+                return true;
               }
             })
         )
-      )
+      );
       const mapped = uniqCurrencies.map((currency) => {
         return {
           text: currency,
           value: currency,
-        }
-      })
-      return mapped
+        };
+      });
+      return mapped;
     });
 
     const outCurrencies = computed(() => {
@@ -364,26 +369,27 @@ export default defineComponent({
         new Set(
           data.value
             .map((t) => {
-              const out = getOutflow(t.involvedCurrencies)
-              if (out && out[2] !== '') {
-                return out[2]
+              const out = getOutflow(t.involvedCurrencies);
+              if (out && out[2] !== "") {
+                return out[2];
               }
             })
             .flat()
-            .filter(item => { // Remove empties
+            .filter((item) => {
+              // Remove empties
               if (item !== undefined && Object.keys(item).length !== 0) {
-                return true
+                return true;
               }
             })
         )
-      )
+      );
       const mapped = uniqCurrencies.map((currency) => {
         return {
           text: currency,
           value: currency,
-        }
-      })
-      return mapped
+        };
+      });
+      return mapped;
     });
 
     return {
