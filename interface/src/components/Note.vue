@@ -111,16 +111,25 @@
         name="newTag"
         v-bind="validateInfos.newTag"
       >
-        <template v-for="tag in formState.tags" :key="tag">
-          <a-tag
-            closable
-            @close="handleCloseTag(tag)"
-            color="#475668"
-          >
-            {{ tag }}
-          </a-tag>
-        </template>
-        <a-input v-model:value="formState.newTag" type="text" size="small" :style="{ width: '78px' }" @pressEnter="onSubmit" />
+        <div class="mb-2" v-if="formState.tags.length > 0">
+          <template v-for="tag in formState.tags" :key="tag">
+            <a-tag
+              closable
+              @close="handleCloseTag(tag)"
+              color="#475668"
+            >
+              {{ tag }}
+            </a-tag>
+          </template>
+        </div>
+
+        <a-input
+          v-model:value="formState.newTag"
+          type="text"
+          size="small"
+          @pressEnter="onSubmit"
+          placeholder="abc, one-two, three four"
+        />
       </a-form-item>
       <div class="flex">
         <a-button
