@@ -129,7 +129,7 @@ import { useStore } from 'vuex';
 import dateFormat, { masks } from 'dateformat';
 import AddressLookup from '@/components/AddressLookup.vue';
 import TransDetails from '@/components/TransDetails.vue';
-import { computed, defineComponent, ref } from 'vue';
+import { computed, defineComponent } from 'vue';
 import dateFormat, { masks } from 'dateformat';
 import Immutable from 'immutable';
 import { Address, Transaction } from '@/types';
@@ -228,10 +228,10 @@ export default defineComponent({
       }
     }
 
-    // TODO: unclear how to use
-    const getExchange = (involved: Array<Steps>): Steps | undefined  => {
-      return involved.find((triplet: Steps) => triplet[0] === 'exchange')
-    }
+    // Unused for now
+    // const getExchange = (involved: Array<Steps>): Steps | undefined  => {
+    //   return involved.find((triplet: Steps) => triplet[0] === 'exchange')
+    // }
 
     const presentFlow = (steps: Steps | undefined): string => {
       if (steps === undefined) {

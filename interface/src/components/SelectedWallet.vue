@@ -9,10 +9,9 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { mapState, mapGetters } from 'vuex';
-import type { PropType } from 'vue';
-import { Address, TxHash, Transaction } from '@/types';
-import Immutable, { OrderedMap, Map } from 'immutable';
+import { mapState } from 'vuex';
+import { Address } from '@/types';
+import Immutable, { Map } from 'immutable';
 
 export default defineComponent({
   data() {

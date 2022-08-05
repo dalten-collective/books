@@ -20,9 +20,12 @@
             <div class="flex flex-col gap-4">
                 <a-collapse v-if="Object.keys(contentList).length !== 0" v-model:activeKey="activeKey">
                   <a-collapse-panel key="1" header="Tags">
-                    <template v-for="tag in contentList[key].tags">
-                      <a-tag>{{tag}}</a-tag>
-                    </template>
+                    <a-tag
+                      v-for="tag in contentList[key].tags"
+                      :key="tag"
+                    >
+                      {{tag}}
+                    </a-tag>
                   </a-collapse-panel>
                   <a-collapse-panel key="2" header="Balances">
                     {{contentList[key].balances}}
@@ -120,6 +123,7 @@ import TransDetails from '@/components/TransDetails.vue';
 import { useStore } from 'vuex';
 import Immutable from 'immutable';
 import dateFormat, { masks } from 'dateformat';
+import { Steps } from '@/types';
 
 export default defineComponent({
   setup() {
@@ -141,32 +145,6 @@ export default defineComponent({
     //  Tabs
     const activeKey = ref([]);
 
-    //  Transaction Data
-    // const columns = [
-    //   {
-    //     title: 'Timestamp',
-    //     dataIndex: 'timeStamp',
-    //     sorter: (a, b) => a.timeOriginal - b.timeOriginal,
-    //   },
-    //   {
-    //     title: 'Primary Wallet',
-    //     dataIndex: 'primaryWallet',
-    //     slots: {
-    //       customRender: 'addressColumn',
-    //     },
-    //   },
-    //   {
-    //     title: 'Involved Currencies',
-    //     dataIndex: 'involvedCurrencies',
-    //     slots: {
-    //       customRender: 'currencyColumn',
-    //     },
-    //   },
-    //   {
-    //     title: 'Action',
-    //     dataIndex: 'shortDescription',
-    //   },
-    // ];
     const columns = computed(() => {
       return [
         {

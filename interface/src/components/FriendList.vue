@@ -30,7 +30,7 @@
       </template>
 
       <template #tags="{ record }">
-        <FriendTagEdit :record="record" />
+        <WalletTagEdit :record="record" />
       </template>
       <template #actions="{ record }">
         <a-popconfirm
@@ -52,12 +52,12 @@
     >
       <a-row>
         <a-col :span="12">
-          <a-form-item label="Nickname: " ref="nick" name="nick">
+          <a-form-item label="Nickname: " ref="nick" name="nick" v-bind="validateInfos.nick">
             <a-input v-model:value="formState.nick" placeholder="UnBankedKing" />
           </a-form-item>
         </a-col>
         <a-col :span="12">
-          <a-form-item label="Address: " ref="address" name="address">
+          <a-form-item label="Address: " ref="address" name="address" v-bind="validateInfos.address">
             <a-input
               v-model:value="formState.address"
               placeholder="0xeeee111122223333444455556666777788889999"
@@ -73,8 +73,8 @@
           </a-form-item>
         </a-col>
         <a-col :span="12">
-          <a-form-item label="Tags: " ref="tags" name="tags">
-            <a-input v-model:value="formState.tags" placeholder="abc one-two three" />
+          <a-form-item label="Tags: " ref="tags" name="tags" v-bind="validateInfos.tags">
+            <a-input v-model:value="formState.tags" placeholder="abc, one-two, three four" />
           </a-form-item>
         </a-col>
       </a-row>
@@ -98,13 +98,14 @@
 
 <script lang="ts">
 import Immutable from 'immutable';
-import FriendTagEdit from '@/components/WalletTagEdit.vue';
+import WalletTagEdit from '@/components/WalletTagEdit.vue';
 import { computed, defineComponent, reactive, ref, toRaw } from 'vue';
 import { mapState, useStore } from 'vuex';
-import { pushFriend, pullFriend, pushName } from '@/api/books.ts';
+import { pushFriend, pullFriend, pushName } from '@/api/books';
 import { CheckOutlined, EditOutlined } from '@ant-design/icons-vue';
 import { cloneDeep } from 'lodash-es';
-import { Address } from '@/types';
+import { Form } from 'ant-design-vue';
+import { arrayAndHepTags } from '@/api/books';
 
 export default defineComponent({
   setup() {
@@ -127,15 +128,11 @@ export default defineComponent({
         };
       });
     });
-    const frenMap = computed(() => {
-      return Immutable.Map(myFriends.value);
-    });
 
 
     // Refs
     const overallLoading = ref(false);
     const formRef = ref();
-    const inputRef = ref();
     const awaitingNewFriend = ref(false);
 
     const editableData = reactive({});
@@ -190,23 +187,23 @@ export default defineComponent({
       nick: [
         {
           required: true,
+          message: 'Nickname required',
+        },
+        {
           min: 2,
-          message: 'Nickname Required',
-          trigger: 'blur',
+          message: 'Nickname must be longer',
         },
       ],
       address: [
         {
           required: true,
-          message: 'Address Required',
-          trigger: 'blur',
+          message: 'Address required',
         },
         {
           min: 42,
           max: 42,
           pattern: /^0x[a-fA-F0-9]{40}$/,
-          message: 'Provide Wallet Address',
-          trigger: 'blur',
+          message: 'Provide valid wallet address',
         },
       ],
       who: [
@@ -214,15 +211,13 @@ export default defineComponent({
           required: false,
           pattern: /^~[a-z\-]+$/,
           message: "Are you sure that's a @p?",
-          trigger: 'blur',
         },
       ],
       tags: [
         {
           required: false,
-          pattern: /^[a-zA-Z0-9\,\-\_\s]+$/,
-          trigger: 'blur',
-          message: "a-z, 0-9, ' ', '-' and '_' only, comma delimited",
+          pattern: /^[a-zA-Z0-9\-\s\,]*$/,
+          message: "a-z, 0-9, '-' and spaces only, separated by commas",
         },
       ],
     };
@@ -263,19 +258,23 @@ export default defineComponent({
       });
     };
 
+    const useForm = Form.useForm
+    const { resetFields, validate, validateInfos } = useForm(formState, rules, {
+      onValidate: (...args) => console.log(...args),
+    });
+
     const onSubmit = () => {
-      overallLoading.value = true;
-      awaitingNewFriend.value = true;
-      formRef.value
-        .validate()
+      validate()
         .then(() => {
-          console.log(formRef.value);
           console.log('values', formState, toRaw(formState));
+          overallLoading.value = true;
+          awaitingNewFriend.value = true;
+          const safeTags = arrayAndHepTags(toRaw(formState).tags)
           pushFriend(
             toRaw(formState).address,
             toRaw(formState).nick,
             toRaw(formState).who,
-            toRaw(formState).tags
+            safeTags
           )
             .then((r) => {
               console.log('res: ', r);
@@ -286,10 +285,11 @@ export default defineComponent({
             .finally(() => {
               overallLoading.value = false;
               awaitingNewFriend.value = false;
-              formRef.value.resetFields();
+              resetFields();
             });
         })
         .catch((error) => {
+          // validation failed
           console.log('error', error);
         });
     };
@@ -307,13 +307,14 @@ export default defineComponent({
       save,
       edit,
       cancel,
-      awaitingNewFriend
+      awaitingNewFriend,
+      validateInfos,
     };
   },
   components: {
     CheckOutlined,
     EditOutlined,
-    FriendTagEdit,
+    WalletTagEdit,
   },
 });
 

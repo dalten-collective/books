@@ -96,9 +96,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, ref, PropType } from 'vue';
+import { defineComponent, computed, ref } from 'vue';
 import { useStore } from 'vuex';
-import { Address, TxHash } from '@/types';
+import { Address } from '@/types';
 import { Decimal } from 'decimal.js';
 import Immutable from 'immutable';
 
@@ -110,9 +110,6 @@ export default defineComponent({
     //  mapState and mapGetters replacements
     const myWallets = computed(() => store.state.books.myWallets);
     const myFriends = computed(() => store.state.books.myFriends);
-    const orderedTransactions = computed(
-      () => store.state.books.orderedTransactions
-    );
 
     //  Tabs
     const activeKey = ref('1');
@@ -169,19 +166,19 @@ export default defineComponent({
   props: {
     timestamp: String,
     description: {
-      type: Array as Array<[string, string, string, Address]>,
+      type: Array<[string, string, string, Address]>,
     },
     nonce: {
       type: Number,
     },
     input: {
-      type: String as string,
+      type: String,
     },
     fee: {
-      type: String as string,
+      type: String,
     },
     hash: {
-      type: String as string,
+      type: String,
     },
   },
 });

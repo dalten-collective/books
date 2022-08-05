@@ -111,16 +111,25 @@
         name="newTag"
         v-bind="validateInfos.newTag"
       >
-        <template v-for="tag in formState.tags" :key="tag">
+        <div class="mb-2" v-if="formState.tags.length > 0">
           <a-tag
+            v-for="tag in formState.tags"
+            :key="tag"
             closable
             @close="handleCloseTag(tag)"
             color="#475668"
           >
             {{ tag }}
           </a-tag>
-        </template>
-        <a-input v-model:value="formState.newTag" type="text" size="small" :style="{ width: '78px' }" @pressEnter="onSubmit" />
+        </div>
+
+        <a-input
+          v-model:value="formState.newTag"
+          type="text"
+          size="small"
+          @pressEnter="onSubmit"
+          placeholder="abc, one-two, three four"
+        />
       </a-form-item>
       <div class="flex">
         <a-button
@@ -144,10 +153,12 @@ import { UserOutlined } from '@ant-design/icons-vue';
 import { defineComponent, reactive, computed, ref, toRaw } from 'vue';
 import { useStore } from 'vuex';
 import type { PropType } from 'vue';
-import { pushAnnotation } from '@/api/books.ts';
+import { pushAnnotation } from '@/api/books';
 import { TxHash } from '@/types';
-import Immutable, { OrderedMap, Map } from 'immutable';
+import Immutable from 'immutable';
 import { Decimal } from 'decimal.js';
+
+import { concatOldTagsNewTagString } from '@/api/books';
 
 import AddressLookup from '@/components/AddressLookup.vue';
 
@@ -215,43 +226,7 @@ export default defineComponent({
         tags,
       }
 
-
     });
-
-    const hoonedNewTags = computed(() => {
-      if (formState.newTag === '') {
-        return []
-      } else {
-        return formState.newTag.split(" ")
-      }
-    })
-
-    const noChanges = computed(() => {
-      // TODO: remove function
-      return
-      // // if no annotations
-      // if (Immutable.get(annotations.value, props.hash) === undefined) {
-      //   return false
-      // }
-
-      // const prevBasis = parseInt(
-      //   Immutable.get(annotations.value, props.hash)
-      //     .basis.toSignificantDigits(5)
-      // )
-      // const newBasis = parseInt(formState.basis)
-
-      // const prevCounterparties = Immutable.get(annotations.value, props.hash).to
-      // const newCounterparties = formState.to
-      // const counterpartiesUnchanged = newCounterparties === prevCounterparties
-
-      // const prevAnnotation = Immutable.get(annotations.value, props.hash).annotation
-      // const newAnnotation = formState.annotation
-
-      // const basisUnchanged = newBasis === prevBasis
-      // const annotationUnchanged = newAnnotation === prevAnnotation
-
-      // return basisUnchanged && counterpartiesUnchanged && annotationUnchanged
-    })
 
     const people = computed(() => {
       const friends = (() => {
@@ -312,7 +287,6 @@ export default defineComponent({
     const editing = ref(false);
 
     const newTag = ref('');
-    const thing = ref('hello');
 
     console.log('notes', notes.value);
     console.log('props', props.hash);
@@ -366,6 +340,7 @@ export default defineComponent({
       basis: [
         {
           required: true,
+          message: "Leave basis as 0 if unknown"
         },
       ],
       annotation: [
@@ -381,8 +356,8 @@ export default defineComponent({
       newTag: [
         {
           required: false,
-          pattern: /^[a-zA-Z0-9\-\_\s]*$/,
-          message: "a-z, 0-9, '-' and '_' only, separated by spaces",
+          pattern: /^[a-zA-Z0-9\-\s\,]*$/,
+          message: "a-z, 0-9, '-' and spaces only, separated by commas",
         },
       ],
     });
@@ -420,18 +395,16 @@ export default defineComponent({
 
     const saveAnnotation = () => {
       annotationPending.value = true;
+      const safeTags = concatOldTagsNewTagString(formState.tags, formState.newTag)
       pushAnnotation(props.hash, {
         basis: new Decimal(toRaw(formState.basis)).toSignificantDigits(5),
         to: toForUpdate(),
         annotation: toRaw(formState.annotation),
-        tags: tagsForUpdate(),
-      }).finally((r) => {
+        tags: safeTags,
+      }).finally(() => {
         annotationPending.value = false;
         editing.value = false;
       });
-    }
-
-    const updateFormState = () => {
     }
 
     const handleCloseTag = (killedTag) => {
@@ -439,17 +412,6 @@ export default defineComponent({
       const newTags = formState.tags.filter(t => t !== killedTag)
       formState.tags = newTags
       saveAnnotation()
-      updateFormState()
-    }
-
-    const tagsForUpdate = () => {
-      // not making changes - keep whatever tags already exist
-      if (hoonedNewTags.value.length === 0) {
-        return formState.tags
-      } else {
-        // otherwise, concat in our new tags to existing.
-        return formState.tags.concat(hoonedNewTags.value).flat()
-      }
     }
 
     const { resetFields, validate, validateInfos } = useForm(formState, rules, {
@@ -465,7 +427,6 @@ export default defineComponent({
         // Validation failed
       }).finally(() => {
         annotationPending.value = false;
-        updateFormState()
       })
 
     };
@@ -486,8 +447,6 @@ export default defineComponent({
       rules,
       newTag,
       handleCloseTag,
-      hoonedNewTags,
-      noChanges,
       ourAnnotations,
       editing,
       labelCol: { span: 4 },
