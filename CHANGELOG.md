@@ -16,6 +16,7 @@ and this project adheres to
 
 - Add loading state to tag manipulation on existing records
 - All API calls expect tag arrays; include helper function for handling
+- Disallow underscores in tags
 
 ### Fixed
 

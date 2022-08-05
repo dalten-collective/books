@@ -356,8 +356,8 @@ export default defineComponent({
       newTag: [
         {
           required: false,
-          pattern: /^[a-zA-Z0-9\-\_\s\,]*$/,
-          message: "a-z, 0-9, '-', ' ' and '_' only, separated by commas",
+          pattern: /^[a-zA-Z0-9\-\s\,]*$/,
+          message: "a-z, 0-9, '-' and spaces only, separated by commas",
         },
       ],
     });
