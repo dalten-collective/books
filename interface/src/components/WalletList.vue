@@ -98,6 +98,7 @@ import { mapState, useStore } from 'vuex';
 import type { PropType } from 'vue';
 import { Address, WalletDetails } from '@/types';
 import { Form } from 'ant-design-vue';
+import { arrayAndHepTags } from '@/api/books';
 
 export default defineComponent({
   setup() {
@@ -299,10 +300,11 @@ export default defineComponent({
         console.log('values', formState, toRaw(formState));
         awaitingNewWallet.value = true;
         overallLoading.value = true;
+        const safeTags = arrayAndHepTags(toRaw(formState).tags)
         pushWallet(
           toRaw(formState).address,
           toRaw(formState).nick,
-          toRaw(formState).tags
+          safeTags
         )
           .then((r) => {
             console.log('res: ', r);

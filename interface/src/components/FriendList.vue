@@ -106,6 +106,7 @@ import { CheckOutlined, EditOutlined } from '@ant-design/icons-vue';
 import { cloneDeep } from 'lodash-es';
 import { Address } from '@/types';
 import { Form } from 'ant-design-vue';
+import { arrayAndHepTags } from '@/api/books';
 
 export default defineComponent({
   setup() {
@@ -273,11 +274,12 @@ export default defineComponent({
           console.log('values', formState, toRaw(formState));
           overallLoading.value = true;
           awaitingNewFriend.value = true;
+          const safeTags = arrayAndHepTags(toRaw(formState).tags)
           pushFriend(
             toRaw(formState).address,
             toRaw(formState).nick,
             toRaw(formState).who,
-            toRaw(formState).tags
+            safeTags
           )
             .then((r) => {
               console.log('res: ', r);

@@ -35,9 +35,10 @@
 import Immutable from 'immutable';
 import { mapState, useStore } from 'vuex';
 import { computed, defineComponent, reactive, ref, toRaw, PropType } from 'vue';
-import { pushTags } from '@/api/books.ts';
+import { pushTags } from '@/api/books';
 
 import { Form } from 'ant-design-vue';
+import { concatOldTagsNewTagString } from '@/api/books';
 
 //  Types
 type UIWallet = {
@@ -80,14 +81,7 @@ export default defineComponent({
     const handleInput = () => {
       tagsPending.value = true;
       validate().then(() => {
-        // TODO: handle concatting with arrayAndHep helper
-        const regex = /\s+/g;
-        const tNew = props.record.tags.slice().concat(
-          formState.newTag
-            .split(',')
-            .slice()
-            .map((nt) => nt.trim().replace(regex, '-').toLowerCase())
-        );
+        const tNew = concatOldTagsNewTagString(props.record.tags, formState.newTag)
         pushTags(props.record.key, tNew)
           .then((r) => {
             formState.newTag = '';
@@ -96,6 +90,7 @@ export default defineComponent({
             console.log('err: ', e);
           });
       }).catch(err => {
+        console.log(err)
         // Validation failed
       }).finally(() => {
         tagsPending.value = false;

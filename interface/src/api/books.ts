@@ -3,8 +3,7 @@ import { Scry } from '@urbit/http-api';
 import { Transaction, Address, TxHash } from '@/types';
 import Decimal from 'decimal.js';
 
-// TODO: do this in components. always have tags as array here.
-export function arrayAndHepTags(tags: string) {
+export function arrayAndHepTags(tags: string): Array<string> {
   const regex = /\s+/g;
   return tags
     .split(',')
@@ -12,7 +11,16 @@ export function arrayAndHepTags(tags: string) {
     .map((tag) => tag.trim().replace(regex, '-').toLowerCase())
 }
 
-export function pushWallet(address: Address, nick: string, tags: string) {
+export function concatOldTagsNewTagString(
+  oldTags: Array<string>,
+  newTagString: string
+): Array<string> {
+  return oldTags.slice().concat(
+    arrayAndHepTags(newTagString)
+  )
+}
+
+export function pushWallet(address: Address, nick: string, tags: Array<string>) {
   return urbitAPI.poke({
     //   return {
     app: 'books',
@@ -21,7 +29,7 @@ export function pushWallet(address: Address, nick: string, tags: string) {
       'add-wallet': {
         address: address.toLowerCase(),
         nick: nick,
-        tags: arrayAndHepTags(tags)
+        tags: tags
       },
     },
     //   }
@@ -47,7 +55,7 @@ export function pushFriend(
   address: Address,
   nick: string,
   who: string,
-  tags: string
+  tags: Array<string>
 ) {
   return urbitAPI.poke({
     app: 'books',
@@ -57,7 +65,7 @@ export function pushFriend(
         address: address.toLowerCase(),
         nick: nick,
         who: who,
-        tags: arrayAndHepTags(tags)
+        tags: tags
       },
     },
   });
@@ -78,7 +86,7 @@ export function pullFriend(address: Address) {
     });
 }
 
-export function pushTags(address: Address, tags: []) {
+export function pushTags(address: Address, tags: Array<string>) {
   return urbitAPI.poke({
     app: 'books',
     mark: 'books-page',
