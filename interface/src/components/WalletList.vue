@@ -51,12 +51,12 @@
     >
       <a-row>
         <a-col :span="8">
-          <a-form-item label="Nickname: " ref="nick" name="nick">
+          <a-form-item label="Nickname: " ref="nick" name="nick" v-bind="validateInfos.nick">
             <a-input v-model:value="formState.nick" placeholder="UnBankedKing" />
           </a-form-item>
         </a-col>
         <a-col :span="8">
-          <a-form-item label="Address: " ref="address" name="address">
+          <a-form-item label="Address: " ref="address" name="address" v-bind="validateInfos.address">
             <a-input
               v-model:value="formState.address"
               placeholder="0xeeee111122223333444455556666777788889999"
@@ -64,7 +64,7 @@
           </a-form-item>
         </a-col>
         <a-col :span="8">
-          <a-form-item label="Tags: " ref="tags" name="tags">
+          <a-form-item label="Tags: " ref="tags" name="tags" v-bind="validateInfos.tags">
             <a-input v-model:value="formState.tags" placeholder="abc, one-two, three four" />
           </a-form-item>
         </a-col>
@@ -75,7 +75,7 @@
           <a-button
             type="primary"
             class="bg-slate-600"
-            @click="onSubmit"
+            @click.prevent="onSubmit"
             :loading="awaitingNewWallet"
             :disabled="awaitingNewWallet"
           >
@@ -97,6 +97,7 @@ import { computed, defineComponent, reactive, ref, toRaw } from 'vue';
 import { mapState, useStore } from 'vuex';
 import type { PropType } from 'vue';
 import { Address, WalletDetails } from '@/types';
+import { Form } from 'ant-design-vue';
 
 export default defineComponent({
   setup() {
@@ -258,68 +259,68 @@ export default defineComponent({
       nick: [
         {
           required: true,
-          message: 'Nickname Required',
-          trigger: 'blur',
+          message: 'Nickname required',
         },
         {
           min: 2,
-          message: 'Nickname Required',
-          trigger: 'blur',
+          message: 'Nickname must be longer',
         },
       ],
       address: [
         {
           required: true,
-          message: 'Address Required',
-          trigger: 'blur',
+          message: 'Address required',
         },
         {
           min: 42,
           max: 42,
           pattern: /^0x[a-fA-F0-9]{40}$/,
-          message: 'Provide Wallet Address',
-          trigger: 'blur',
+          message: 'Provide valid wallet address',
         },
       ],
       tags: [
         {
           required: false,
-          pattern: /^[a-zA-Z0-9\-\_\s]+$/,
-          trigger: 'blur',
-          message: "a-z, 0-9, '-' and '_' only, separated by spaces",
+          pattern: /^[a-zA-Z0-9\-\_\s\,]*$/,
+          message: "a-z, 0-9, '-', ' ' and '_' only, separated by commas",
         },
       ],
     };
 
+    const useForm = Form.useForm
+    const { resetFields, validate, validateInfos } = useForm(formState, rules, {
+      onValidate: (...args) => console.log(...args),
+    });
+
     //  methods
     const onSubmit = () => {
-      awaitingNewWallet.value = true;
-      overallLoading.value = true;
-      formRef.value
-        .validate()
-        .then(() => {
-          console.log(formRef.value);
-          console.log('values', formState, toRaw(formState));
-          pushWallet(
-            toRaw(formState).address,
-            toRaw(formState).nick,
-            toRaw(formState).tags
-          )
-            .then((r) => {
-              console.log('res: ', r);
-            })
-            .catch((e) => {
-              console.log('err: ', e);
-            })
-            .finally(() => {
-              overallLoading.value = false;
-              awaitingNewWallet.value = false;
-              formRef.value.resetFields();
-            });
-        })
+      validate()
+      .then(() => {
+        console.log(formRef.value);
+        console.log('values', formState, toRaw(formState));
+        awaitingNewWallet.value = true;
+        overallLoading.value = true;
+        pushWallet(
+          toRaw(formState).address,
+          toRaw(formState).nick,
+          toRaw(formState).tags
+        )
+          .then((r) => {
+            console.log('res: ', r);
+          })
+          .catch((e) => {
+            console.log('err: ', e);
+          })
+          .finally(() => {
+            overallLoading.value = false;
+            awaitingNewWallet.value = false;
+            resetFields();
+          });
+      })
       .catch((error) => {
+        // validation failed
         console.log('error', error);
-      });
+      })
     };
 
     return {
@@ -342,6 +343,7 @@ export default defineComponent({
       columns,
       overallLoading,
       awaitingNewWallet,
+      validateInfos,
     };
   },
 
