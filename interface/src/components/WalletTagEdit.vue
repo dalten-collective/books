@@ -19,6 +19,7 @@
           v-bind="validateInfos.newTag"
         >
           <a-input
+            placeholder="abc, one-two, three four"
             v-model:value="formState.newTag"
             type="text"
             size="small"

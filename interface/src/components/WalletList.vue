@@ -65,7 +65,7 @@
         </a-col>
         <a-col :span="8">
           <a-form-item label="Tags: " ref="tags" name="tags">
-            <a-input v-model:value="formState.tags" placeholder="abc one-two three" />
+            <a-input v-model:value="formState.tags" placeholder="abc, one-two, three four" />
           </a-form-item>
         </a-col>
       </a-row>

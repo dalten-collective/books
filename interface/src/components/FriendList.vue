@@ -30,7 +30,7 @@
       </template>
 
       <template #tags="{ record }">
-        <FriendTagEdit :record="record" />
+        <WalletTagEdit :record="record" />
       </template>
       <template #actions="{ record }">
         <a-popconfirm
@@ -74,7 +74,7 @@
         </a-col>
         <a-col :span="12">
           <a-form-item label="Tags: " ref="tags" name="tags">
-            <a-input v-model:value="formState.tags" placeholder="abc one-two three" />
+            <a-input v-model:value="formState.tags" placeholder="abc, one-two, three four" />
           </a-form-item>
         </a-col>
       </a-row>
@@ -98,7 +98,7 @@
 
 <script lang="ts">
 import Immutable from 'immutable';
-import FriendTagEdit from '@/components/WalletTagEdit.vue';
+import WalletTagEdit from '@/components/WalletTagEdit.vue';
 import { computed, defineComponent, reactive, ref, toRaw } from 'vue';
 import { mapState, useStore } from 'vuex';
 import { pushFriend, pullFriend, pushName } from '@/api/books.ts';
@@ -313,7 +313,7 @@ export default defineComponent({
   components: {
     CheckOutlined,
     EditOutlined,
-    FriendTagEdit,
+    WalletTagEdit,
   },
 });
 
