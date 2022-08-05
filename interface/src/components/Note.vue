@@ -149,6 +149,8 @@ import { TxHash } from '@/types';
 import Immutable, { OrderedMap, Map } from 'immutable';
 import { Decimal } from 'decimal.js';
 
+import { arrayAndHepTags } from '@/api/books';
+
 import AddressLookup from '@/components/AddressLookup.vue';
 
 import { Form } from 'ant-design-vue';
@@ -222,7 +224,7 @@ export default defineComponent({
       if (formState.newTag === '') {
         return []
       } else {
-        return formState.newTag.split(" ")
+        return arrayAndHepTags(formState.newTag)
       }
     })
 
@@ -366,6 +368,7 @@ export default defineComponent({
       basis: [
         {
           required: true,
+          message: "Leave basis as 0 if unknown"
         },
       ],
       annotation: [
@@ -381,8 +384,8 @@ export default defineComponent({
       newTag: [
         {
           required: false,
-          pattern: /^[a-zA-Z0-9\-\_\s]*$/,
-          message: "a-z, 0-9, '-' and '_' only, separated by spaces",
+          pattern: /^[a-zA-Z0-9\-\_\s\,]*$/,
+          message: "a-z, 0-9, '-', ' ' and '_' only, separated by commas",
         },
       ],
     });
@@ -431,15 +434,11 @@ export default defineComponent({
       });
     }
 
-    const updateFormState = () => {
-    }
-
     const handleCloseTag = (killedTag) => {
       // remove from formState.tags
       const newTags = formState.tags.filter(t => t !== killedTag)
       formState.tags = newTags
       saveAnnotation()
-      updateFormState()
     }
 
     const tagsForUpdate = () => {
@@ -465,7 +464,6 @@ export default defineComponent({
         // Validation failed
       }).finally(() => {
         annotationPending.value = false;
-        updateFormState()
       })
 
     };

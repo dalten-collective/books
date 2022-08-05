@@ -3,8 +3,16 @@ import { Scry } from '@urbit/http-api';
 import { Transaction, Address, TxHash } from '@/types';
 import Decimal from 'decimal.js';
 
-export function pushWallet(address: Address, nick: string, tags: string) {
+// TODO: do this in components. always have tags as array here.
+export function arrayAndHepTags(tags: string) {
   const regex = /\s+/g;
+  return tags
+    .split(',')
+    .slice()
+    .map((tag) => tag.trim().replace(regex, '-').toLowerCase())
+}
+
+export function pushWallet(address: Address, nick: string, tags: string) {
   return urbitAPI.poke({
     //   return {
     app: 'books',
@@ -13,10 +21,7 @@ export function pushWallet(address: Address, nick: string, tags: string) {
       'add-wallet': {
         address: address.toLowerCase(),
         nick: nick,
-        tags: tags
-          .split(',')
-          .slice()
-          .map((item) => item.trim().replace(regex, '-').toLowerCase()),
+        tags: arrayAndHepTags(tags)
       },
     },
     //   }
@@ -44,7 +49,6 @@ export function pushFriend(
   who: string,
   tags: string
 ) {
-  const regex = /\s+/g;
   return urbitAPI.poke({
     app: 'books',
     mark: 'books-page',
@@ -53,9 +57,7 @@ export function pushFriend(
         address: address.toLowerCase(),
         nick: nick,
         who: who,
-        tags: tags
-          .split(',')
-          .map((item) => item.trim().replace(regex, '-').toLowerCase()),
+        tags: arrayAndHepTags(tags)
       },
     },
   });
