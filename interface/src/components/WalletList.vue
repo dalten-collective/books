@@ -296,7 +296,6 @@ export default defineComponent({
     const onSubmit = () => {
       validate()
       .then(() => {
-        console.log(formRef.value);
         console.log('values', formState, toRaw(formState));
         awaitingNewWallet.value = true;
         overallLoading.value = true;
