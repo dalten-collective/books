@@ -1,0 +1,49 @@
+/-  spider, *books
+:: Import structure libraries from /sur.
+/+  *strandio
+:: import strandio from library/lib
+::
+=,  strand=strand:spider
+::
+^-  thread:spider
+::We make it a thread by casting it to thread:spider
+|=  prep=vase
+:: We create a gate named prep that takes a vase, the first part of the previously mentioned thread definition.
+=/  m  (strand ,vase)
+::Inside the gate we create our strand specialised to produce a vase and give it the canonical face m.
+^-  form:m
+::We cast the output to form - the mold of the strand we created.
+=/  uber  !<([bol=bowl:gall man=(map @ux annotation)] prep)
+=,  enjs:format
+:: Container arm for JSON encoders
+=/  jon=json
+:: json - javascript object notation data 
+  %-  pairs
+  :: gate called pairs but what is it doing? it shows up latter in the code
+  :~  head+s+'annotation'
+  :: 
+  ::null terminated cell but don't know the rest
+      status+s+'annotations incoming'
+      :+  %new  %a
+      ^-  (list json)
+      :: we cast the form
+      %-  ~(rep by man.uber)
+      ::call a gate but what is man.uber
+      |=  $:  [hax=@ux [b=@rd t=(unit @ux) a=@t tg=(set @tas)]]
+      :: produce a gate (one armed core with ?)
+              max=(list json)
+          ==
+      :_  max
+      :: inverted cell max??
+      %-  pairs
+      :~  hash+s+(scot %ux hax)
+      :: Render dime as cord
+          basis+s+(scot %rd b)
+          to+?~(t ~ s+(scot %ux u.t))
+          annotation+s+a
+          tags+a+`(list json)`(turn ~(tap in tg) (lead %s))
+          :: json arrays- a list of strings
+      ==
+  ==
+(pure:m !>(jon)):: takes uber(hoon data structure) to json data structure
+:: communicates with java-scri
