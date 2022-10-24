@@ -1,0 +1,593 @@
+::  /app/books
+::
+/-  *books
+:: import structured library books from sur
+/+  default-agent, dbug
+:: import from library /lib default-agent,dbug
+:: default-agent is a library that provides default behaviors for Gall agent arms.
+
+|%
+:: Build and import a mark core.
++$  versioned-state
+:: Produce a structure arm (type definition).
+  $%  [%0 state-zero]
+  :: $% is a tagged union state-zero to 0 c 
+  ==
+:: Build and import a mark core.
+::  state-zero
+::  - zapper-token: zapper.fi uid + password, defaulting to public
+::  - transactions: a mop of zapper timestamps to transaction data
+::  - tags: tags you've used for wallets, transactions
+::
+::  - held-wallets: your wallets - a map of addresses to metadatas
+::  - lilblackbook: your friends - a map of addresses to metadatas
+::
+::  - transactions: your transactions, stored, as a mop
+::  - elucidations: your notes - a map of trxhashes to annotations
+::
++$  state-zero
+  $:  zapper-token=[uid=@t pw=@t]
+  :: user id and password
+      etherscankey=@t
+      tags=(set @tas)
+    ::
+      held-wallets=(map @ux [nick=@t tags=(set @tas)])::wallets nickname, tags
+      lilblackbook=(map @ux wallet)
+    :: map is a mold generator of key value pairs - in this case held-wallets is a mold of nick and tags
+      transactions=((mop ,[p=@da q=@ux] transaction) gth-hex)
+      :: what is a mop?  transactions map is a mold generator of date and hex
+      elucidations=(map @ux annotation)
+      :: elucidations map is a unsigned hexidecimal linked to annotation
+  ==
+::
++$  card  card:agent:gall
+::
+::  sort helper
+::
+++  gth-hex
+  |=  [a=[p=@da q=@ux] b=[p=@da q=@ux]]
+  ?:(=(p.a p.b) (gth q.a q.b) (gth p.a p.b))
+--
+::
+%-  agent:dbug
+::call agent dbug
+=|  [%0 state-zero]
+=*  state  -
+:: Evaluate an expression, then resolve a wing with changes.
+^-  agent:gall
+:: Typecast by explicit type label.
+=<
+  |_  =bowl:gall :: door giving a bowl to call
+  +*  this  .
+      def   ~(. (default-agent this %|) bowl) ::default-agent is a library that provides default behaviors for Gall agent arms.
+      is    ~(. +> bowl)
+  ++  on-init  :: arm that specifies thread on initiation.  
+    ^-  (quip card _this)::initate arm
+    =.  zapper-token
+      ['9cf73788-8e8e-4bab-bff9-3ee126f2eccd' '']
+    =+  new=(add now.bowl ~m30)
+    %-  (slog leaf+"%books-online" ~) 
+    :: Prints stack trace a if the stack trace isn't null, then produces the other input.
+    :_  this
+    [%pass /books/timer [%arvo %b [%wait new]]]~
+  ::
+  ++  on-save
+    ^-  vase
+    !>(state):: Wrap a noun, state in its type (form a vase).
+  ::This arm is called immediately before the agent is upgraded. 
+  ::It packages the permament state of the agent in a vase for the next version of the agent.
+  ++  on-load:: This arm is called immediately after the agent is upgraded
+    |=  ole=vase
+    =/  old=versioned-state  !<(versioned-state ole)
+    |-
+    ?-    -.old
+        %0
+      %-  (slog leaf+"%books-reloaded" ~)
+      `this(state old)
+    ==
+  ::
+  ++  on-poke
+  :: This arm is called when the agent is "poked". A poke is a kind of note passed from one agent to another in a card
+  ::The input is a cage, so it's a pair of a mark and a dynamic vase
+    |=  [=mark =vase]:: mark is a file type in clay. This vase is part of the state
+    ^-  (quip card _this) :: produces this when poked
+    ?>  =(our.bowl src.bowl)::A bowl is given to the agent core each time an event comes in. our is our ship src is ship of request.
+    ?+    mark  (on-poke:def mark vase)
+        %books-page
+      =/  vaz=page  !<(page vase)
+      =^  cards  state
+        ?-  -.vaz
+          %change-zapper-creds  (zip-zap:gilt:is +.vaz)
+          %etherscan-key        (eth-key:gilt:is +.vaz)
+          %add-transaction      (add-dis:gilt:is +.vaz)
+          %add-wallet           (add-wal:gilt:is +.vaz)
+          %del-wallet           (del-wal:gilt:is +.vaz)
+          %add-friend           (add-bud:gilt:is +.vaz)
+          %del-friend           (del-bud:gilt:is +.vaz)
+          %annotation           (pen-pad:gilt:is +.vaz)
+          %del-a-note           (rub-rub:gilt:is +.vaz)
+          %set-tags             (tag-man:gilt:is +.vaz)
+          %set-nick             (nic-nam:gilt:is +.vaz)
+          %set-patp             (mah-guy:gilt:is +.vaz)
+        ==
+      [cards this]
+    ==
+  ::
+  ++  on-watch
+  :: This arm is called when a program wants to subscribe to the agent 
+  :: on a particular path. The agent may or may not need to perform setup steps to intialize the subscription. It may produce a %give %subscription-result to the subscriber to get it up to date, but after this event is complete, it cannot give further updates to a specific subscriber. It must give all further updates to all subscribers on a specific path
+    |=  pat=path
+:: Produce a gate (a one-armed core with a sample). A path is a list of $knot (@ta)
+    ?+    pat  (on-watch:def pat)
+        [%website ~]
+      :_  this
+      :~  (zapper-fi:uber:is /full)
+          note-send:uber:is
+          [%give %fact ~ json+!>(rolo-send:uber:is)]
+      ==
+    ==
+  ++  on-arvo :: This arm is called to handle responses to %pass moves to vanes. 
+    |=  [=wire sign=sign-arvo]
+    ?+    wire  (on-arvo:def wire sign)
+        [%books %timer ~]
+      =+  new=(add now.bowl ~m30)
+      =;  always=(list card)
+        [[(zapper-fi:uber:is /when) always] this]
+      [%pass /books/timer [%arvo %b [%wait new]]]~
+    ::
+        [%books %do %nix ~]
+      ?>  ?=([%khan %arow *] sign)
+      ?.  ?=(%& -.p.+.sign)  ((slog +.p.p.+.sign) `this)
+      ?>  ?=(%noun -.p.p.+.sign)
+      =/  upd  ::=[p=((mop ,[p=@da q=@ux] transaction) gth-hex) q=(list [[@da @ux] transaction])]
+        !<  $:  p=((mop ,[p=@da q=@ux] transaction) gth-hex)
+                q=(list [[@da @ux] transaction])
+            ==
+        +.p.p.+.sign
+      :_  this(transactions p.upd)
+      =,  enjs:format::Calling Container arm for JSON encoders
+      =-  [%give %fact ~[/website] json+!>(`json`-)]~
+        %-  pairs
+        :~  head+s+'del-transactions':: null terminated list, getting head of list 'del-transaction'
+        ::head+s creates a cell [%head s], which is useful for tagged unions 
+            tran+a+(transactions:en-json:is p.upd)::Encode val, a json structure, in a tape
+        ==
+    ::
+        [%books %do %note ~]
+      ?>  ?=([%khan %arow *] sign)
+      ?.  ?=(%& -.p.+.sign)  ((slog +.p.p.+.sign) `this)
+      ?>  ?=(%noun -.p.p.+.sign)
+      =/  jon  !<(json +.p.p.+.sign)
+      [[%give %fact ~[/website] json+!>(jon)]~ this]
+    ::
+        [%books %do %zap *]
+      ?+    +>+.wire  !!
+          [%full ~]
+        ?>  ?=([%khan %arow *] sign)
+        ?.  ?=(%& -.p.+.sign)  ((slog +.p.p.+.sign) `this)
+        ?>  ?=(%noun -.p.p.+.sign)
+        =/  upd  ::=[p=((mop ,[p=@da q=@ux] transaction) gth-hex) q=(list [[@da @ux] transaction])]
+          !<  $:  p=((mop ,[p=@da q=@ux] transaction) gth-hex)
+                  q=(list [[@da @ux] transaction])
+              ==
+          +.p.p.+.sign
+        =.  transactions
+          %.  [transactions p.upd]
+          uni:((on ,[@da @ux] transaction) gth-hex)
+        :_  this
+        =,  enjs:format::Calling Container arm for JSON encoders
+        =-  [%give %fact ~[/website] json+!>(`json`-)]~
+        %-  pairs
+        :~  head+s+'transactions':: null terminated list-getting head of cell 
+        ::head+s creates a cell [%head s], which is useful for tagged unions
+            tran+a+(transactions:en-json:is p.upd)::Encode val, a json structure, in a tape
+        ==
+      ::
+          [%some ~]
+        ?>  ?=([%khan %arow *] sign)
+        ?.  ?=(%& -.p.+.sign)  ((slog +.p.p.+.sign) `this)
+        ?>  ?=(%noun -.p.p.+.sign)
+        =/  upd  ::=[p=((mop ,[p=@da q=@ux] transaction) gth-hex) q=(list [[@da @ux] transaction])]
+          !<  $:  p=((mop ,[p=@da q=@ux] transaction) gth-hex)
+                  q=(list [[@da @ux] transaction])
+              ==
+          +.p.p.+.sign
+        =.  transactions
+          %.  [transactions p.upd]
+          uni:((on ,[@da @ux] transaction) gth-hex)
+        :_  this
+        =,  enjs:format::Calling Container arm for JSON encoders
+        =-  [%give %fact ~[/website] json+!>(`json`-)]~
+        %-  pairs
+        :~  head+s+'transactions'
+          ::
+            :+  %tran  %a
+            %-  transactions:en-json:is::Encode val, a json structure, in a tape
+            (gas:((on ,[p=@da q=@ux] transaction) gth-hex) *((mop ,[p=@da q=@ux] transaction) gth-hex) q.upd)
+        ==
+      ::
+          [%when ~]
+        ?>  ?=([%khan %arow *] sign)
+        ?.  ?=(%& -.p.sign)
+          ((slog +.p.p.sign) `this)
+        ?>  ?=(%noun -.p.p.sign)
+        =/  upd
+          !<  $:  p=((mop ,[p=@da q=@ux] transaction) gth-hex)
+                  q=(list [[@da @ux] transaction])
+              ==
+          +.p.p.+.sign
+        =.  transactions
+          %.  [transactions p.upd]
+          uni:((on ,[@da @ux] transaction) gth-hex)
+        `this
+      ==
+    ==
+  ++  on-fail   on-fail:def ::If an error happens in +on-poke, the crash report goes into the %poke-ack response.
+  ++  on-peek   on-peek:def:: This arm is called when a program reads from the agent's "scry" namespace, which should be referentially transparent.
+  ++  on-agent  on-agent:def::This arm is called to handle responses to %give moves to other agents. It will be one of the following types of response:
+  ++  on-leave  on-leave:def::This arm is called when a program becomes unsubscribed to you. 
+  --
+|_  bol=bowl:gall:: door that defines bol as bowl(data given to gall)
+++  uber                                                 ::  khan control plane/thread runner helpers
+  |%
+  ++  note-send :: arm that sends card to khan for threads
+    ^-  card
+    :^  %pass  /books/do/note  %arvo
+    [%k %fard %books %send-notes %noun !>([bol elucidations])]
+  ++  nix-trans:: arm that sends transaction threads to arvo
+    ^-  card:: type cast as card
+    :^  %pass  /books/do/nix  %arvo
+    =-  [%k %fard %books %del-trans %noun !>(-)]
+    ^-  [bowl:gall @t @t (set @ux) ((mop ,[p=@da q=@ux] transaction) gth-hex)]
+    [bol uid.zapper-token pw.zapper-token ~(key by held-wallets) transactions]
+    ::
+  ++  zapper-fi:: arm that welds books, do, zap, p lists together into pass
+    |=  p=path::gate that puts face -p on path.
+    ^-  card
+    :^  %pass  (weld /books/do/zap p)  %arvo::welds books, do,zap,p lists into tuple named pass
+    =-  [%k %fard %books %get-trans %noun !>(-)]
+    ^-  [bowl:gall @t @t (set @ux) ((mop ,[p=@da q=@ux] transaction) gth-hex)]
+    [bol uid.zapper-token pw.zapper-token ~(key by held-wallets) transactions]
+    ::bowl sets structures
+  ++  rolo-send::rolodex arm
+    ^-  json::
+    =,  enjs:format:: This contains ten functions for encoding $json
+    %-  pairs::takes multiple key-value pairs rather than just one:
+    :~  head+s+'wallets'::null terminated list
+      :+  'fren'  %a
+      ^-  (list json)::Generates a mold of a null-terminated list named json
+      %-  ~(rep by lilblackbook)
+      |=  [[a=@ux w=wallet] j=(list json)]::Generates a mold of a null-terminated list named json
+      :_  j  :-  %a
+      ::  here, we're sending a list of mini-arrays to 
+      ::  mirror the structure of a Map Object from 
+      ::  Immutable.js
+      :: - https://immutable-js.com/docs/latest@main/Map/
+      ^-  (list json)::Generates a mold of a null-terminated list named json
+      :~  s+(scot %ux a)
+        ::
+          %-  pairs
+          :~  nick+s+nick.w
+              who+s+?~(who.w '' (scot %p u.who.w))
+              tags+a+`(list json)`(turn ~(tap in tags.w) (lead %s))
+          ==
+      ==
+    ::
+      :+  'mine'  %a
+      ^-  (list json)
+      %-  ~(rep by held-wallets)
+      |=  [[a=@ux [n=@t t=(set @tas)]] j=(list json)]
+      :_  j  :-  %a
+      :~  s+(scot %ux a)
+        ::
+          %-  pairs
+          :~  address+s+(scot %ux a)
+              nick+s+n
+              tags+a+`(list json)`(turn ~(tap in t) (lead %s))
+          ==
+      ==
+    ==
+  --
+++  gilt                                                 ::  page helpers
+  |%
+  ++  zip-zap::zapper updated
+    |=  [u=@t p=@t]
+    ^-  (quip card _state):: initializes the agent
+    :_  state(zapper-token [u p])
+    =-  [%give %fact ~[/website] json+!>(`json`-)]~
+    %-  pairs:enjs:format::Container arm for JSON encoders, Produces a json object containing each key-value pair in list
+    ~[head+s+'just-status' status+s+'Zapper.Fi Credentials Updated']::
+  ++  eth-key
+    |=  [k=@t]
+    ^-  (quip card _state):: initializes the agent
+    :_  state(etherscankey k)
+    =-  [%give %fact ~[/website] json+!>(`json`-)]~
+    %-  pairs:enjs:format::Container arm for JSON encoders, Produces a json object containing each key-value pair in list
+    :~  head+s+'etherscan-key'
+        key+s+k
+        status+s+'Etherscan Credentials Updated':: updates status output
+    ==
+  ++  add-dis::arm to add transactions
+    |=  t=transaction
+    ^-  (quip card _state):: initializes the agent
+    ~|  "%books-fail -bad-transaction! {<timestamp.t>}"::Prettyprints "books-fail +time" in stack trace if q crashes
+    ?~  gat=(get:((on ,[p=@da q=@ux] transaction) gth-hex) transactions [timestamp.t hash.t])
+      =.  transactions
+        (put:((on ,[p=@da q=@ux] transaction) gth-hex) transactions [timestamp.t hash.t] t)
+      :_  state
+      =-  [%give %fact ~[/website] json+!>(`json`-)]~
+      =,  enjs:format
+      %-  pairs
+      :~  head+s+'add-transaction'
+          status+s+(crip "Added Transaction: {(scow %ux hash.t)}")
+          transaction+(transaction:en-json t)::Encode val, a json structure, in a tape
+      ==
+    ~|  "%worse-news -different-records! {<t>} {<u.gat>}"
+    ?>  ?&  =(hash.t hash.u.gat)
+            =(nonce.t nonce.u.gat)
+        ==
+    `state
+  ::
+  ++  del-wal::delete tracked wallet arm
+    |=  a=@ux
+    ^-  (quip card _state):: initializes the agent
+    ~|  '%books-fail -address-not-tracked'::Prettyprints p in stack trace if books-fail crashes.
+    ?>  (~(has by held-wallets) a)
+    =.  held-wallets  (~(del by held-wallets) a)
+    =,  enjs:format::Container arm for JSON encoders, Produces a json object containing each key-value pair in list
+    :_  state
+    =-  ~[nix-trans:uber [%give %fact ~[/website] json+!>(`json`-)]]
+    %-  pairs
+    :~  head+s+'del-wallet'
+        remove+s+(scot %ux a)
+        status+s+(crip "Deleted Tracked Wallet: {(scow %ux a)}")
+    ==
+    ::
+  ++  add-wal::checks to see if you already have that address
+    |=  [a=@ux n=@t t=(set @tas)]::gate that sets a as unsigned hex and t as a term
+    ^-  (quip card _state):: initializes the agent
+    ~|  '%books-fail -address-already-tracked'::Prettyprints p in stack trace if books-fail crashes.
+    ?<  (~(has by held-wallets) a)
+    =.  held-wallets
+      (~(put by held-wallets) a [n t])
+    =,  enjs:format::Container arm for JSON encoders, Produces a json object containing each key-value pair in list
+    :_  state
+    :-  (zapper-fi:uber /some)
+    =-  [%give %fact ~[/website] json+!>(`json`-)]~
+    %-  pairs
+    :~  head+s+'add-wallet'
+      :-  'new'
+      :-  %a
+      :~  s+(scot %ux a)
+        ::
+          %-  pairs
+          :~  nick+s+n
+              tags+a+`(list json)`(turn ~(tap in t) (lead %s))
+          ==
+      ==
+    ::
+      status+s+(crip "Added Tracked Wallet: {(scow %ux a)}")
+    ==
+  ::
+  ++  add-bud:: arm to add a contact to lilblackbook
+    |=  [a=@ux w=wallet]
+    :_  state(lilblackbook (~(put by lilblackbook) a w))
+    =-  [%give %fact ~[/website] json+!>(`json`-)]~
+    =,  enjs:format::Container arm for JSON encoders, Produces a json object containing each key-value pair in list
+    %-  pairs
+    :~  head+s+'add-friend'
+        status+s+(crip "Added Friend: {(scow %uw a)}")
+        :+  %new  %a
+        :~  s+(scot %ux a)
+            %-  pairs
+            :~  nick+s+nick.w
+                who+?~(who.w ~ s+(scot %p u.who.w))
+                :+  %tags  %a
+                %~  tap  in  ^-  (set json)
+                (~(run in tags.w) |=(a=@tas `json`s+(scot %tas a)))
+            ==
+        ==
+    ==
+  ++  del-bud:: arm to delete someone from contacts
+    |=  [a=@ux]
+    :_  state(lilblackbook (~(del by lilblackbook) a))
+    =-  [%give %fact ~[/website] json+!>(`json`-)]~
+    %-  pairs:enjs:format::Container arm for JSON encoders, Produces a json object containing each key-value pair in list
+    :~  head+s+'del-friend'
+        remove+s+(scot %ux a)
+        status+s+(crip "Deleted Friend Info: {(scow %ux a)}")
+    ==
+  ::
+  ++  pen-pad:: arm for logging users notes
+    |=  [h=@ux n=annotation]
+    ^-  (quip card _state):: initializes the agent
+    :_  state(elucidations (~(put by elucidations) h n))
+    =-  [%give %fact ~[/website] json+!>(`json`-)]~
+    %-  pairs:enjs:format::Container arm for JSON encoders, Produces a json object containing each key-value pair in list
+    :~  head+s+'annotation'
+        status+s+(crip "New Annotation For: {(scow %ux h)}")
+      ::
+      :+  'new'  %a
+      :~  %-  pairs:enjs:format::Container arm for JSON encoders, Produces a json object containing each key-value pair in list
+          :~  hash+s+(scot %ux h)
+              basis+s+(scot %rd basis.n)
+              to+?~(to.n ~ s+(scot %ux u.to.n))
+              annotation+s+annotation.n
+              tags+a+(turn ~(tap in tags.n) (lead %s))
+          ==
+      ==
+    ==
+  ++  rub-rub::arm to Delete a note
+    |=  h=@ux
+    ^-  (quip card _state):: initializes the agent
+    =.  elucidations
+      (~(del by elucidations) h)
+    :_  state
+    =-  [%give %fact ~[/website] json+!>(`json`-)]~
+    %-  pairs:enjs:format::Container arm for JSON encoders, Produces a json object containing each key-value pair in list
+    :~  head+s+'del-a-note'
+        status+s+(crip "Deleted Annotation For: {(scow %ux h)}")
+        remove+s+(scot %ux h)
+    ==
+  ++  mah-guy::arm to update contact or friend
+    |=  [a=@ux p=(unit @p)]
+    ^-  (quip card _state):: initializes the agent
+    ~|  '%books-fail -no-such-friend'::Prettyprints p in stack trace if books-fail crashes.
+    ?>  (~(has by lilblackbook) a)::Positive assertion does lilblackbook have a
+    =+  old=(~(got by lilblackbook) a)::Combine a new noun with the result of got by which is a Produce the value located at key b within map a. Crash if key b does not exist.)
+    =.  lilblackbook::Change one leg in the subject - lilblackbook
+      (~(put by lilblackbook) a old(who p))::Add key-value pair of results of old and lilblackbook
+    :_  state
+    =-  [%give %fact ~[/website] json+!>(`json`-)]~
+    %-  pairs:enjs:format::Container arm for JSON encoders, Produces a json object containing each key-value pair in list
+    :~  head+s+'add-friend'::Construct a null-terminated list of head + s
+        status+s+(crip "Updated Friend: {(scow %ux a)}")::Tape to cord for updated friends and Render dime as tape
+    ::
+      :+  'new'  %a:: combine 'new' to a
+      :~  s+(scot %ux a)
+        %-  pairs:enjs:format::Container arm for JSON encoders, Produces a json object containing each key-value pair in list
+        :~  nick+s+nick.old
+            who+?~(p ~ s+(scot %p u.p))
+            tags+a+`(list json)`(turn ~(tap in tags.old) (lead %s))
+        ==
+      ==
+    ==
+  ++  nic-nam::arm to add nickname arm for contacts
+    |=  [a=@ux n=@t]
+    ^-  (quip card _state):: initializes the agent
+    ~|  '%books-fail -no-such-wallet'::Prettyprints p in stack trace if books-fail crashes.
+    ?>  |((~(has by held-wallets) a) (~(has by lilblackbook) a))::checks whether map held-wallets and lilblackbook contans an element with key b, producting a flag
+    ?:  (~(has by lilblackbook) a)::Checks whether map a contains an element with key b, producing a flag. lilblackbook only. If true update a, false then stop
+      =+  old=(~(got by lilblackbook) a)::update old by producing the value located at key b within map lilblackbook Crash if key b does not exist.
+      =.  lilblackbook::update lilblackbook with old
+        (~(put by lilblackbook) a old(nick n))::put by Produces a with the addition of the key-value pair of b and c.
+      :_  state
+      =-  [%give %fact ~[/website] json+!>(`json`-)]~
+      %-  pairs:enjs:format::Container arm for JSON encoders, Produces a json object containing each key-value pair in list
+      :~  head+s+'add-friend'
+          status+s+(crip "Updated Friend: {(scow %ux a)}")
+      ::
+        :+  'new'  %a
+        :~  s+(scot %ux a)
+        ::
+          %-  pairs:enjs:format::Container arm for JSON encoders, Produces a json object containing each key-value pair in list
+          :~  nick+s+n
+              who+?~(who.old ~ s+(scot %p u.who.old))
+              tags+a+`(list json)`(turn ~(tap in tags.old) (lead %s))
+          ==
+        ==
+      ==
+    =+  old=(~(got by held-wallets) a)::update old by producing the value located at key b within map held-wallets Crash if key b does not exist.
+    =.  held-wallets
+      (~(put by held-wallets) a old(nick n))
+    :_  state
+    =-  [%give %fact ~[/website] json+!>(`json`-)]~
+    %-  pairs:enjs:format::Container arm for JSON encoders, Produces a json object containing each key-value pair in list
+    :~  head+s+'add-wallet'
+        status+s+(crip "Updated Wallet: {(scow %ux a)}")
+      ::
+      :+  'new'  %a
+      :~  s+(scot %ux a)
+      ::
+        %-  pairs:enjs:format::Container arm for JSON encoders, Produces a json object containing each key-value pair in list
+        ~[nick+s+n tags+a+`(list json)`(turn ~(tap in tags.old) (lead %s))]
+      ==
+    ==
+  ++  tag-man::arm that updates contact
+    |=  [a=@ux t=(set @tas)]::gate that sets a as unsigned hex and t as a term
+    ^-  (quip card _state)
+    ~|  '%books-fail -no-such-wallet'::Prettyprints p in stack trace if books-fail crashes.
+    ?>  |((~(has by held-wallets) a) (~(has by lilblackbook) a))::Checks whether held-wallets and lilblackbook contains an element with key b, producing a flag.
+    ?:  (~(has by lilblackbook) a)::Checks whether map a contains an element with key b, producing a flag. lilblackbook only. If true update a, false then stop
+      =+  old=(~(got by lilblackbook) a)::update old by producing the value located at key b within map lilblackbook Crash if key b does not exist.
+      =.  lilblackbook
+        (~(put by lilblackbook) a old(tags t))::Produces a with the addition of the key-value pair of b and c.
+      :_  state
+      =-  [%give %fact ~[/website] json+!>(`json`-)]~
+      %-  pairs:enjs:format::Container arm for JSON encoders, Produces a json object containing each key-value pair in list
+      :~  head+s+'add-friend'
+          status+s+(crip "Updated Friend: {(scow %ux a)}")
+        ::
+        :+  'new'  %a
+        :~  s+(scot %ux a)
+          ::
+            %-  pairs:enjs:format::Container arm for JSON encoders, Produces a json object containing each key-value pair in list
+            :~  nick+s+nick.old
+                who+?~(who.old ~ s+(scot %p u.who.old))
+              tags+a+`(list json)`(turn ~(tap in t) (lead %s))
+            ==
+        ==
+      ==
+      ::
+    =+  old=(~(got by held-wallets) a)::update old by producing the value located at key b within map held-wallets Crash if key b does not exist.
+    =.  held-wallets
+      (~(put by held-wallets) a old(tags t))
+    :_  state
+    =-  [%give %fact ~[/website] json+!>(`json`-)]~
+    %-  pairs:enjs:format::Container arm for JSON encoders, Produces a json object containing each key-value pair in list
+    :~  head+s+'add-wallet'
+        status+s+(crip "Updated Wallet: {(scow %ux a)}")
+      ::
+      :+  'new'  %a
+      :~  s+(scot %ux a)
+        ::
+          %-  pairs:enjs:format::Container arm for JSON encoders, Produces a json object containing each key-value pair in list
+          :~  nick+s+nick.old
+            tags+a+`(list json)`(turn ~(tap in t) (lead %s))
+          ==
+      ==
+    ==
+  --
+  ++  en-json::arm that Encodes val, a json structure, in a tape
+    =,  enjs:format::Container arm for JSON encoders
+    |%:: produces a core, battery and payload
+    ++  transactions:: transaction arm
+      |=  t=_^transactions
+      %+  turn::calling gate turn
+        (tap:((on ,[@da @ux] ^transaction) gth-hex) t)
+      |=  [[@da @ux] p=^transaction]
+      (transaction p)
+
+    ++  transaction::transaction logging arm to create json output 
+      |=  t=^transaction::Pin the head of a pair; change a leg with the tail.
+      ^-  json::specify structure = json
+      %-  pairs::Produces a json object containing each key-value pair in list a. call a gate named pairs
+      :~  primarywallet+s+(scot %ux primarywallet.t)::key is primary wallet 
+          network+s+network.t
+          hash+s+(scot %ux hash.t)::Render dime-hash as cord
+          blocknumber+(numb blocknumber.t)
+          name+s+name.t
+          direction+s+direction.t
+          timestamp+(sect timestamp.t)
+          symbol+s+symbol.t
+          address+?~(address.t ~ s+(scot %ux u.address.t))
+          amount+s+(cut 3 [2 (lent (scow %rd amount.t))] (scot %rd amount.t))
+          from+s+(scot %ux from.t)
+          destination+s+(scot %ux destination.t)
+          contract+?~(contract.t ~ s+(scot %ux u.contract.t))
+        ::
+          :-  'subtransactions'
+          :-  %a  %+  turn  ~(tap in subtransactions.t)::Flattens the set a into a list
+          |=  st=[t=@tas s=@t am=@rd ad=(unit @ux)]
+          %-  pairs
+          :~  type+s+t.st
+              symbol+s+s.st
+              amount+s+(cut 3 [2 (lent (scow %rd am.st))] (scot %rd am.st))
+              address+?~(ad.st ~ s+(scot %ux u.ad.st))
+          ==
+        ::
+          nonce+(numb nonce.t)
+        ::
+          :-  'txgas'
+          ?~  txgas.t  ~
+          s+(cut 3 [2 (lent (scow %rd u.txgas.t))] (scot %rd u.txgas.t))
+          :-  'txgaslimit'
+          ?~  txgaslimit.t  ~
+          s+(cut 3 [2 (lent (scow %rd u.txgaslimit.t))] (scot %rd u.txgaslimit.t))
+        ::
+          input+?~(input.t ~ s+u.input.t)
+          fee+s+(cut 3 [2 (lent (scow %rd fee.t))] (scot %rd fee.t))
+          txsuccessful+b+txsuccessful.t
+      ==
+    --
+--
